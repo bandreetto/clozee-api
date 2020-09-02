@@ -9,5 +9,5 @@ export class User {
   name: string;
 
   @Field((type) => [String])
-  selling_products?: string[];
+  sellingProducts?: string[];
 }

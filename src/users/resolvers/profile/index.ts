@@ -10,7 +10,7 @@ export class UserResolver {
     return {
       id: "1",
       name: "Daniel",
-      selling_products: ["teste"],
+      sellingProducts: ["teste"],
     };
   }
 
