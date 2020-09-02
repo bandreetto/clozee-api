@@ -4,10 +4,19 @@ import cors from "cors";
 import express from "express";
 import depthLimit from "graphql-depth-limit";
 import { createServer } from "http";
+import { connect } from "mongoose";
 import "reflect-metadata";
 import { createSchema } from "./createSchema";
 
 const startServer = async () => {
+  const mongoose = await connect(
+    "mongodb+srv://backend-marketplace:wHWmBqlposg24Q0G@marketplace-staging.bubxc.gcp.mongodb.net/marketplace?retryWrites=true&w=majority",
+    { useNewUrlParser: true }
+  );
+  await mongoose.connection;
+
+  console.log(`\n🍃 Mongo Connected`);
+
   const app = express();
   const schema = await createSchema();
 

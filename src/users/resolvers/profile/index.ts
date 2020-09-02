@@ -1,5 +1,5 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { User } from "./types";
+import { User, UserModel } from "./types";
 
 @Resolver(User)
 export class UserResolver {
@@ -7,10 +7,11 @@ export class UserResolver {
 
   @Query((returns) => User)
   async user(): Promise<User> {
+    const user: User = await UserModel.findOne({});
     return {
-      id: "1",
-      name: "Daniel",
-      sellingProducts: ["teste"],
+      id: user.id,
+      name: user.name,
+      sellingProducts: user.sellingProducts,
     };
   }
 
