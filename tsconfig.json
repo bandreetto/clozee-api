@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "incremental": true,
+    "inlineSourceMap": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "lib": ["esnext"],
+    "types": ["reflect-metadata"],
+    "paths": {
+      "@src/*": ["./*"],
+      "@consumers/*": ["./consumers/*"],
+      "@database/*": ["./database/*"],
+      "@graphql/*": ["./graphql/*"],
+      "@routes/*": ["./routes/*"],
+      "@services/*": ["./services/*"],
+      "@system/*": ["./system/*"]
+    }
+  }
+}
