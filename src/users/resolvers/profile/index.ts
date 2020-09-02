@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
 import { User, UserModel } from "./types";
 
 @Resolver(User)
@@ -15,9 +15,13 @@ export class UserResolver {
     };
   }
 
-  @Mutation((returns) => String)
+  @Mutation((returns) => User)
   //   @Authorized()
-  addPost(@Arg("url") photoUrl: string, @Ctx("user") user: User): string {
-    return "adicionado";
+  async addPost(@Arg("url") photoUrl: string): Promise<User> {
+    const updatedUser = await UserModel.update({
+      $push: { sellingProducts: photoUrl },
+    });
+
+    return await UserModel.findOne({});
   }
 }
