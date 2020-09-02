@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2018",
     "module": "commonjs",
     "outDir": "./dist",
     "baseUrl": "./src",
@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "lib": ["esnext"],
+    "lib": ["es2018", "esnext.asynciterable"],
     "types": ["reflect-metadata"],
     "paths": {
       "@src/*": ["./*"],

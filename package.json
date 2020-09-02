@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node 'dist/server.js'",
+    "start": "node 'dist/index.js'",
     "build": "tsc -p . && ncp src/schema dist/schema",
     "start:dev": "npm run build:dev",
-    "build:dev": "nodemon 'src/server.ts' --exec 'ts-node' src/server.ts -e ts,graphql"
+    "build:dev": "nodemon 'src/index.ts' --exec 'ts-node' src/index.ts -e ts,graphql"
   },
   "dependencies": {
     "@typegoose/typegoose": "^7.3.0",
@@ -21,7 +21,7 @@
     "mongoose": "^5.9.25",
     "ncp": "^2.0.0",
     "reflect-metadata": "^0.1.13",
-    "type-graphql": "^1.0.0-rc.3"
+    "type-graphql": "^1.0.0"
   },
   "devDependencies": {
     "@types/compression": "^1.7.0",
