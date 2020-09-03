@@ -1,4 +1,4 @@
-import { arrayProp, getModelForClass, prop } from "@typegoose/typegoose";
+import { getModelForClass, prop } from "@typegoose/typegoose";
 import { ModelType } from "@typegoose/typegoose/lib/types";
 import { Field, ID, ObjectType } from "type-graphql";
 
@@ -12,7 +12,7 @@ export class User {
   name: string;
 
   @Field((type) => [String])
-  @arrayProp({ items: String, default: [] })
+  @prop({ type: String, default: [] })
   sellingProducts?: string[];
 }
 

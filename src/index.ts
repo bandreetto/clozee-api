@@ -11,7 +11,7 @@ import { createSchema } from "./createSchema";
 const startServer = async () => {
   const mongoose = await connect(
     "mongodb+srv://backend-marketplace:wHWmBqlposg24Q0G@marketplace-staging.bubxc.gcp.mongodb.net/marketplace?retryWrites=true&w=majority",
-    { useNewUrlParser: true }
+    { useNewUrlParser: true, useUnifiedTopology: true }
   );
   await mongoose.connection;
 
