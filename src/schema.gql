@@ -1,0 +1,22 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  _id: String!
+  name: String!
+  sellingProducts: [String!]!
+}
+
+type Query {
+  user(id: String!): User!
+}
+
+type Mutation {
+  addPost(addPostInput: AddPostInput!): User!
+}
+
+input AddPostInput {
+  userId: String!
+  postUrl: String!
+}
