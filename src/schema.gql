@@ -2,10 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Post {
+  _id: String!
+  user: User!
+  title: String!
+  size: String!
+  description: String!
+
+  """An array of urls for post images"""
+  images: [String!]!
+}
+
 type User {
   _id: String!
   name: String!
-  sellingProducts: [String!]!
+  posts: [Post!]!
 }
 
 type Query {
@@ -13,10 +24,16 @@ type Query {
 }
 
 type Mutation {
-  addPost(addPostInput: AddPostInput!): User!
+  addPost(addPostInput: AddPostInput!): Post!
 }
 
 input AddPostInput {
-  userId: String!
-  postUrl: String!
+  """The id of the post's user"""
+  user: String!
+  title: String!
+  size: String!
+  description: String!
+
+  """An array of urls for post images"""
+  images: [String!]!
 }
