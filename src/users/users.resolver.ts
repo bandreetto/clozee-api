@@ -1,19 +1,23 @@
-import { Resolver, Args, Query, Mutation } from '@nestjs/graphql';
+import { Resolver, Args, Query, ResolveField, Root } from '@nestjs/graphql';
 import { User } from './contracts/domain';
 import { UsersService } from './users.service';
-import { AddPostInput } from './contracts/dto/inputs';
+import { PostsService } from 'src/posts/posts.service';
+import { Post } from 'src/posts/contracts/domain';
 
 @Resolver(() => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly postsService: PostsService,
+  ) {}
 
   @Query(() => User)
   user(@Args('id') id: string) {
     return this.usersService.findById(id);
   }
 
-  @Mutation(() => User)
-  addPost(@Args('addPostInput') input: AddPostInput) {
-    return this.usersService.addPost(input.userId, input.postUrl);
+  @ResolveField(() => [Post])
+  posts(@Root() user: User): Promise<Post[]> {
+    return this.postsService.findManyByUser(user._id);
   }
 }
