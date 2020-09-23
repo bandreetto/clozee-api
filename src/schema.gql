@@ -11,6 +11,9 @@ type Post {
 
   """An array of urls for post images"""
   images: [String!]!
+
+  """An array of strings representing the post categories"""
+  categories: [String!]!
 }
 
 type User {
@@ -21,6 +24,7 @@ type User {
 
 type Query {
   user(id: String!): User!
+  post(postId: String!): Post!
 }
 
 type Mutation {
@@ -36,4 +40,7 @@ input AddPostInput {
 
   """An array of urls for post images"""
   images: [String!]!
+
+  """An array of strings representing the post categories"""
+  categories: [String!] = []
 }

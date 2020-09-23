@@ -17,4 +17,8 @@ export class PostsService {
   async findManyByUser(userId: string): Promise<Post[]> {
     return this.postModel.find({ user: userId }).lean();
   }
+
+  async findById(postId: string): Promise<Post> {
+    return this.postModel.findById(postId).lean();
+  }
 }
