@@ -16,4 +16,10 @@ export class AddPostInput {
 
   @Field(() => [String], { description: 'An array of urls for post images' })
   images: string[];
+
+  @Field(() => [String], {
+    description: 'An array of strings representing the post categories',
+    defaultValue: [],
+  })
+  categories: string[];
 }

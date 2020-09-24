@@ -1,10 +1,18 @@
-import { Resolver, Args, Mutation, ResolveField, Root } from '@nestjs/graphql';
+import {
+  Resolver,
+  Args,
+  Mutation,
+  ResolveField,
+  Root,
+  Query,
+} from '@nestjs/graphql';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { AddPostInput } from './contracts/dto/inputs';
 import { v4 } from 'uuid';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -13,8 +21,20 @@ export class PostsResolver {
     private readonly usersService: UsersService,
   ) {}
 
+  @Query(() => Post)
+  post(@Args('postId') postId: string): Promise<Post> {
+    return this.postsService.findById(postId);
+  }
+
   @Mutation(() => Post)
-  addPost(@Args('addPostInput') input: AddPostInput) {
+  async addPost(@Args('addPostInput') input: AddPostInput) {
+    const user = await this.usersService.findById(input.user);
+    if (!user) {
+      throw new HttpException(
+        'You must provide an existing user',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return this.postsService.create({
       ...input,
       _id: v4(),

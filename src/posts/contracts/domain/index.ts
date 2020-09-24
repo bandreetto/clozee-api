@@ -28,6 +28,12 @@ export class Post {
   @Prop({ type: [String], default: [] })
   @Field(() => [String], { description: 'An array of urls for post images' })
   images: string[];
+
+  @Prop({ type: [String], default: [] })
+  @Field(() => [String], {
+    description: 'An array of strings representing the post categories',
+  })
+  categories: string[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);
