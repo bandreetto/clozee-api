@@ -9,8 +9,11 @@ export class PostsService {
     @InjectModel(Post.name) private readonly postModel: Model<Post & Document>,
   ) {}
 
-  async create(post: Post): Promise<Post> {
-    const newPost = await this.postModel.create(post);
+  async create(post: Omit<Post, 'comments'>): Promise<Post> {
+    const newPost = await this.postModel.create({
+      ...post,
+      comments: [],
+    });
     return newPost.toObject();
   }
 

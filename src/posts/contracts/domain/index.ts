@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from 'src/users/contracts/domain';
+import { Comment } from 'src/comments/contracts/domain';
 
 @Schema()
 @ObjectType()
@@ -22,7 +23,7 @@ export class Post {
   size: string;
 
   @Prop()
-  @Field()
+  @Field({ nullable: true })
   description: string;
 
   @Prop({ type: [String], default: [] })
@@ -34,6 +35,9 @@ export class Post {
     description: 'An array of strings representing the post categories',
   })
   categories: string[];
+
+  @Field(() => [Comment])
+  comments: Comment[];
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

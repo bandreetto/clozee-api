@@ -13,7 +13,7 @@ export class User {
   name: string;
 
   @Field(() => [Post])
-  posts: Post[] | string[];
+  posts: Post[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

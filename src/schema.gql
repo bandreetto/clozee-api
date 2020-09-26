@@ -2,18 +2,39 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CommentTag {
+  """The char index where the tag starts"""
+  bodyIndex: Int!
+
+  """The user tagged"""
+  user: User!
+}
+
+type Comment {
+  _id: String!
+  body: String!
+  tags: [CommentTag!]!
+
+  """The post that the comment belongs to"""
+  post: Post!
+
+  """The user who made the comment"""
+  user: User!
+}
+
 type Post {
   _id: String!
   user: User!
   title: String!
   size: String!
-  description: String!
+  description: String
 
   """An array of urls for post images"""
   images: [String!]!
 
   """An array of strings representing the post categories"""
   categories: [String!]!
+  comments: [Comment!]!
 }
 
 type User {
@@ -28,7 +49,26 @@ type Query {
 }
 
 type Mutation {
+  addComment(input: AddCommentInput!): Comment!
   addPost(addPostInput: AddPostInput!): Post!
+}
+
+input AddCommentInput {
+  """The id of the post the comment is being made."""
+  post: String!
+  body: String!
+  tags: [CommentTagInput!] = []
+
+  """The user who made the comment"""
+  user: String!
+}
+
+input CommentTagInput {
+  """The char index where the tag starts"""
+  bodyIndex: Int!
+
+  """Id of the tagged user."""
+  user: String!
 }
 
 input AddPostInput {
