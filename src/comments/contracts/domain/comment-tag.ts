@@ -1,9 +1,8 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from 'src/users/contracts/domain';
-import { CommentTagInput } from '../dto/inputs';
 
-@Schema()
+@Schema({ _id: false })
 @ObjectType()
 export class CommentTag {
   @Prop({ required: true })
@@ -15,4 +14,4 @@ export class CommentTag {
   user: User | string;
 }
 
-export const CommentTagSchema = SchemaFactory.createForClass(CommentTagInput);
+export const CommentTagSchema = SchemaFactory.createForClass(CommentTag);

@@ -1,8 +1,8 @@
 import { Args, Mutation, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { v4 } from 'uuid';
-import { CommentsService } from './comments.service';
-import { AddCommentInput } from './contracts/dto/inputs';
-import { Comment } from './contracts/domain';
+import { CommentsService } from '../comments.service';
+import { AddCommentInput } from '../contracts/dto/inputs';
+import { Comment } from '../contracts/domain';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { UsersService } from 'src/users/users.service';

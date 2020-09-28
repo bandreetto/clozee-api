@@ -5,6 +5,7 @@ import { Post } from 'src/posts/contracts/domain';
 @Schema()
 @ObjectType()
 export class User {
+  @Prop()
   @Field()
   _id: string;
 
