@@ -5,6 +5,7 @@ import { Post } from 'src/posts/contracts/domain';
 @Schema()
 @ObjectType()
 export class User {
+  @Prop()
   @Field()
   _id: string;
 
@@ -13,7 +14,7 @@ export class User {
   name: string;
 
   @Field(() => [Post])
-  posts: Post[] | string[];
+  posts: Post[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
