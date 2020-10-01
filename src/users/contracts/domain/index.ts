@@ -2,7 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Post } from 'src/posts/contracts/domain';
 
-@Schema()
+@Schema({ timestamps: true })
 @ObjectType()
 export class User {
   @Prop()
@@ -15,6 +15,13 @@ export class User {
 
   @Field(() => [Post])
   posts: Post[];
+
+  @Prop({ required: true, index: true })
+  @Field()
+  username: string;
+
+  @Field()
+  createdAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

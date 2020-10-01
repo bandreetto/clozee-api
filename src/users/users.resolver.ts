@@ -3,6 +3,7 @@ import { User } from './contracts/domain';
 import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
+import { descend, sort } from 'ramda';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -17,7 +18,11 @@ export class UsersResolver {
   }
 
   @ResolveField(() => [Post])
-  posts(@Root() user: User): Promise<Post[]> {
-    return this.postsService.findManyByUser(user._id);
+  async posts(@Root() user: User): Promise<Post[]> {
+    const posts = await this.postsService.findManyByUser(user._id);
+    return sort(
+      descend(post => post.createdAt),
+      posts,
+    );
   }
 }

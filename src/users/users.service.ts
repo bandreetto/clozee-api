@@ -13,6 +13,14 @@ export class UsersService {
     return this.userModel.findById(id).lean();
   }
 
+  async findManyById(ids: string[]): Promise<User[]> {
+    return this.userModel.find({ _id: { $in: ids } }).lean();
+  }
+
+  async findManyByUsername(usernames: string[]): Promise<User[]> {
+    return this.userModel.find({ username: { $in: usernames } }).lean();
+  }
+
   async addPost(id: string, postUrl: string) {
     return this.userModel
       .findByIdAndUpdate(
