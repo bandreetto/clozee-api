@@ -7,7 +7,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
-import { getTagsFromComment } from './logic';
+import { getTaggedUsersFromComment } from './logic';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 @Resolver(() => Comment)
@@ -36,7 +36,7 @@ export class CommentsResolver {
         HttpStatus.NOT_FOUND,
       );
 
-    const usernames = getTagsFromComment(input.body);
+    const usernames = getTaggedUsersFromComment(input.body);
     const users = await this.usersService.findManyByUsername(usernames);
     const tags = users
       .filter(user => usernames.some(username => user.username === username))
