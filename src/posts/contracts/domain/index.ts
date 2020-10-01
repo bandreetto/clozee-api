@@ -3,7 +3,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from 'src/users/contracts/domain';
 import { Comment } from 'src/comments/contracts/domain';
 
-@Schema()
+@Schema({ timestamps: true })
 @ObjectType()
 export class Post {
   @Prop()
@@ -38,6 +38,9 @@ export class Post {
 
   @Field(() => [Comment])
   comments: Comment[];
+
+  @Field()
+  createdAt?: Date;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

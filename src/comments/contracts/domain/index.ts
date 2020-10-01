@@ -2,9 +2,8 @@ import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from 'src/posts/contracts/domain';
 import { User } from 'src/users/contracts/domain';
-import { CommentTag, CommentTagSchema } from './comment-tag';
 
-@Schema()
+@Schema({ timestamps: true })
 @ObjectType()
 export class Comment {
   @Prop()
@@ -15,9 +14,12 @@ export class Comment {
   @Field()
   body: string;
 
-  @Prop({ type: [CommentTagSchema], default: [] })
-  @Field(() => [CommentTag], { defaultValue: [] })
-  tags: CommentTag[];
+  @Prop({ type: [String], default: [] })
+  @Field(() => [User], {
+    defaultValue: [],
+    description: 'The users tagged on this comment',
+  })
+  tags: string[] | User[];
 
   @Prop({ type: String, required: true })
   @Field(() => Post, { description: 'The post that the comment belongs to' })
@@ -26,6 +28,9 @@ export class Comment {
   @Prop({ type: String, required: true })
   @Field(() => User, { description: 'The user who made the comment' })
   user: string | User;
+
+  @Field()
+  createdAt?: Date;
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

@@ -15,6 +15,7 @@ import { CommentsModule } from './comments/comments.module';
       {
         useFindAndModify: true,
         useNewUrlParser: true,
+        useCreateIndex: true,
       },
     ),
     GraphQLModule.forRoot({
