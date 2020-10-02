@@ -39,6 +39,10 @@ export class Post {
   @Field(() => [Comment])
   comments: Comment[];
 
+  @Prop({ required: true })
+  @Field({ description: 'Price of the item being announced in cents' })
+  price: number;
+
   @Field()
   createdAt?: Date;
 }

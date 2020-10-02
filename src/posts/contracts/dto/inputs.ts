@@ -22,4 +22,7 @@ export class AddPostInput {
     defaultValue: [],
   })
   categories: string[];
+
+  @Field({ description: 'Price of the item being announced in cents' })
+  price: number;
 }

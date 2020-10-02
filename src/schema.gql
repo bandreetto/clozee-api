@@ -35,6 +35,9 @@ type Post {
   """An array of strings representing the post categories"""
   categories: [String!]!
   comments: [Comment!]!
+
+  """Price of the item being announced in cents"""
+  price: Float!
   createdAt: DateTime!
 }
 
@@ -43,6 +46,7 @@ type User {
   name: String!
   posts: [Post!]!
   username: String!
+  avatar: String
   createdAt: DateTime!
 }
 
@@ -77,4 +81,7 @@ input AddPostInput {
 
   """An array of strings representing the post categories"""
   categories: [String!] = []
+
+  """Price of the item being announced in cents"""
+  price: Float!
 }
