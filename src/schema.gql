@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Address {
+  street: String!
+  number: Float!
+  district: String
+  zipCode: String
+  city: String!
+  country: String!
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -47,17 +56,37 @@ type User {
   posts: [Post!]!
   username: String!
   avatar: String
+  address: Address!
   createdAt: DateTime!
 }
 
 type Query {
   user(id: String!): User!
   post(postId: String!): Post!
+  posts(
+    """Filter posts by user id"""
+    user: String!
+  ): [Post!]!
 }
 
 type Mutation {
+  updateAddress(input: UpdateAddressInput!): User!
   addComment(input: AddCommentInput!): Comment!
   addPost(addPostInput: AddPostInput!): Post!
+}
+
+input UpdateAddressInput {
+  userId: String!
+  newAddress: AddressInput!
+}
+
+input AddressInput {
+  street: String
+  number: Float
+  district: String
+  zipCode: String
+  city: String
+  country: String
 }
 
 input AddCommentInput {

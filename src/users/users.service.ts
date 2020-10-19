@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
-import { User } from './contracts/domain';
+import { Address, User } from './contracts/domain';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +21,7 @@ export class UsersService {
     return this.userModel.find({ username: { $in: usernames } }).lean();
   }
 
-  async addPost(id: string, postUrl: string) {
+  async addPost(id: string, postUrl: string): Promise<User> {
     return this.userModel
       .findByIdAndUpdate(
         { _id: id },
@@ -29,5 +29,20 @@ export class UsersService {
         { new: true },
       )
       .lean<User>();
+  }
+
+  async updateAddress(
+    userId: string,
+    newAddress: Partial<Address>,
+  ): Promise<User> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $set: { address: newAddress as Address } },
+        { new: true },
+      )
+      .lean<User>();
+
+    return updatedUser as User;
   }
 }

@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { User, UserSchema } from './contracts/domain';
+import { Address, AddressSchema, User, UserSchema } from './contracts/domain';
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
 import { PostsModule } from 'src/posts/posts.module';
@@ -12,6 +12,10 @@ import { PostsModule } from 'src/posts/posts.module';
         name: User.name,
         schema: UserSchema,
       },
+      {
+        name: Address.name,
+        schema: AddressSchema,
+      }
     ]),
     forwardRef(() => PostsModule),
   ],

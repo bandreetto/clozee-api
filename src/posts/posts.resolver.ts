@@ -29,6 +29,11 @@ export class PostsResolver {
     return this.postsService.findById(postId);
   }
 
+  @Query(() => [Post])
+  posts(@Args('user', {description:'Filter posts by user id'}) userId: string) {
+    return this.postsService.findManyByUser(userId)
+  }
+
   @Mutation(() => Post)
   async addPost(@Args('addPostInput') input: AddPostInput) {
     const user = await this.usersService.findById(input.user);
