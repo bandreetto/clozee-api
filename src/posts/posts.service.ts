@@ -24,4 +24,24 @@ export class PostsService {
   async findById(postId: string): Promise<Post> {
     return this.postModel.findById(postId).lean();
   }
+
+  async findSortedBy<TKey extends keyof Post>(
+    amount: number,
+    sortBy: TKey,
+    after?: Post[TKey],
+  ): Promise<Post[]> {
+    return this.postModel
+      .find({
+        ...(after ? { [sortBy]: { $lt: after } } : null),
+      })
+      .sort({ [sortBy]: -1 })
+      .limit(amount)
+      .lean<Post>();
+  }
+
+  async countAfter(query: { createdAt?: Date }): Promise<number> {
+    return this.postModel.countDocuments({
+      ...(query.createdAt ? { createdAt: { $gt: query.createdAt } } : null),
+    });
+  }
 }
