@@ -41,7 +41,7 @@ export class PostsService {
 
   async countAfter(query: { createdAt?: Date }): Promise<number> {
     return this.postModel.countDocuments({
-      ...(query.createdAt ? { createdAt: { $gt: query.createdAt } } : null),
+      ...(query.createdAt ? { createdAt: { $lt: query.createdAt } } : null),
     });
   }
 }
