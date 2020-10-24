@@ -37,7 +37,7 @@ export class CommentsResolver {
       );
 
     const usernames = getTaggedUsersFromComment(input.body);
-    const users = await this.usersService.findManyByUsername(usernames);
+    const users = await this.usersService.findManyByUsernames(usernames);
     const tags = users
       .filter(user => usernames.some(username => user.username === username))
       .map(user => user._id);

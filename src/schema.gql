@@ -86,6 +86,9 @@ type FeedPostConnection {
 
 type Query {
   user(id: String!): User!
+
+  """A list of 60 users"""
+  users(filters: UsersFiltersInput = {}): [User!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
@@ -98,6 +101,11 @@ type Query {
     """Only return edges after this cursor."""
     after: String
   ): FeedPostConnection!
+}
+
+input UsersFiltersInput {
+  username: String
+  name: String
 }
 
 type Mutation {

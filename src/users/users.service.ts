@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
+import { escapeRegex } from 'src/common/regex';
 import { Address, User } from './contracts/domain';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class UsersService {
     return this.userModel.find({ _id: { $in: ids } }).lean();
   }
 
-  async findManyByUsername(usernames: string[]): Promise<User[]> {
+  async findManyByUsernames(usernames: string[]): Promise<User[]> {
     return this.userModel.find({ username: { $in: usernames } }).lean();
   }
 
@@ -44,5 +45,26 @@ export class UsersService {
       .lean<User>();
 
     return updatedUser as User;
+  }
+
+  async filter(
+    filters: { username?: string; name?: string },
+    limit: number,
+  ): Promise<User[]> {
+    const filtersArray = [];
+    if (filters.username)
+      filtersArray.push({
+        username: new RegExp(`^${escapeRegex(filters.username)}`, 'i'),
+      });
+    if (filters.name)
+      filtersArray.push({
+        name: new RegExp(`^${escapeRegex(filters.name)}`, 'i'),
+      });
+    return this.userModel
+      .find({
+        $or: filtersArray,
+      })
+      .limit(limit)
+      .lean<User>();
   }
 }

@@ -29,3 +29,11 @@ export class UpdateAddressInput {
   @Field(() => AddressInput)
   newAddress: AddressInput;
 }
+
+@InputType()
+export class UsersFiltersInput {
+  @Field({ nullable: true })
+  username?: string;
+  @Field({ nullable: true })
+  name?: string;
+}

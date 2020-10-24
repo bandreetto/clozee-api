@@ -11,7 +11,7 @@ import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { descend, sort } from 'ramda';
-import { UpdateAddressInput } from './contracts/dto';
+import { UpdateAddressInput, UsersFiltersInput } from './contracts/dto';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -23,6 +23,14 @@ export class UsersResolver {
   @Query(() => User)
   user(@Args('id') id: string) {
     return this.usersService.findById(id);
+  }
+
+  @Query(() => [User], { description: 'A list of 60 users' })
+  users(
+    @Args('filters', { nullable: true, defaultValue: {} })
+    usersFilters: UsersFiltersInput,
+  ): Promise<User[]> {
+    return this.usersService.filter(usersFilters, 60);
   }
 
   @Mutation(() => User)
