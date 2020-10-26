@@ -25,6 +25,34 @@ export class UsersResolver {
     return this.usersService.findById(id);
   }
 
+  @Query(() => [User], { description: 'A list of 60 users' })
+  async users(
+    @Args('searchTerm', { nullable: true })
+    searchTerm: string,
+  ): Promise<User[]> {
+    const usersResult = await this.usersService.filter(
+      {
+        startsWith: true,
+        name: searchTerm,
+        username: searchTerm,
+      },
+      60,
+    );
+    if (usersResult.length < 60) {
+      const expandedSearch = await this.usersService.filter(
+        {
+          name: searchTerm,
+          username: searchTerm,
+        },
+        60 - usersResult.length,
+        usersResult.map(user => user._id),
+      );
+
+      return [...usersResult, ...expandedSearch];
+    }
+    return usersResult;
+  }
+
   @Mutation(() => User)
   updateAddress(@Args('input') input: UpdateAddressInput) {
     return this.usersService.updateAddress(input.userId, input.newAddress);

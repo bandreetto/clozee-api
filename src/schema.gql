@@ -86,6 +86,9 @@ type FeedPostConnection {
 
 type Query {
   user(id: String!): User!
+
+  """A list of 60 users"""
+  users(searchTerm: String): [User!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
