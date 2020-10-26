@@ -11,7 +11,7 @@ import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { descend, sort } from 'ramda';
-import { UpdateAddressInput, UsersFiltersInput } from './contracts/dto';
+import { UpdateAddressInput } from './contracts/dto';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -26,11 +26,31 @@ export class UsersResolver {
   }
 
   @Query(() => [User], { description: 'A list of 60 users' })
-  users(
-    @Args('filters', { nullable: true, defaultValue: {} })
-    usersFilters: UsersFiltersInput,
+  async users(
+    @Args('searchTerm', { nullable: true })
+    searchTerm: string,
   ): Promise<User[]> {
-    return this.usersService.filter(usersFilters, 60);
+    const usersResult = await this.usersService.filter(
+      {
+        startsWith: true,
+        name: searchTerm,
+        username: searchTerm,
+      },
+      60,
+    );
+    if (usersResult.length < 60) {
+      const expandedSearch = await this.usersService.filter(
+        {
+          name: searchTerm,
+          username: searchTerm,
+        },
+        60 - usersResult.length,
+        usersResult.map(user => user._id),
+      );
+
+      return [...usersResult, ...expandedSearch];
+    }
+    return usersResult;
   }
 
   @Mutation(() => User)

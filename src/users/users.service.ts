@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
+import { startsWith } from 'ramda';
 import { escapeRegex } from 'src/common/regex';
 import { Address, User } from './contracts/domain';
 
@@ -48,21 +49,38 @@ export class UsersService {
   }
 
   async filter(
-    filters: { username?: string; name?: string },
+    filters: {
+      username?: string;
+      name?: string;
+      startsWith?: boolean;
+    },
     limit: number,
+    exclude: string[] = [],
   ): Promise<User[]> {
     const filtersArray = [];
-    if (filters.username)
+    if (filters.username) {
+      const usernameRegex = new RegExp(
+        `${filters.startsWith ? '^' : ''}${escapeRegex(filters.username)}`,
+        'i',
+      );
       filtersArray.push({
-        username: new RegExp(`^${escapeRegex(filters.username)}`, 'i'),
+        username: usernameRegex,
       });
-    if (filters.name)
+    }
+
+    if (filters.name) {
+      const nameRegex = new RegExp(
+        `${filters.startsWith ? '^' : ''}${escapeRegex(filters.name)}`,
+        'i',
+      );
       filtersArray.push({
-        name: new RegExp(`^${escapeRegex(filters.name)}`, 'i'),
+        name: nameRegex,
       });
+    }
     return this.userModel
       .find({
-        $or: filtersArray,
+        ...(exclude.length > 0 ? { _id: { $nin: exclude } } : null),
+        ...(filtersArray.length > 0 ? { $or: filtersArray } : null),
       })
       .limit(limit)
       .lean<User>();
