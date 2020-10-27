@@ -8,6 +8,7 @@ import { join } from 'path';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { FeedModule } from './feed/feed.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { FeedModule } from './feed/feed.module';
     PostsModule,
     CommentsModule,
     FeedModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
