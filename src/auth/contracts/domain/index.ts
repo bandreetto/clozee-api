@@ -1,4 +1,4 @@
-export * from './auth-response';
+export * from './auth-responses';
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 

@@ -7,7 +7,7 @@ import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { SignUpInput } from './contracts/dto/inputs';
 import { JwtService } from '@nestjs/jwt';
-import { AuthResponse } from './contracts/domain';
+import { LogInResponse, SignUpResponse } from './contracts/domain';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
@@ -21,8 +21,29 @@ export class AuthResolver {
     private readonly jwtService: JwtService,
   ) {}
 
-  @Mutation(() => User)
-  async signUp(@Args('input') input: SignUpInput): Promise<User> {
+  createAccessToken = (user: User) =>
+    this.jwtService.sign(
+      { username: user.username },
+      {
+        header: {
+          typ: 'access',
+        },
+        expiresIn: ACCESS_TOKEN_EXP,
+        subject: user._id,
+      },
+    );
+
+  createRefreshToken = (userId: string) =>
+    this.jwtService.sign(
+      {},
+      {
+        header: { typ: 'refresh' },
+        subject: userId,
+      },
+    );
+
+  @Mutation(() => SignUpResponse)
+  async signUp(@Args('input') input: SignUpInput): Promise<SignUpResponse> {
     if (await this.usersService.existsWithUsername(input.username)) {
       throw new HttpException(
         'This username already exists.',
@@ -47,14 +68,18 @@ export class AuthResolver {
       salt: salt.toString('base64'),
       user: createdUser._id,
     });
-    return createdUser;
+    return {
+      user: createdUser,
+      token: this.createAccessToken(createdUser),
+      refreshToken: this.createRefreshToken(createdUser._id),
+    };
   }
 
-  @Mutation(() => AuthResponse)
+  @Mutation(() => LogInResponse)
   async logIn(
     @Args('username') username: string,
     @Args('password') password: string,
-  ): Promise<AuthResponse> {
+  ): Promise<LogInResponse> {
     const user = await this.usersService.findByUsername(username);
 
     if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
@@ -68,27 +93,9 @@ export class AuthResolver {
     if (passwordHash !== loginPasswordHash)
       throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
 
-    const token = this.jwtService.sign(
-      { username: user.username },
-      {
-        header: {
-          typ: 'access',
-        },
-        expiresIn: ACCESS_TOKEN_EXP,
-        subject: user._id,
-      },
-    );
-    const refreshToken = this.jwtService.sign(
-      {},
-      {
-        header: { typ: 'refresh' },
-        subject: user._id,
-      },
-    );
-
     return {
-      token,
-      refreshToken,
+      token: this.createAccessToken(user),
+      refreshToken: this.createRefreshToken(user._id),
     };
   }
 }
