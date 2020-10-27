@@ -7,5 +7,5 @@ export class SignUpInput {
   @Field()
   password: string;
   @Field({ nullable: true })
-  avatartUrl: string;
+  avatarUrl: string;
 }

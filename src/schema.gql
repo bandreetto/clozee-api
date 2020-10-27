@@ -15,13 +15,19 @@ type Comment {
   _id: String!
   body: String!
 
-  """The users tagged on this comment"""
+  """
+  The users tagged on this comment
+  """
   tags: [User!]!
 
-  """The post that the comment belongs to"""
+  """
+  The post that the comment belongs to
+  """
   post: Post!
 
-  """The user who made the comment"""
+  """
+  The user who made the comment
+  """
   user: User!
   createdAt: DateTime!
 }
@@ -38,14 +44,20 @@ type Post {
   size: String!
   description: String
 
-  """An array of urls for post images"""
+  """
+  An array of urls for post images
+  """
   images: [String!]!
 
-  """An array of strings representing the post categories"""
+  """
+  An array of strings representing the post categories
+  """
   categories: [String!]!
   comments: [Comment!]!
 
-  """Price of the item being announced in cents"""
+  """
+  Price of the item being announced in cents
+  """
   price: Float!
   createdAt: DateTime!
 }
@@ -61,25 +73,35 @@ type User {
 }
 
 type PageInfo {
-  """The first cursor of this page."""
+  """
+  The first cursor of this page.
+  """
   startCursor: String!
 
-  """The last cursor of this page."""
+  """
+  The last cursor of this page.
+  """
   endCursor: String!
 
-  """A boolean indicating if there are more edges after this page."""
+  """
+  A boolean indicating if there are more edges after this page.
+  """
   hasNextPage: Boolean!
 }
 
 type FeedPostEdge {
   node: Post!
 
-  """An opaque cursor representing this edge position."""
+  """
+  An opaque cursor representing this edge position.
+  """
   cursor: String!
 }
 
 type FeedPostConnection {
-  """An array of post edges containing the node (Post) and its cursor."""
+  """
+  An array of post edges containing the node (Post) and its cursor.
+  """
   edges: [FeedPostEdge!]!
   pageInfo: PageInfo!
 }
@@ -87,18 +109,26 @@ type FeedPostConnection {
 type Query {
   user(id: String!): User!
 
-  """A list of 60 users"""
+  """
+  A list of 60 users
+  """
   users(searchTerm: String): [User!]!
   post(postId: String!): Post!
   posts(
-    """Filter posts by user id"""
+    """
+    Filter posts by user id
+    """
     user: String!
   ): [Post!]!
   feed(
-    """The first N elements to return after the cursor."""
+    """
+    The first N elements to return after the cursor.
+    """
     first: Float!
 
-    """Only return edges after this cursor."""
+    """
+    Only return edges after this cursor.
+    """
     after: String
   ): FeedPostConnection!
 }
@@ -125,33 +155,45 @@ input AddressInput {
 }
 
 input AddCommentInput {
-  """The id of the post the comment is being made."""
+  """
+  The id of the post the comment is being made.
+  """
   post: String!
   body: String!
 
-  """The user who made the comment"""
+  """
+  The user who made the comment
+  """
   user: String!
 }
 
 input AddPostInput {
-  """The id of the post's user"""
+  """
+  The id of the post's user
+  """
   user: String!
   title: String!
   size: String!
   description: String!
 
-  """An array of urls for post images"""
+  """
+  An array of urls for post images
+  """
   images: [String!]!
 
-  """An array of strings representing the post categories"""
+  """
+  An array of strings representing the post categories
+  """
   categories: [String!] = []
 
-  """Price of the item being announced in cents"""
+  """
+  Price of the item being announced in cents
+  """
   price: Float!
 }
 
 input SignUpInput {
   username: String!
   password: String!
-  avatartUrl: String
+  avatarUrl: String
 }

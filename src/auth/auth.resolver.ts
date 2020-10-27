@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { randomBytes, scryptSync } from 'crypto';
 import { User } from 'src/users/contracts/domain';
 import { UsersService } from 'src/users/users.service';
-import { SignUpInput } from './contracts/dto/inputs';
 import { v4 } from 'uuid';
-import { scryptSync, randomBytes } from 'crypto';
 import { AuthService } from './auth.service';
+import { SignUpInput } from './contracts/dto/inputs';
 
 @Resolver()
 export class AuthResolver {
@@ -26,7 +26,7 @@ export class AuthResolver {
     const createdUser = await this.usersService.create({
       _id: v4(),
       username: input.username,
-      avatar: input.avatartUrl || 'https://picsum.photos/64/64',
+      avatar: input.avatarUrl || 'https://picsum.photos/64/64',
     });
     const salt = randomBytes(16);
     const passwordHash = scryptSync(input.password, salt, 64).toString(
