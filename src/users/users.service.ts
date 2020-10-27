@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
-import { startsWith } from 'ramda';
 import { escapeRegex } from 'src/common/regex';
 import { Address, User } from './contracts/domain';
 
