@@ -19,7 +19,7 @@ export class User {
   @Field(() => [Post])
   posts?: Post[];
 
-  @Prop({ required: true, index: true })
+  @Prop({ required: true, index: true, unique: true })
   @Field()
   username: string;
 
