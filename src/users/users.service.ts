@@ -85,4 +85,8 @@ export class UsersService {
       .limit(limit)
       .lean<User>();
   }
+
+  create(newUser: User): Promise<User> {
+    return this.userModel.create(newUser);
+  }
 }

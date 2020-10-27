@@ -52,11 +52,11 @@ type Post {
 
 type User {
   _id: String!
-  name: String!
+  name: String
   posts: [Post!]!
   username: String!
   avatar: String
-  address: Address!
+  address: Address
   createdAt: DateTime!
 }
 
@@ -107,6 +107,7 @@ type Mutation {
   updateAddress(input: UpdateAddressInput!): User!
   addComment(input: AddCommentInput!): Comment!
   addPost(addPostInput: AddPostInput!): Post!
+  signUp(input: SignUpInput!): User!
 }
 
 input UpdateAddressInput {
@@ -147,4 +148,10 @@ input AddPostInput {
 
   """Price of the item being announced in cents"""
   price: Float!
+}
+
+input SignUpInput {
+  username: String!
+  password: String!
+  avatartUrl: String
 }

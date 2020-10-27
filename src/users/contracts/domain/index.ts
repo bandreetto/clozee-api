@@ -12,12 +12,12 @@ export class User {
   @Field()
   _id: string;
 
-  @Prop({ required: true })
-  @Field()
-  name: string;
+  @Prop()
+  @Field({ nullable: true })
+  name?: string;
 
   @Field(() => [Post])
-  posts: Post[];
+  posts?: Post[];
 
   @Prop({ required: true, index: true })
   @Field()
@@ -25,11 +25,11 @@ export class User {
 
   @Prop()
   @Field({ nullable: true })
-  avatar: string;
+  avatar?: string;
 
-  @Prop({ type: AddressSchema, required: true })
-  @Field(() => Address)
-  address: Address;
+  @Prop({ type: AddressSchema })
+  @Field(() => Address, { nullable: true })
+  address?: Address;
 
   @Field()
   createdAt?: Date;
