@@ -1,3 +1,5 @@
+export * from './auth-responses';
+
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ timestamps: true })

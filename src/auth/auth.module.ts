@@ -4,6 +4,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthResolver } from './auth.resolver';
 import { AuthUser, AuthUserSchema } from './contracts/domain';
 import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -13,6 +14,9 @@ import { AuthService } from './auth.service';
         schema: AuthUserSchema,
       },
     ]),
+    JwtModule.register({
+      secret: 'segredo',
+    }),
     UsersModule,
   ],
   providers: [AuthResolver, AuthService],
