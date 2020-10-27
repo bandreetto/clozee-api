@@ -86,6 +86,10 @@ export class UsersService {
       .lean<User>();
   }
 
+  existsWithUsername(username: string): Promise<boolean> {
+    return this.userModel.exists({ username });
+  }
+
   create(newUser: User): Promise<User> {
     return this.userModel.create(newUser);
   }

@@ -16,11 +16,11 @@ export class AuthResolver {
 
   @Mutation(() => User)
   async signUp(@Args('input') input: SignUpInput): Promise<User> {
-    const [user] = await this.usersService.findManyByUsernames([
-      input.username,
-    ]);
-    if (user) {
-      throw new HttpException('This user already exists.', HttpStatus.CONFLICT);
+    if (await this.usersService.existsWithUsername(input.username)) {
+      throw new HttpException(
+        'This username already exists.',
+        HttpStatus.CONFLICT,
+      );
     }
 
     const createdUser = await this.usersService.create({
