@@ -18,6 +18,10 @@ export class UsersService {
     return this.userModel.find({ _id: { $in: ids } }).lean();
   }
 
+  async findByUsername(username: string): Promise<User> {
+    return this.userModel.findOne({ username }).lean();
+  }
+
   async findManyByUsernames(usernames: string[]): Promise<User[]> {
     return this.userModel.find({ username: { $in: usernames } }).lean();
   }

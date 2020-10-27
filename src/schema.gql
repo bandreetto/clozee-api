@@ -106,6 +106,16 @@ type FeedPostConnection {
   pageInfo: PageInfo!
 }
 
+type AuthResponse {
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
 type Query {
   user(id: String!): User!
 
@@ -138,6 +148,7 @@ type Mutation {
   addComment(input: AddCommentInput!): Comment!
   addPost(addPostInput: AddPostInput!): Post!
   signUp(input: SignUpInput!): User!
+  logIn(password: String!, username: String!): AuthResponse!
 }
 
 input UpdateAddressInput {
