@@ -28,6 +28,16 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Configuration
+
+To configure the project's environment variables, copy the `.env.sample` file present at the root of the project and fill in the desired variables:
+
+```bash
+$ cp .env.sample .env
+```
+
+The variables loading is done by [dotenv](https://www.npmjs.com/package/dotenv).
+
 ## Installation
 
 ```bash
