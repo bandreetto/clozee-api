@@ -114,6 +114,7 @@ export class AuthResolver {
 
     const { sub } = this.jwtService.verify(refreshToken);
     const user = await this.usersService.findById(sub);
+    if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
 
     return this.createAccessToken(user);
   }
