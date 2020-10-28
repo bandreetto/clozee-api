@@ -8,6 +8,8 @@ import { AuthService } from './auth.service';
 import { SignUpInput } from './contracts/dto/inputs';
 import { JwtService } from '@nestjs/jwt';
 import { LogInResponse, SignUpResponse } from './contracts/domain';
+import { Token } from './contracts/domain/token';
+import { isRefreshToken } from './auth.logic';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
@@ -97,5 +99,23 @@ export class AuthResolver {
       token: this.createAccessToken(user),
       refreshToken: this.createRefreshToken(user._id),
     };
+  }
+
+  @Mutation(() => String)
+  async refreshToken(@Args('token') refreshToken: string): Promise<string> {
+    const decodedToken = this.jwtService.decode(refreshToken, {
+      complete: true,
+    }) as Token;
+    if (!isRefreshToken(decodedToken))
+      throw new HttpException(
+        'You can only refresh tokens with a refresh type token.',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    const { sub } = this.jwtService.verify(refreshToken);
+    const user = await this.usersService.findById(sub);
+    if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+
+    return this.createAccessToken(user);
   }
 }
