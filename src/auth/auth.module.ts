@@ -20,6 +20,7 @@ import configuration from 'src/config/configuration';
     }),
     UsersModule,
   ],
+  exports: [JwtModule],
   providers: [AuthResolver, AuthService],
 })
 export class AuthModule {}

@@ -20,12 +20,3 @@ export class AddressInput {
   @Field({ nullable: true })
   country?: string;
 }
-
-@InputType()
-export class UpdateAddressInput {
-  @Field()
-  userId: string;
-
-  @Field(() => AddressInput)
-  newAddress: AddressInput;
-}

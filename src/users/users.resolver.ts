@@ -11,7 +11,11 @@ import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts/domain';
 import { descend, sort } from 'ramda';
-import { UpdateAddressInput } from './contracts/dto';
+import { AddressInput } from './contracts/dto';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/common/guards';
+import { CurrentUser } from 'src/common/decorators';
+import { TokenUser } from 'src/common/types';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -19,6 +23,12 @@ export class UsersResolver {
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
   ) {}
+
+  @UseGuards(AuthGuard)
+  @Query(() => User)
+  me(@CurrentUser() user: TokenUser) {
+    return this.usersService.findById(user._id);
+  }
 
   @Query(() => User)
   user(@Args('id') id: string) {
@@ -53,9 +63,13 @@ export class UsersResolver {
     return usersResult;
   }
 
+  @UseGuards(AuthGuard)
   @Mutation(() => User)
-  updateAddress(@Args('input') input: UpdateAddressInput) {
-    return this.usersService.updateAddress(input.userId, input.newAddress);
+  updateAddress(
+    @Args('address') newAddress: AddressInput,
+    @CurrentUser() user: TokenUser,
+  ) {
+    return this.usersService.updateAddress(user._id, newAddress);
   }
 
   @ResolveField(() => [Post])

@@ -6,6 +6,4 @@ export class AddCommentInput {
   post: string;
   @Field()
   body: string;
-  @Field({ description: 'The user who made the comment' })
-  user: string;
 }

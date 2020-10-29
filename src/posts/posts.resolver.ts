@@ -12,9 +12,12 @@ import { AddPostInput } from './contracts/dto/inputs';
 import { v4 } from 'uuid';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { CommentsService } from 'src/comments/comments.service';
 import { Comment } from 'src/comments/contracts/domain';
+import { AuthGuard } from 'src/common/guards';
+import { CurrentUser } from 'src/common/decorators';
+import { TokenUser } from 'src/common/types';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -30,22 +33,22 @@ export class PostsResolver {
   }
 
   @Query(() => [Post])
-  posts(@Args('user', {description:'Filter posts by user id'}) userId: string) {
-    return this.postsService.findManyByUser(userId)
+  posts(
+    @Args('user', { description: 'Filter posts by user id' }) userId: string,
+  ) {
+    return this.postsService.findManyByUser(userId);
   }
 
+  @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async addPost(@Args('addPostInput') input: AddPostInput) {
-    const user = await this.usersService.findById(input.user);
-    if (!user) {
-      throw new HttpException(
-        'You must provide an existing user',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+  async addPost(
+    @Args('addPostInput') input: AddPostInput,
+    @CurrentUser() user: TokenUser,
+  ) {
     return this.postsService.create({
       ...input,
       _id: v4(),
+      user: user._id,
     });
   }
 

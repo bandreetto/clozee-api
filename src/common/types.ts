@@ -35,3 +35,8 @@ export class PaginationArgs {
   })
   after?: string;
 }
+
+export interface TokenUser {
+  _id: string;
+  username: string;
+}

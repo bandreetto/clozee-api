@@ -10,3 +10,8 @@ export interface RefreshToken extends Token {
   header: { alg: jwt.Algorithm; typ: 'refresh' };
   payload: { sub: string; iat: number };
 }
+
+export interface AccessToken extends Token {
+  header: { alg: jwt.Algorithm; typ: 'access' };
+  payload: { sub: string; username: string; iat: number };
+}
