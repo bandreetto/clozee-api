@@ -3,8 +3,8 @@ import { User } from 'src/users/contracts/domain';
 
 @ObjectType()
 export class AuthResponse {
-  @Field()
-  me: User
+  @Field({ description: "The token's owner user." })
+  me: User;
   @Field({
     description:
       'A short lived access token, used to authenticate and grant access to the subject.',
