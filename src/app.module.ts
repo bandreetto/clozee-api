@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -10,6 +10,7 @@ import { CommentsModule } from './comments/comments.module';
 import { FeedModule } from './feed/feed.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
+import { TokenMiddleware } from './common/middlewares';
 
 @Module({
   imports: [
@@ -30,4 +31,8 @@ import configuration from './config/configuration';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TokenMiddleware).forRoutes('graphql');
+  }
+}

@@ -1,4 +1,4 @@
-import { Field, InputType, Int } from '@nestjs/graphql';
+import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class AddCommentInput {
@@ -6,6 +6,4 @@ export class AddCommentInput {
   post: string;
   @Field()
   body: string;
-  @Field({ description: 'The user who made the comment' })
-  user: string;
 }

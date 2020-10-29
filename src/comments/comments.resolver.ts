@@ -8,7 +8,10 @@ import { Post } from 'src/posts/contracts/domain';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
 import { getTaggedUsersFromComment } from './logic';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/common/guards';
+import { CurrentUser } from 'src/common/decorators';
+import { TokenUser } from 'src/common/types';
 
 @Resolver(() => Comment)
 export class CommentsResolver {
@@ -18,21 +21,17 @@ export class CommentsResolver {
     private readonly usersService: UsersService,
   ) {}
 
+  @UseGuards(AuthGuard)
   @Mutation(() => Comment)
-  async addComment(@Args('input') input: AddCommentInput): Promise<Comment> {
-    const [post, commentingUser] = await Promise.all([
-      this.postsService.findById(input.post),
-      this.usersService.findById(input.user),
-    ]);
+  async addComment(
+    @Args('input') input: AddCommentInput,
+    @CurrentUser() user: TokenUser,
+  ): Promise<Comment> {
+    const post = await this.postsService.findById(input.post);
 
     if (!post)
       throw new HttpException(
         `Could not find a post with the id ${input.post}`,
-        HttpStatus.NOT_FOUND,
-      );
-    if (!commentingUser)
-      throw new HttpException(
-        `Could not find a user with the id ${input.user}`,
         HttpStatus.NOT_FOUND,
       );
 
@@ -45,7 +44,7 @@ export class CommentsResolver {
       _id: v4(),
       body: input.body,
       post: input.post,
-      user: input.user,
+      user: user._id,
       tags,
     });
   }

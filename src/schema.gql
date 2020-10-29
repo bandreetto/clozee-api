@@ -108,6 +108,7 @@ type SignUpResponse {
 }
 
 type Query {
+  me: User!
   user(id: String!): User!
 
   """A list of 60 users"""
@@ -127,17 +128,12 @@ type Query {
 }
 
 type Mutation {
-  updateAddress(input: UpdateAddressInput!): User!
+  updateAddress(address: AddressInput!): User!
   addComment(input: AddCommentInput!): Comment!
   addPost(addPostInput: AddPostInput!): Post!
   signUp(input: SignUpInput!): SignUpResponse!
   logIn(password: String!, username: String!): LogInResponse!
   refreshToken(token: String!): String!
-}
-
-input UpdateAddressInput {
-  userId: String!
-  newAddress: AddressInput!
 }
 
 input AddressInput {
@@ -153,14 +149,9 @@ input AddCommentInput {
   """The id of the post the comment is being made."""
   post: String!
   body: String!
-
-  """The user who made the comment"""
-  user: String!
 }
 
 input AddPostInput {
-  """The id of the post's user"""
-  user: String!
   title: String!
   size: String!
   description: String!
