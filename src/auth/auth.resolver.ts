@@ -7,7 +7,7 @@ import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { SignUpInput } from './contracts/dto/inputs';
 import { JwtService } from '@nestjs/jwt';
-import { LogInResponse, SignUpResponse } from './contracts/domain';
+import { AuthResponse } from './contracts/domain';
 import { Token } from './contracts/domain/token';
 import { isRefreshToken } from './auth.logic';
 
@@ -44,8 +44,8 @@ export class AuthResolver {
       },
     );
 
-  @Mutation(() => SignUpResponse)
-  async signUp(@Args('input') input: SignUpInput): Promise<SignUpResponse> {
+  @Mutation(() => AuthResponse)
+  async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
     if (await this.usersService.existsWithUsername(input.username)) {
       throw new HttpException(
         'This username already exists.',
@@ -71,17 +71,17 @@ export class AuthResolver {
       user: createdUser._id,
     });
     return {
-      user: createdUser,
+      me: createdUser,
       token: this.createAccessToken(createdUser),
       refreshToken: this.createRefreshToken(createdUser._id),
     };
   }
 
-  @Mutation(() => LogInResponse)
+  @Mutation(() => AuthResponse)
   async logIn(
     @Args('username') username: string,
     @Args('password') password: string,
-  ): Promise<LogInResponse> {
+  ): Promise<AuthResponse> {
     const user = await this.usersService.findByUsername(username);
 
     if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
@@ -96,6 +96,7 @@ export class AuthResolver {
       throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
 
     return {
+      me: user,
       token: this.createAccessToken(user),
       refreshToken: this.createRefreshToken(user._id),
     };
