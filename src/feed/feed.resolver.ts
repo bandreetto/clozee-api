@@ -1,12 +1,10 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Resolver, Query } from '@nestjs/graphql';
-import { AuthGuard } from 'src/common/guards';
 import { PaginationArgs } from 'src/common/types';
 import { PostsService } from 'src/posts/posts.service';
 import { FeedPostConnection } from './contracts/domain';
 import { fromPostsToConnection } from './feed.logic';
 
-@UseGuards(AuthGuard)
 @Resolver()
 export class FeedResolver {
   constructor(private postsService: PostsService) {}
