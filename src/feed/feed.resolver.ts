@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import { Args, Resolver, Query } from '@nestjs/graphql';
 import { PaginationArgs } from 'src/common/types';
 import { PostsService } from 'src/posts/posts.service';
