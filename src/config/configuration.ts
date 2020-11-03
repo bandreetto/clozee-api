@@ -1,7 +1,3 @@
-import * as dotenv from 'dotenv';
-
-dotenv.config();
-
 export default {
   port: () => parseInt(process.env.PORT, 10),
   database: {
@@ -9,5 +5,8 @@ export default {
   },
   auth: {
     secret: () => process.env.SECRET,
+  },
+  images: {
+    bucket: () => process.env.IMAGES_BUCKET,
   },
 };
