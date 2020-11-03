@@ -18,6 +18,8 @@ import { Comment } from 'src/comments/contracts/domain';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
+import { S3Client } from 'src/common/s3';
+import configuration from 'src/config/configuration';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -37,6 +39,18 @@ export class PostsResolver {
     @Args('user', { description: 'Filter posts by user id' }) userId: string,
   ) {
     return this.postsService.findManyByUser(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => String, {
+    description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
+  })
+  uploadPostImage(@CurrentUser() user: TokenUser): string {
+    return S3Client.getSignedUrl('putObject', {
+      Bucket: configuration.images.bucket(),
+      Key: `posts/${user._id}_${v4()}.jpg`,
+      ContentType: 'image/jpeg',
+    });
   }
 
   @UseGuards(AuthGuard)

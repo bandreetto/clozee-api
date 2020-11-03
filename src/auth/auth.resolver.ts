@@ -10,6 +10,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthResponse } from './contracts/domain';
 import { Token } from './contracts/domain/token';
 import { isRefreshToken } from './auth.logic';
+import { S3Client } from 'src/common/s3';
+import configuration from 'src/config/configuration';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
@@ -56,7 +58,9 @@ export class AuthResolver {
     const createdUser = await this.usersService.create({
       _id: v4(),
       username: input.username,
-      avatar: input.avatarUrl || 'https://picsum.photos/64/64',
+      avatar:
+        input.avatarUrl ||
+        `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
     });
     const salt = randomBytes(SALT_LEN);
     const passwordHash = scryptSync(

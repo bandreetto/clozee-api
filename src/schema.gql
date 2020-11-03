@@ -119,7 +119,16 @@ type Query {
 
 type Mutation {
   updateAddress(address: AddressInput!): User!
+
+  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  uploadAvatarUrl: String!
+
+  """Returns the user with the updated avatar url."""
+  updateUserAvatar(newAvatarUrl: String!): String!
   addComment(input: AddCommentInput!): Comment!
+
+  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  uploadPostImage: String!
   addPost(addPostInput: AddPostInput!): Post!
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!

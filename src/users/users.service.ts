@@ -51,6 +51,18 @@ export class UsersService {
     return updatedUser as User;
   }
 
+  async updateAvatar(userId: string, newAvatarUrl: string) {
+        const updatedUser = await this.userModel
+          .findByIdAndUpdate(
+            userId,
+            { $set: { avatar: newAvatarUrl } },
+            { new: true },
+          )
+          .lean<User>();
+
+        return updatedUser as User;
+  }
+
   async filter(
     filters: {
       username?: string;
