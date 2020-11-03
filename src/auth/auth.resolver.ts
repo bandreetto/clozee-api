@@ -10,7 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthResponse } from './contracts/domain';
 import { Token } from './contracts/domain/token';
 import { isRefreshToken } from './auth.logic';
-import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 
 const SCRYPT_KEYLEN = 64;
