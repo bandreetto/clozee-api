@@ -1,4 +1,5 @@
 export * from './address';
+export * from './saved-post';
 
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
@@ -18,6 +19,9 @@ export class User {
 
   @Field(() => [Post])
   posts?: Post[];
+
+  @Field(() => [Post])
+  savedPosts?: Post[];
 
   @Prop({ required: true, index: true, unique: true })
   @Field()

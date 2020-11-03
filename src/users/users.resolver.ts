@@ -68,6 +68,34 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
+  async savePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    await this.usersService.upsertSavedPost({
+      user: user._id,
+      post: postId,
+      saved: true,
+    });
+    return this.usersService.findById(user._id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  async unsavePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    await this.usersService.upsertSavedPost({
+      user: user._id,
+      post: postId,
+      saved: false,
+    });
+    return this.usersService.findById(user._id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
   updateAddress(
     @Args('address') newAddress: AddressInput,
     @CurrentUser() user: TokenUser,
@@ -109,5 +137,12 @@ export class UsersResolver {
       descend(post => post.createdAt),
       posts,
     );
+  }
+
+  @ResolveField(() => [Post])
+  async savedPosts(@Root() user: User): Promise<Post[]> {
+    const savedPosts = await this.usersService.getUserSavedPosts(user._id);
+    const postsIds = savedPosts.map(s => s.post);
+    return this.postsService.findManyByIds(postsIds);
   }
 }

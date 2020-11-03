@@ -54,6 +54,7 @@ type User {
   _id: String!
   name: String
   posts: [Post!]!
+  savedPosts: [Post!]!
   username: String!
   avatar: String
   address: Address
@@ -118,6 +119,8 @@ type Query {
 }
 
 type Mutation {
+  savePost(postId: String!): User!
+  unsavePost(postId: String!): User!
   updateAddress(address: AddressInput!): User!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""

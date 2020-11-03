@@ -25,6 +25,10 @@ export class PostsService {
     return this.postModel.findById(postId).lean();
   }
 
+  async findManyByIds(postsIds: string[]): Promise<Post[]> {
+    return this.postModel.find({ _id: { $in: postsIds } }).lean();
+  }
+
   async findSortedBy<TKey extends keyof Post>(
     amount: number,
     sortBy: TKey,
