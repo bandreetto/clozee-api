@@ -112,6 +112,7 @@ export class UsersResolver {
       Bucket: configuration.images.bucket(),
       Key: `avatars/${user._id}_${v4()}.jpg`,
       ContentType: 'image/jpeg',
+      ACL: 'public-read',
     });
   }
 

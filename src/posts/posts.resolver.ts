@@ -50,6 +50,7 @@ export class PostsResolver {
       Bucket: configuration.images.bucket(),
       Key: `posts/${user._id}_${v4()}.jpg`,
       ContentType: 'image/jpeg',
+      ACL: 'public-read',
     });
   }
 
