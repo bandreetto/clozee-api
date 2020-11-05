@@ -103,14 +103,13 @@ export class UsersResolver {
     return this.usersService.updateAddress(user._id, newAddress);
   }
 
-  @UseGuards(AuthGuard)
   @Mutation(() => String, {
     description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
   })
   uploadAvatarUrl(@CurrentUser() user: TokenUser): string {
     return S3Client.getSignedUrl('putObject', {
       Bucket: configuration.images.bucket(),
-      Key: `avatars/${user._id}_${v4()}.jpg`,
+      Key: `avatars/${user?._id || ''}_${v4()}.jpg`,
       ContentType: 'image/jpeg',
       ACL: 'public-read',
     });
