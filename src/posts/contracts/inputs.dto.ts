@@ -14,11 +14,10 @@ export class AddPostInput {
   @Field(() => [String], { description: 'An array of urls for post images' })
   images: string[];
 
-  @Field(() => [String], {
-    description: 'An array of strings representing the post categories',
-    defaultValue: [],
+  @Field(() => String, {
+    description: 'The id of the post category.',
   })
-  categories: string[];
+  category: string;
 
   @Field({ description: 'Price of the item being announced in cents' })
   price: number;

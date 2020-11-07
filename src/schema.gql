@@ -31,6 +31,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Category {
+  _id: String!
+  name: String!
+  parent: Category
+
+  """
+  Every parent of this category, from its direct parent to the category root.
+  """
+  ancestrals: [Category!]!
+  children: [Category!]!
+}
+
 type Post {
   _id: String!
   user: User!
@@ -38,14 +50,14 @@ type Post {
   size: String!
   description: String
 
-  """An array of urls for post images"""
+  """An array of urls for post images."""
   images: [String!]!
 
-  """An array of strings representing the post categories"""
-  categories: [String!]!
+  """The category of this post."""
+  category: Category!
   comments: [Comment!]!
 
-  """Price of the item being announced in cents"""
+  """Price of the item being announced in cents."""
   price: Float!
   createdAt: DateTime!
 }
@@ -104,6 +116,9 @@ type Query {
 
   """A list of 60 users"""
   users(searchTerm: String): [User!]!
+
+  """Returns all categories"""
+  categories(roots: Boolean): [Category!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
@@ -161,8 +176,8 @@ input AddPostInput {
   """An array of urls for post images"""
   images: [String!]!
 
-  """An array of strings representing the post categories"""
-  categories: [String!] = []
+  """The id of the post category."""
+  category: String!
 
   """Price of the item being announced in cents"""
   price: Float!

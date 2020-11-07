@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Connection, Edge, PageInfo } from 'src/common/types';
-import { Post } from 'src/posts/contracts/domain';
+import { Post } from 'src/posts/contracts';
 
 @ObjectType()
 export class FeedPostEdge implements Edge<Post> {

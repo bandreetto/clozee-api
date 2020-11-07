@@ -9,7 +9,7 @@ import {
 import { User } from './contracts/domain';
 import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
-import { Post } from 'src/posts/contracts/domain';
+import { Post } from 'src/posts/contracts';
 import { descend, sort } from 'ramda';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';

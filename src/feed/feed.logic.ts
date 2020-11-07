@@ -1,5 +1,5 @@
 import { Connection } from 'src/common/types';
-import { Post } from 'src/posts/contracts/domain';
+import { Post } from 'src/posts/contracts';
 
 export function fromPostsToConnection(
   posts: Post[],

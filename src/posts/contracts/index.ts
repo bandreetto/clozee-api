@@ -2,6 +2,7 @@ import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from 'src/users/contracts/domain';
 import { Comment } from 'src/comments/contracts/domain';
+import { Category } from 'src/categories/contracts';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -27,20 +28,20 @@ export class Post {
   description: string;
 
   @Prop({ type: [String], default: [] })
-  @Field(() => [String], { description: 'An array of urls for post images' })
+  @Field(() => [String], { description: 'An array of urls for post images.' })
   images: string[];
 
-  @Prop({ type: [String], default: [] })
-  @Field(() => [String], {
-    description: 'An array of strings representing the post categories',
+  @Prop({ type: String, required: true })
+  @Field(() => Category, {
+    description: 'The category of this post.',
   })
-  categories: string[];
+  category: string | Category;
 
   @Field(() => [Comment])
   comments: Comment[];
 
   @Prop({ required: true })
-  @Field({ description: 'Price of the item being announced in cents' })
+  @Field({ description: 'Price of the item being announced in cents.' })
   price: number;
 
   @Field()
