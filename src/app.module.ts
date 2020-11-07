@@ -11,6 +11,7 @@ import { FeedModule } from './feed/feed.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { TokenMiddleware } from './common/middlewares';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TokenMiddleware } from './common/middlewares';
     CommentsModule,
     FeedModule,
     AuthModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,8 +3,8 @@ export * from './saved-post';
 
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Post } from 'src/posts/contracts/domain';
 import { Address, AddressSchema } from './address';
+import { Post } from 'src/posts/contracts';
 
 @Schema({ timestamps: true })
 @ObjectType()

@@ -4,7 +4,7 @@ import { CommentsService } from './comments.service';
 import { AddCommentInput } from './contracts/dto/inputs';
 import { Comment } from './contracts/domain';
 import { PostsService } from 'src/posts/posts.service';
-import { Post } from 'src/posts/contracts/domain';
+import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
 import { getTaggedUsersFromComment } from './logic';

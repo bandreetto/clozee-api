@@ -7,8 +7,6 @@ import {
   Query,
 } from '@nestjs/graphql';
 import { PostsService } from 'src/posts/posts.service';
-import { Post } from 'src/posts/contracts/domain';
-import { AddPostInput } from './contracts/dto/inputs';
 import { v4 } from 'uuid';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts/domain';
@@ -20,6 +18,10 @@ import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
+import { Post } from './contracts';
+import { AddPostInput } from './contracts/inputs.dto';
+import { CategoriesService } from 'src/categories/categories.service';
+import { Category } from 'src/categories/contracts';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -27,6 +29,7 @@ export class PostsResolver {
     private readonly postsService: PostsService,
     private readonly usersService: UsersService,
     private readonly commentsService: CommentsService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   @Query(() => Post)
@@ -76,5 +79,11 @@ export class PostsResolver {
   @ResolveField()
   async comments(@Root() post: Post): Promise<Comment[]> {
     return this.commentsService.findByPost(post._id);
+  }
+
+  @ResolveField()
+  async category(@Root() post: Post): Promise<Category> {
+    if (typeof post.category !== 'string') return post.category;
+    return this.categoriesService.findById(post.category);
   }
 }
