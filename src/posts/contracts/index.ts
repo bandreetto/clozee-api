@@ -3,6 +3,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from 'src/users/contracts';
 import { Comment } from 'src/comments/contracts';
 import { Category } from 'src/categories/contracts';
+import { POST_CONDITIONS } from './enums';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -37,12 +38,18 @@ export class Post {
   })
   category: string | Category;
 
-  @Field(() => [Comment])
-  comments: Comment[];
-
   @Prop({ required: true })
   @Field({ description: 'Price of the item being announced in cents.' })
   price: number;
+
+  @Prop({ required: true })
+  @Field(() => POST_CONDITIONS, {
+    description: "The condition of the post's product",
+  })
+  condition: POST_CONDITIONS;
+
+  @Field(() => [Comment])
+  comments: Comment[];
 
   @Field()
   createdAt?: Date;
