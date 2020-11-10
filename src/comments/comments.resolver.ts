@@ -1,17 +1,17 @@
 import { Args, Mutation, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { v4 } from 'uuid';
 import { CommentsService } from './comments.service';
-import { AddCommentInput } from './contracts/dto/inputs';
-import { Comment } from './contracts/domain';
+import { Comment } from './contracts';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/contracts/domain';
+import { User } from 'src/users/contracts';
 import { getTaggedUsersFromComment } from './logic';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
+import { AddCommentInput } from './contracts/inputs.dto';
 
 @Resolver(() => Comment)
 export class CommentsResolver {

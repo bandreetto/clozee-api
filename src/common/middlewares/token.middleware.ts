@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { isAccessToken } from '../../auth/auth.logic';
-import { Token } from '../../auth/contracts/domain';
+import { Token } from '../../auth/contracts';
 
 @Injectable()
 export class TokenMiddleware implements NestMiddleware {

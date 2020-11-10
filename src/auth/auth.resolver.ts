@@ -1,16 +1,15 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { randomBytes, scryptSync } from 'crypto';
-import { User } from 'src/users/contracts/domain';
+import { User } from 'src/users/contracts';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
-import { SignUpInput } from './contracts/dto/inputs';
+import { SignUpInput } from './contracts/inputs.dto';
 import { JwtService } from '@nestjs/jwt';
-import { AuthResponse } from './contracts/domain';
-import { Token } from './contracts/domain/token';
 import { isRefreshToken } from './auth.logic';
 import configuration from 'src/config/configuration';
+import { AuthResponse, Token } from './contracts';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;

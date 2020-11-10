@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
-import { User } from 'src/users/contracts/domain';
-import { Comment } from 'src/comments/contracts/domain';
+import { User } from 'src/users/contracts';
+import { Comment } from 'src/comments/contracts';
 import { Category } from 'src/categories/contracts';
 
 @Schema({ timestamps: true })

@@ -7,7 +7,7 @@ import {
   SavedPostSchema,
   User,
   UserSchema,
-} from './contracts/domain';
+} from './contracts';
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
 import { PostsModule } from 'src/posts/posts.module';

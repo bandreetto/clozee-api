@@ -6,7 +6,7 @@ import {
   Root,
   Mutation,
 } from '@nestjs/graphql';
-import { User } from './contracts/domain';
+import { User } from './contracts';
 import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
@@ -18,7 +18,7 @@ import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
-import { AddressInput } from './contracts/dto/inputs';
+import { AddressInput } from './contracts/inputs';
 
 @Resolver(() => User)
 export class UsersResolver {

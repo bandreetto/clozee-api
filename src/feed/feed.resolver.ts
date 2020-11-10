@@ -1,7 +1,7 @@
 import { Args, Resolver, Query } from '@nestjs/graphql';
 import { PaginationArgs } from 'src/common/types';
 import { PostsService } from 'src/posts/posts.service';
-import { FeedPostConnection } from './contracts/domain';
+import { FeedPostConnection } from './contracts';
 import { fromPostsToConnection } from './feed.logic';
 
 @Resolver()

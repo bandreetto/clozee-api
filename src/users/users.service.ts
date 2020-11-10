@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
 import { escapeRegex } from 'src/common/regex';
-import { Address, SavedPost, User } from './contracts/domain';
+import { Address, SavedPost, User } from './contracts';
 
 @Injectable()
 export class UsersService {
