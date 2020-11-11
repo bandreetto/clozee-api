@@ -1,10 +1,12 @@
 export * from './address';
 export * from './saved-post';
+export * from './payment-method';
 
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
 import { Address, AddressSchema } from './address';
 import { Post } from 'src/posts/contracts';
+import { PaymentMethod } from './payment-method';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -34,6 +36,11 @@ export class User {
   @Prop({ type: AddressSchema })
   @Field(() => Address, { nullable: true })
   address?: Address;
+
+  @Field(() => [PaymentMethod], {
+    description: 'The ids of users credit cards',
+  })
+  paymentMethods?: PaymentMethod[];
 
   @Field()
   createdAt?: Date;

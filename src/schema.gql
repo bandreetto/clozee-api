@@ -17,6 +17,19 @@ type Address {
   coordinates: Coordinates
 }
 
+type PaymentMethod {
+  _id: String!
+
+  """Card id provided by the payment gateway."""
+  cardId: String!
+
+  """Last 4 digits of the credit card."""
+  lastDigits: String!
+
+  """The card's flag."""
+  flag: String!
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -87,6 +100,9 @@ type User {
   username: String!
   avatar: String
   address: Address
+
+  """The ids of users credit cards"""
+  paymentMethods: [PaymentMethod!]!
   createdAt: DateTime!
 }
 
@@ -160,6 +176,8 @@ type Mutation {
 
   """Returns the user with the updated avatar url."""
   updateUserAvatar(newAvatarUrl: String!): String!
+  addCreditCard(input: AddCreditCardInput!): User!
+  deletePaymentMethod(paymentMethodId: String!): User!
   addComment(input: AddCommentInput!): Comment!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
@@ -183,6 +201,17 @@ input AddressInput {
 input CoordinatesInput {
   latitude: Float!
   longitude: Float!
+}
+
+input AddCreditCardInput {
+  """Card id provided by the payment gateway."""
+  cardId: String!
+
+  """Last 4 digits of the credit card."""
+  lastDigits: String!
+
+  """The card's flag."""
+  flag: String!
 }
 
 input AddCommentInput {
