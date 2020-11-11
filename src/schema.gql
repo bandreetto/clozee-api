@@ -87,6 +87,9 @@ type User {
   username: String!
   avatar: String
   address: Address
+
+  """The ids of users credit cards"""
+  cardIds: [String!]!
   createdAt: DateTime!
 }
 
@@ -160,6 +163,8 @@ type Mutation {
 
   """Returns the user with the updated avatar url."""
   updateUserAvatar(newAvatarUrl: String!): String!
+  addCreditCard(cardId: String!): User!
+  removeCreditCard(cardId: String!): User!
   addComment(input: AddCommentInput!): Comment!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""

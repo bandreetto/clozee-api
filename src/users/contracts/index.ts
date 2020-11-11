@@ -35,6 +35,12 @@ export class User {
   @Field(() => Address, { nullable: true })
   address?: Address;
 
+  @Prop({ Type: [String], default: [] })
+  @Field(() => [String], {
+    description: 'The ids of users credit cards',
+  })
+  cardIds?: string[];
+
   @Field()
   createdAt?: Date;
 }

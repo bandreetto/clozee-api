@@ -130,6 +130,24 @@ export class UsersResolver {
     return updatedUser;
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  async addCreditCard(
+    @Args('cardId') cardId: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    return this.usersService.addCardId(user._id, cardId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  async removeCreditCard(
+    @Args('cardId') cardId: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    return this.usersService.removeCardId(user._id, cardId);
+  }
+
   @ResolveField(() => [Post])
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsService.findManyByUser(user._id);

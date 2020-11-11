@@ -138,4 +138,28 @@ export class UsersService {
       .lean();
     return savedPost as SavedPost;
   }
+
+  async addCardId(userId: string, cardId: string): Promise<User> {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $push: { cardIds: cardId },
+        },
+        { new: true },
+      )
+      .lean();
+  }
+
+  async removeCardId(userId: string, cardId: string): Promise<User> {
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $pull: { cardIds: cardId },
+        },
+        { new: true },
+      )
+      .lean();
+  }
 }
