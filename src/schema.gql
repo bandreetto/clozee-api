@@ -55,11 +55,22 @@ type Post {
 
   """The category of this post."""
   category: Category!
-  comments: [Comment!]!
 
   """Price of the item being announced in cents."""
   price: Float!
+
+  """The condition of the post's product"""
+  condition: POST_CONDITIONS!
+  comments: [Comment!]!
   createdAt: DateTime!
+}
+
+"""Possible post's product conditions."""
+enum POST_CONDITIONS {
+  NEW
+  USED_NEW
+  USED_GOOD
+  USED_FAIR
 }
 
 type User {
@@ -178,6 +189,9 @@ input AddPostInput {
 
   """The id of the post category."""
   category: String!
+
+  """The condition of this post's product"""
+  condition: POST_CONDITIONS!
 
   """Price of the item being announced in cents"""
   price: Float!
