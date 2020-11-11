@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Coordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
 type Address {
   street: String!
   number: Float!
@@ -9,6 +14,7 @@ type Address {
   zipCode: String
   city: String!
   country: String!
+  coordinates: Coordinates
 }
 
 type Comment {
@@ -171,6 +177,12 @@ input AddressInput {
   zipCode: String
   city: String
   country: String
+  coordinates: CoordinatesInput
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
 }
 
 input AddCommentInput {

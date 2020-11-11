@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   Address,
   AddressSchema,
+  Coordinates,
+  CoordinatesSchema,
   SavedPost,
   SavedPostSchema,
   User,
@@ -18,6 +20,10 @@ import { PostsModule } from 'src/posts/posts.module';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: Coordinates.name,
+        schema: CoordinatesSchema,
       },
       {
         name: Address.name,

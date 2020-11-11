@@ -16,7 +16,7 @@ import { CategoriesModule } from './categories/categories.module';
 @Module({
   imports: [
     MongooseModule.forRoot(configuration.database.url(), {
-      useFindAndModify: true,
+      useFindAndModify: false,
       useNewUrlParser: true,
       useCreateIndex: true,
     }),

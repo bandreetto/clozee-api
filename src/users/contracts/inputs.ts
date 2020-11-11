@@ -1,4 +1,12 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { Field, Float, InputType } from '@nestjs/graphql';
+
+@InputType()
+export class CoordinatesInput {
+  @Field(() => Float)
+  latitude: number;
+  @Field(() => Float)
+  longitude: number;
+}
 
 @InputType()
 export class AddressInput {
@@ -19,4 +27,7 @@ export class AddressInput {
 
   @Field({ nullable: true })
   country?: string;
+
+  @Field(() => CoordinatesInput, { nullable: true })
+  coordinates: CoordinatesInput;
 }

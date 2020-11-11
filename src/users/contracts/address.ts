@@ -1,5 +1,16 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Float } from '@nestjs/graphql';
+
+@Schema({ _id: false })
+@ObjectType()
+export class Coordinates {
+  @Prop({ required: true })
+  @Field(() => Float)
+  latitude: number;
+  @Prop({ required: true })
+  @Field(() => Float)
+  longitude: number;
+}
 
 @Schema({ _id: false })
 @ObjectType()
@@ -27,6 +38,11 @@ export class Address {
   @Prop({ required: true })
   @Field()
   country: string;
+
+  @Prop()
+  @Field(() => Coordinates, { nullable: true })
+  coordinates: Coordinates;
 }
 
+export const CoordinatesSchema = SchemaFactory.createForClass(Coordinates);
 export const AddressSchema = SchemaFactory.createForClass(Address);
