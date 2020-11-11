@@ -6,19 +6,19 @@ import {
   Root,
   Mutation,
 } from '@nestjs/graphql';
-import { User } from './contracts';
+import { PaymentMethod, User } from './contracts';
 import { UsersService } from './users.service';
 import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
 import { descend, sort } from 'ramda';
-import { UseGuards } from '@nestjs/common';
+import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
-import { AddressInput } from './contracts/inputs';
+import { AddCreditCardInput, AddressInput } from './contracts/inputs';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -133,19 +133,29 @@ export class UsersResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => User)
   async addCreditCard(
-    @Args('cardId') cardId: string,
+    @Args('input') input: AddCreditCardInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    return this.usersService.addCardId(user._id, cardId);
+    if (input.lastDigits.length !== 4)
+      throw new HttpException(
+        'Last digits must be a string of length 4',
+        HttpStatus.BAD_REQUEST,
+      );
+    await this.usersService.addPaymentMethod(user._id, {
+      ...input,
+      _id: v4(),
+    });
+    return this.usersService.findById(user._id);
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async removeCreditCard(
-    @Args('cardId') cardId: string,
+  async deletePaymentMethod(
+    @Args('paymentMethodId') paymentMethodId: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    return this.usersService.removeCardId(user._id, cardId);
+    await this.usersService.deletePaymentMethod(user._id, paymentMethodId);
+    return this.usersService.findById(user._id);
   }
 
   @ResolveField(() => [Post])
@@ -162,5 +172,10 @@ export class UsersResolver {
     const savedPosts = await this.usersService.getUserSavedPosts(user._id);
     const postsIds = savedPosts.map(s => s.post);
     return this.postsService.findManyByIds(postsIds);
+  }
+
+  @ResolveField(() => [PaymentMethod])
+  async paymentMethods(@Root() user: User): Promise<PaymentMethod[]> {
+    return this.usersService.getUserPaymentMethods(user._id);
   }
 }

@@ -31,3 +31,15 @@ export class AddressInput {
   @Field(() => CoordinatesInput, { nullable: true })
   coordinates: CoordinatesInput;
 }
+
+@InputType()
+export class AddCreditCardInput {
+  @Field({ description: 'Card id provided by the payment gateway.' })
+  cardId: string;
+
+  @Field({ description: 'Last 4 digits of the credit card.' })
+  lastDigits: string;
+
+  @Field({ description: "The card's flag." })
+  flag: string;
+}

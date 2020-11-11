@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
 import { escapeRegex } from 'src/common/regex';
-import { Address, SavedPost, User } from './contracts';
+import { Address, PaymentMethod, SavedPost, User } from './contracts';
 
 @Injectable()
 export class UsersService {
@@ -10,6 +10,8 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<User & Document>,
     @InjectModel(SavedPost.name)
     private readonly savedPostModel: Model<SavedPost & Document>,
+    @InjectModel(PaymentMethod.name)
+    private readonly paymentMethodModel: Model<PaymentMethod & Document>,
   ) {}
 
   async findById(id: string): Promise<User> {
@@ -139,27 +141,28 @@ export class UsersService {
     return savedPost as SavedPost;
   }
 
-  async addCardId(userId: string, cardId: string): Promise<User> {
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        {
-          $push: { cardIds: cardId },
-        },
-        { new: true },
-      )
-      .lean();
+  async addPaymentMethod(
+    userId: string,
+    paymentMethod: Omit<PaymentMethod, 'user'>,
+  ): Promise<PaymentMethod> {
+    const createdMethod = await this.paymentMethodModel.create({
+      ...paymentMethod,
+      user: userId,
+    });
+    return createdMethod.toObject();
   }
 
-  async removeCardId(userId: string, cardId: string): Promise<User> {
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        {
-          $pull: { cardIds: cardId },
-        },
-        { new: true },
-      )
-      .lean();
+  async deletePaymentMethod(
+    userId: string,
+    paymentMethodId: string,
+  ): Promise<void> {
+    await this.paymentMethodModel.deleteOne({
+      _id: paymentMethodId,
+      user: userId,
+    });
+  }
+
+  async getUserPaymentMethods(userId: string): Promise<PaymentMethod[]> {
+    return this.paymentMethodModel.find({ user: userId }).lean();
   }
 }

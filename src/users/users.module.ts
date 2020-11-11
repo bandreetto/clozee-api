@@ -5,6 +5,8 @@ import {
   AddressSchema,
   Coordinates,
   CoordinatesSchema,
+  PaymentMethod,
+  PaymentMethodSchema,
   SavedPost,
   SavedPostSchema,
   User,
@@ -32,6 +34,10 @@ import { PostsModule } from 'src/posts/posts.module';
       {
         name: SavedPost.name,
         schema: SavedPostSchema,
+      },
+      {
+        name: PaymentMethod.name,
+        schema: PaymentMethodSchema,
       },
     ]),
     forwardRef(() => PostsModule),
