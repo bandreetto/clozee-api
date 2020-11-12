@@ -11,7 +11,7 @@ import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
-import { AddCommentInput } from './contracts/inputs.dto';
+import { AddCommentInput } from './contracts/inputs';
 
 @Resolver(() => Comment)
 export class CommentsResolver {

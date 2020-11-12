@@ -19,7 +19,7 @@ import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { Post } from './contracts';
-import { AddPostInput } from './contracts/inputs.dto';
+import { AddPostInput } from './contracts/inputs';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/contracts';
 
