@@ -5,7 +5,7 @@ import { User } from 'src/users/contracts';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
-import { SignUpInput } from './contracts/inputs.dto';
+import { SignUpInput } from './contracts/inputs';
 import { JwtService } from '@nestjs/jwt';
 import { isRefreshToken } from './auth.logic';
 import configuration from 'src/config/configuration';
