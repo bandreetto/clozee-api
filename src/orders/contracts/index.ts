@@ -1,6 +1,6 @@
 export * from './sales';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Address, AddressSchema, User } from 'src/users/contracts';
 
@@ -10,6 +10,10 @@ export class Order {
   @Prop()
   @Field()
   _id: string;
+
+  @Prop({ required: true, unique: true })
+  @Field(() => Int)
+  number: number;
 
   @Prop({ type: String, required: true })
   @Field(() => User)

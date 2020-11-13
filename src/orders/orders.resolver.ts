@@ -8,6 +8,7 @@ import { Args, Mutation, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
+import { CountersService } from 'src/counters/counters.service';
 import { User } from 'src/users/contracts';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
@@ -22,6 +23,7 @@ export class OrdersResolver {
     private readonly usersService: UsersService,
     private readonly salesService: SalesService,
     private readonly ordersService: OrdersService,
+    private readonly countersService: CountersService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -59,6 +61,7 @@ export class OrdersResolver {
     await this.salesService.createMany(newSales);
     return this.ordersService.create({
       _id: orderId,
+      number: await this.countersService.getCounterAndIncrement('orders'),
       buyer: user._id,
       paymentMethod: paymentMethod._id,
       address: user.address,

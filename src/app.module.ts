@@ -13,6 +13,7 @@ import configuration from './config/configuration';
 import { TokenMiddleware } from './common/middlewares';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
+import { CountersModule } from './counters/counters.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { OrdersModule } from './orders/orders.module';
     AuthModule,
     CategoriesModule,
     OrdersModule,
+    CountersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

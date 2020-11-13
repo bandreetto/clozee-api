@@ -145,6 +145,7 @@ type AuthResponse {
 
 type Order {
   _id: String!
+  number: Int!
   buyer: User!
   paymentMethod: String!
   address: Address!
