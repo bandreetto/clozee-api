@@ -26,7 +26,7 @@ export class AddressInput {
   city?: string;
 
   @Field({ nullable: true })
-  country?: string;
+  state?: string;
 
   @Field(() => CoordinatesInput, { nullable: true })
   coordinates: CoordinatesInput;
