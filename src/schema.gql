@@ -13,7 +13,7 @@ type Address {
   district: String
   zipCode: String
   city: String!
-  country: String!
+  state: String!
   coordinates: Coordinates
 }
 
@@ -203,7 +203,7 @@ input AddressInput {
   district: String
   zipCode: String
   city: String
-  country: String
+  state: String
   coordinates: CoordinatesInput
 }
 

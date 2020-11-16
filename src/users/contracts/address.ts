@@ -37,7 +37,7 @@ export class Address {
 
   @Prop({ required: true })
   @Field()
-  country: string;
+  state: string;
 
   @Prop()
   @Field(() => Coordinates, { nullable: true })
