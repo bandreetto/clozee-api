@@ -7,10 +7,10 @@ export class Sale {
   @Prop()
   _id: string;
 
-  @Prop({ type: String, unique: true })
+  @Prop({ type: String, unique: true, index: true })
   post: string | Post;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   order: string | Order;
 }
 

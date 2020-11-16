@@ -16,6 +16,8 @@ import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
 import { CountersService } from 'src/counters/counters.service';
+import { Post } from 'src/posts/contracts';
+import { PostsService } from 'src/posts/posts.service';
 import { User } from 'src/users/contracts';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
@@ -31,6 +33,7 @@ export class OrdersResolver {
     private readonly salesService: SalesService,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
+    private readonly postsService: PostsService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -85,5 +88,20 @@ export class OrdersResolver {
   async buyer(@Root() order: Order): Promise<User> {
     if (typeof order.buyer !== 'string') return order.buyer;
     return this.usersService.findById(order.buyer);
+  }
+
+  @ResolveField()
+  async posts(@Root() order: Order): Promise<Post[]> {
+    const sales = await this.salesService.findByOrder(order._id);
+    return this.postsService.findManyByIds(sales.map(s => s.post as string));
+  }
+
+  @ResolveField()
+  async total(@Root() order: Order): Promise<number> {
+    const sales = await this.salesService.findByOrder(order._id);
+    const posts = await this.postsService.findManyByIds(
+      sales.map(s => s.post as string),
+    );
+    return posts.reduce((total, post) => total + post.price, 0);
   }
 }
