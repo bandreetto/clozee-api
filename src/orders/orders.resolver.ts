@@ -17,6 +17,7 @@ import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
 import { CountersService } from 'src/counters/counters.service';
 import { Post } from 'src/posts/contracts';
+import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
 import { User } from 'src/users/contracts';
 import { UsersService } from 'src/users/users.service';
@@ -34,6 +35,7 @@ export class OrdersResolver {
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
     private readonly postsService: PostsService,
+    private readonly postsLoader: PostsLoader,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -93,15 +95,17 @@ export class OrdersResolver {
   @ResolveField()
   async posts(@Root() order: Order): Promise<Post[]> {
     const sales = await this.salesService.findByOrder(order._id);
-    return this.postsService.findManyByIds(sales.map(s => s.post as string));
+    return this.postsLoader.loadMany(
+      sales.map(s => s.post as string),
+    ) as Promise<Post[]>;
   }
 
   @ResolveField()
   async total(@Root() order: Order): Promise<number> {
     const sales = await this.salesService.findByOrder(order._id);
-    const posts = await this.postsService.findManyByIds(
+    const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),
-    );
+    )) as Post[];
     return posts.reduce((total, post) => total + post.price, 0);
   }
 }

@@ -12,12 +12,14 @@ import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
 import { AddCommentInput } from './contracts/inputs';
+import { PostsLoader } from 'src/posts/posts.dataloader';
 
 @Resolver(() => Comment)
 export class CommentsResolver {
   constructor(
     private readonly commentsService: CommentsService,
     private readonly postsService: PostsService,
+    private readonly postsLoader: PostsLoader,
     private readonly usersService: UsersService,
   ) {}
 
@@ -52,7 +54,7 @@ export class CommentsResolver {
   @ResolveField()
   async post(@Root() comment: Comment): Promise<Post> {
     if (typeof comment.post !== 'string') return comment.post;
-    return this.postsService.findById(comment.post);
+    return this.postsLoader.load(comment.post);
   }
 
   @ResolveField()
