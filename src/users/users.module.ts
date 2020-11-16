@@ -15,6 +15,7 @@ import {
 import { UsersService } from './users.service';
 import { UsersResolver } from './users.resolver';
 import { PostsModule } from 'src/posts/posts.module';
+import { OrdersModule } from 'src/orders/orders.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { PostsModule } from 'src/posts/posts.module';
       },
     ]),
     forwardRef(() => PostsModule),
+    forwardRef(() => OrdersModule),
   ],
   providers: [UsersService, UsersResolver],
   exports: [UsersService],

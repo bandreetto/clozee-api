@@ -15,7 +15,7 @@ export class Order {
   @Field(() => Int)
   number: number;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   @Field(() => User)
   buyer: string | User;
 
