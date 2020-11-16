@@ -2,9 +2,39 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Coordinates {
-  latitude: Float!
-  longitude: Float!
+input AddCommentInput {
+  """The id of the post the comment is being made."""
+  post: String!
+  body: String!
+}
+
+input AddCreditCardInput {
+  """Card id provided by the payment gateway."""
+  cardId: String!
+
+  """Last 4 digits of the credit card."""
+  lastDigits: String!
+
+  """The card's flag."""
+  flag: String!
+}
+
+input AddPostInput {
+  title: String!
+  size: String!
+  description: String!
+
+  """An array of urls for post images"""
+  images: [String!]!
+
+  """The id of the post category."""
+  category: String!
+
+  """The condition of this post's product"""
+  condition: POST_CONDITIONS!
+
+  """Price of the item being announced in cents"""
+  price: Float!
 }
 
 type Address {
@@ -17,17 +47,47 @@ type Address {
   coordinates: Coordinates
 }
 
-type PaymentMethod {
+input AddressInput {
+  street: String
+  number: Float
+  district: String
+  zipCode: String
+  city: String
+  state: String
+  coordinates: CoordinatesInput
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type Category {
   _id: String!
+  name: String!
+  parent: Category
 
-  """Card id provided by the payment gateway."""
-  cardId: String!
+  """
+  Every parent of this category, from its direct parent to the category root.
+  """
+  ancestrals: [Category!]!
+  children: [Category!]!
+}
 
-  """Last 4 digits of the credit card."""
-  lastDigits: String!
+input CheckoutInput {
+  """The array of posts being bought."""
+  posts: [String!]!
 
-  """The card's flag."""
-  flag: String!
+  """The id of the user's payment method to use on the checkout."""
+  paymentMethodId: String!
 }
 
 type Comment {
@@ -45,21 +105,87 @@ type Comment {
   createdAt: DateTime!
 }
 
+type Coordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
-type Category {
-  _id: String!
-  name: String!
-  parent: Category
+type FeedPostConnection {
+  """An array of post edges containing the node (Post) and its cursor."""
+  edges: [FeedPostEdge!]!
+  pageInfo: PageInfo!
+}
 
-  """
-  Every parent of this category, from its direct parent to the category root.
-  """
-  ancestrals: [Category!]!
-  children: [Category!]!
+type FeedPostEdge {
+  node: Post!
+
+  """An opaque cursor representing this edge position."""
+  cursor: String!
+}
+
+type Mutation {
+  savePost(postId: String!): User!
+  unsavePost(postId: String!): User!
+  updateAddress(address: AddressInput!): User!
+
+  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  uploadAvatarUrl: String!
+
+  """Returns the user with the updated avatar url."""
+  updateUserAvatar(newAvatarUrl: String!): String!
+  addCreditCard(input: AddCreditCardInput!): User!
+  deletePaymentMethod(paymentMethodId: String!): User!
+  addComment(input: AddCommentInput!): Comment!
+  checkout(input: CheckoutInput!): Order!
+
+  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  uploadPostImage: String!
+  addPost(addPostInput: AddPostInput!): Post!
+  signUp(input: SignUpInput!): AuthResponse!
+  logIn(password: String!, username: String!): AuthResponse!
+  refreshToken(token: String!): String!
+}
+
+type Order {
+  _id: String!
+  number: Int!
+  buyer: User!
+  paymentMethod: String!
+  address: Address!
+}
+
+type PageInfo {
+  """The first cursor of this page."""
+  startCursor: String!
+
+  """The last cursor of this page."""
+  endCursor: String!
+
+  """A boolean indicating if there are more edges after this page."""
+  hasNextPage: Boolean!
+}
+
+type PaymentMethod {
+  _id: String!
+
+  """Card id provided by the payment gateway."""
+  cardId: String!
+
+  """Last 4 digits of the credit card."""
+  lastDigits: String!
+
+  """The card's flag."""
+  flag: String!
 }
 
 type Post {
@@ -95,68 +221,6 @@ enum POST_CONDITIONS {
   USED_FAIR
 }
 
-type Order {
-  _id: String!
-  number: Int!
-  buyer: User!
-  paymentMethod: String!
-  address: Address!
-}
-
-type User {
-  _id: String!
-  name: String
-  posts: [Post!]!
-  savedPosts: [Post!]!
-  username: String!
-  avatar: String
-  address: Address
-
-  """The ids of users credit cards"""
-  paymentMethods: [PaymentMethod!]!
-
-  """The orders that this user has made."""
-  orders: [Order!]!
-  createdAt: DateTime!
-}
-
-type PageInfo {
-  """The first cursor of this page."""
-  startCursor: String!
-
-  """The last cursor of this page."""
-  endCursor: String!
-
-  """A boolean indicating if there are more edges after this page."""
-  hasNextPage: Boolean!
-}
-
-type FeedPostEdge {
-  node: Post!
-
-  """An opaque cursor representing this edge position."""
-  cursor: String!
-}
-
-type FeedPostConnection {
-  """An array of post edges containing the node (Post) and its cursor."""
-  edges: [FeedPostEdge!]!
-  pageInfo: PageInfo!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
 type Query {
   me: User!
   user(id: String!): User!
@@ -181,89 +245,25 @@ type Query {
   ): FeedPostConnection!
 }
 
-type Mutation {
-  savePost(postId: String!): User!
-  unsavePost(postId: String!): User!
-  updateAddress(address: AddressInput!): User!
-
-  """Returns a pre-signed S3 URL that allows the avatar upload."""
-  uploadAvatarUrl: String!
-
-  """Returns the user with the updated avatar url."""
-  updateUserAvatar(newAvatarUrl: String!): String!
-  addCreditCard(input: AddCreditCardInput!): User!
-  deletePaymentMethod(paymentMethodId: String!): User!
-  addComment(input: AddCommentInput!): Comment!
-  checkout(input: CheckoutInput!): Order!
-
-  """Returns a pre-signed S3 URL that allows the avatar upload."""
-  uploadPostImage: String!
-  addPost(addPostInput: AddPostInput!): Post!
-  signUp(input: SignUpInput!): AuthResponse!
-  logIn(password: String!, username: String!): AuthResponse!
-  refreshToken(token: String!): String!
-}
-
-input AddressInput {
-  street: String
-  number: Float
-  district: String
-  zipCode: String
-  city: String
-  state: String
-  coordinates: CoordinatesInput
-}
-
-input CoordinatesInput {
-  latitude: Float!
-  longitude: Float!
-}
-
-input AddCreditCardInput {
-  """Card id provided by the payment gateway."""
-  cardId: String!
-
-  """Last 4 digits of the credit card."""
-  lastDigits: String!
-
-  """The card's flag."""
-  flag: String!
-}
-
-input AddCommentInput {
-  """The id of the post the comment is being made."""
-  post: String!
-  body: String!
-}
-
-input CheckoutInput {
-  """The array of posts being bought."""
-  posts: [String!]!
-
-  """The id of the user's payment method to use on the checkout."""
-  paymentMethodId: String!
-}
-
-input AddPostInput {
-  title: String!
-  size: String!
-  description: String!
-
-  """An array of urls for post images"""
-  images: [String!]!
-
-  """The id of the post category."""
-  category: String!
-
-  """The condition of this post's product"""
-  condition: POST_CONDITIONS!
-
-  """Price of the item being announced in cents"""
-  price: Float!
-}
-
 input SignUpInput {
   username: String!
   password: String!
   avatarUrl: String
+}
+
+type User {
+  _id: String!
+  name: String
+  posts: [Post!]!
+  savedPosts: [Post!]!
+  username: String!
+  avatar: String
+  address: Address
+
+  """The ids of users credit cards"""
+  paymentMethods: [PaymentMethod!]!
+
+  """The orders that this user has made."""
+  orders: [Order!]!
+  createdAt: DateTime!
 }

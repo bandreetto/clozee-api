@@ -11,7 +11,10 @@ async function bootstrap() {
   await app
     .listen(configuration.port())
     .then(() =>
-      Logger.log(`Server is listening on port ${configuration.port()}`),
+      Logger.log(
+        `Server is listening on port ${configuration.port()}`,
+        'NestApplication',
+      ),
     );
 }
 bootstrap();
