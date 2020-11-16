@@ -19,12 +19,15 @@ import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
 import { AddCreditCardInput, AddressInput } from './contracts/inputs';
+import { Order } from 'src/orders/contracts';
+import { OrdersService } from 'src/orders/orders.service';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -158,7 +161,7 @@ export class UsersResolver {
     return this.usersService.findById(user._id);
   }
 
-  @ResolveField(() => [Post])
+  @ResolveField()
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsService.findManyByUser(user._id);
     return sort(
@@ -167,15 +170,20 @@ export class UsersResolver {
     );
   }
 
-  @ResolveField(() => [Post])
+  @ResolveField()
   async savedPosts(@Root() user: User): Promise<Post[]> {
     const savedPosts = await this.usersService.getUserSavedPosts(user._id);
     const postsIds = savedPosts.map(s => s.post);
     return this.postsService.findManyByIds(postsIds);
   }
 
-  @ResolveField(() => [PaymentMethod])
+  @ResolveField()
   async paymentMethods(@Root() user: User): Promise<PaymentMethod[]> {
     return this.usersService.getUserPaymentMethods(user._id);
+  }
+
+  @ResolveField()
+  async orders(@Root() user: User): Promise<Order[]> {
+    return this.ordersService.findUserOrders(user._id);
   }
 }

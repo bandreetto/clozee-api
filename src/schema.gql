@@ -95,6 +95,14 @@ enum POST_CONDITIONS {
   USED_FAIR
 }
 
+type Order {
+  _id: String!
+  number: Int!
+  buyer: User!
+  paymentMethod: String!
+  address: Address!
+}
+
 type User {
   _id: String!
   name: String
@@ -106,6 +114,9 @@ type User {
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
+
+  """The orders that this user has made."""
+  orders: [Order!]!
   createdAt: DateTime!
 }
 
@@ -118,14 +129,6 @@ type PageInfo {
 
   """A boolean indicating if there are more edges after this page."""
   hasNextPage: Boolean!
-}
-
-type Order {
-  _id: String!
-  number: Int!
-  buyer: User!
-  paymentMethod: String!
-  address: Address!
 }
 
 type FeedPostEdge {

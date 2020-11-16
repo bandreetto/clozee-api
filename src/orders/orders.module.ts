@@ -25,6 +25,6 @@ import { SalesService } from './sales.service';
     forwardRef(() => PostsModule),
   ],
   providers: [SalesService, OrdersResolver, OrdersService],
-  exports: [SalesService],
+  exports: [SalesService, OrdersService],
 })
 export class OrdersModule {}
