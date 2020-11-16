@@ -4,7 +4,14 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { Args, Mutation, ResolveField, Resolver, Root } from '@nestjs/graphql';
+import {
+  Args,
+  Mutation,
+  Query,
+  ResolveField,
+  Resolver,
+  Root,
+} from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
@@ -25,6 +32,12 @@ export class OrdersResolver {
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
   ) {}
+
+  @UseGuards(AuthGuard)
+  @Query(() => Order)
+  order(@Args('orderId') orderId: string): Promise<Order> {
+    return this.ordersService.findById(orderId);
+  }
 
   @UseGuards(AuthGuard)
   @Mutation(() => Order)

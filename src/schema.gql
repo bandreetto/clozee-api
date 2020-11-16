@@ -166,6 +166,7 @@ type Query {
 
   """Returns all categories"""
   categories(roots: Boolean): [Category!]!
+  order(orderId: String!): Order!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
