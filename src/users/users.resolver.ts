@@ -21,12 +21,14 @@ import { v4 } from 'uuid';
 import { AddCreditCardInput, AddressInput } from './contracts/inputs';
 import { Order } from 'src/orders/contracts';
 import { OrdersService } from 'src/orders/orders.service';
+import { PostsLoader } from 'src/posts/posts.dataloader';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
+    private readonly postsLoader: PostsLoader,
     private readonly ordersService: OrdersService,
   ) {}
 
@@ -174,7 +176,7 @@ export class UsersResolver {
   async savedPosts(@Root() user: User): Promise<Post[]> {
     const savedPosts = await this.usersService.getUserSavedPosts(user._id);
     const postsIds = savedPosts.map(s => s.post);
-    return this.postsService.findManyByIds(postsIds);
+    return this.postsLoader.loadMany(postsIds) as Promise<Post[]>;
   }
 
   @ResolveField()

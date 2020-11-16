@@ -5,6 +5,7 @@ import { CommentsModule } from 'src/comments/comments.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { UsersModule } from 'src/users/users.module';
 import { Post, PostSchema } from './contracts';
+import { PostsLoader } from './posts.dataloader';
 import { PostsResolver } from './posts.resolver';
 import { PostsService } from './posts.service';
 
@@ -21,7 +22,7 @@ import { PostsService } from './posts.service';
     forwardRef(() => CommentsModule),
     forwardRef(() => OrdersModule),
   ],
-  providers: [PostsResolver, PostsService],
-  exports: [PostsService],
+  providers: [PostsResolver, PostsService, PostsLoader],
+  exports: [PostsService, PostsLoader],
 })
 export class PostsModule {}
