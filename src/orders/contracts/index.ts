@@ -33,6 +33,9 @@ export class Order {
 
   @Field({ description: 'The total price of this order in cents.' })
   total?: number;
+
+  @Field()
+  createdAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
