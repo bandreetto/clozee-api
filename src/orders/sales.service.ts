@@ -27,4 +27,8 @@ export class SalesService {
   async findByPost(postId: string): Promise<Sale> {
     return this.saleModel.findOne({ post: postId }).lean();
   }
+
+  async findByOrder(orderId: string): Promise<Sale[]> {
+    return this.saleModel.find({ order: orderId }).lean();
+  }
 }

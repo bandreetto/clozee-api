@@ -162,6 +162,12 @@ type Order {
   buyer: User!
   paymentMethod: String!
   address: Address!
+
+  """The posts of this order."""
+  posts: [Post!]!
+
+  """The total price of this order in cents."""
+  total: Float!
 }
 
 type PageInfo {
