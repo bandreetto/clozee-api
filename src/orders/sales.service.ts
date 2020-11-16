@@ -23,4 +23,8 @@ export class SalesService {
     session.endSession();
     return newSales.map(s => s.toObject());
   }
+
+  async findByPost(postId: string): Promise<Sale> {
+    return this.saleModel.findOne({ post: postId }).lean();
+  }
 }

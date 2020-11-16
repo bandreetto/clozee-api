@@ -81,6 +81,9 @@ type Post {
   """The condition of the post's product"""
   condition: POST_CONDITIONS!
   comments: [Comment!]!
+
+  """A boolean indicating whether this post was sold or not."""
+  sold: Boolean!
   createdAt: DateTime!
 }
 
@@ -117,6 +120,14 @@ type PageInfo {
   hasNextPage: Boolean!
 }
 
+type Order {
+  _id: String!
+  number: Int!
+  buyer: User!
+  paymentMethod: String!
+  address: Address!
+}
+
 type FeedPostEdge {
   node: Post!
 
@@ -141,14 +152,6 @@ type AuthResponse {
 
   """A long lived token, used to get a new access token."""
   refreshToken: String!
-}
-
-type Order {
-  _id: String!
-  number: Int!
-  buyer: User!
-  paymentMethod: String!
-  address: Address!
 }
 
 type Query {
@@ -187,6 +190,7 @@ type Mutation {
   addCreditCard(input: AddCreditCardInput!): User!
   deletePaymentMethod(paymentMethodId: String!): User!
   addComment(input: AddCommentInput!): Comment!
+  checkout(input: CheckoutInput!): Order!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
   uploadPostImage: String!
@@ -194,7 +198,6 @@ type Mutation {
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
-  checkout(input: CheckoutInput!): Order!
 }
 
 input AddressInput {
@@ -229,6 +232,14 @@ input AddCommentInput {
   body: String!
 }
 
+input CheckoutInput {
+  """The array of posts being bought."""
+  posts: [String!]!
+
+  """The id of the user's payment method to use on the checkout."""
+  paymentMethodId: String!
+}
+
 input AddPostInput {
   title: String!
   size: String!
@@ -251,12 +262,4 @@ input SignUpInput {
   username: String!
   password: String!
   avatarUrl: String
-}
-
-input CheckoutInput {
-  """The array of posts being bought."""
-  posts: [String!]!
-
-  """The id of the user's payment method to use on the checkout."""
-  paymentMethodId: String!
 }

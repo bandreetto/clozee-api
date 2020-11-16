@@ -51,6 +51,11 @@ export class Post {
   @Field(() => [Comment])
   comments: Comment[];
 
+  @Field({
+    description: 'A boolean indicating whether this post was sold or not.',
+  })
+  sold?: boolean;
+
   @Field()
   createdAt?: Date;
 }

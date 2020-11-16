@@ -22,6 +22,7 @@ import { Post } from './contracts';
 import { AddPostInput } from './contracts/inputs';
 import { CategoriesService } from 'src/categories/categories.service';
 import { Category } from 'src/categories/contracts';
+import { SalesService } from 'src/orders/sales.service';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -30,6 +31,7 @@ export class PostsResolver {
     private readonly usersService: UsersService,
     private readonly commentsService: CommentsService,
     private readonly categoriesService: CategoriesService,
+    private readonly salesService: SalesService,
   ) {}
 
   @Query(() => Post)
@@ -85,5 +87,10 @@ export class PostsResolver {
   async category(@Root() post: Post): Promise<Category> {
     if (typeof post.category !== 'string') return post.category;
     return this.categoriesService.findById(post.category);
+  }
+
+  @ResolveField()
+  async sold(@Root() post: Post): Promise<boolean> {
+    return !!(await this.salesService.findByPost(post._id));
   }
 }
