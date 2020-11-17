@@ -20,6 +20,7 @@ export class OrdersService {
       .find({
         buyer: userId,
       })
+      .sort({ createdAt: -1 })
       .lean();
   }
 

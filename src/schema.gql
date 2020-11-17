@@ -168,6 +168,7 @@ type Order {
 
   """The total price of this order in cents."""
   total: Float!
+  createdAt: DateTime!
 }
 
 type PageInfo {
