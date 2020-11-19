@@ -24,11 +24,11 @@ export class SalesService {
     return newSales.map(s => s.toObject());
   }
 
-  async findByPost(postId: string): Promise<Sale> {
-    return this.saleModel.findOne({ post: postId }).lean();
+  async findManyByPosts(postIds: string[]): Promise<Sale[]> {
+    return this.saleModel.find({ post: { $in: postIds } }).lean();
   }
 
-  async findByOrder(orderId: string): Promise<Sale[]> {
-    return this.saleModel.find({ order: orderId }).lean();
+  async findByOrders(orderIds: string[]): Promise<Sale[]> {
+    return this.saleModel.find({ order: { $in: orderIds } });
   }
 }

@@ -18,7 +18,7 @@ export class UsersService {
     return this.userModel.findById(id).lean();
   }
 
-  async findManyById(ids: string[]): Promise<User[]> {
+  async findManyByIds(ids: string[]): Promise<User[]> {
     return this.userModel.find({ _id: { $in: ids } }).lean();
   }
 
@@ -116,11 +116,11 @@ export class UsersService {
     return user.toObject();
   }
 
-  async getUserSavedPosts(userId: string): Promise<SavedPost[]> {
+  async findManySavedPosts(userIds: string[]): Promise<SavedPost[]> {
     return this.savedPostModel
       .find({
         saved: true,
-        user: userId,
+        user: { $in: userIds },
       })
       .lean();
   }
@@ -164,5 +164,9 @@ export class UsersService {
 
   async getUserPaymentMethods(userId: string): Promise<PaymentMethod[]> {
     return this.paymentMethodModel.find({ user: userId }).lean();
+  }
+
+  async findManyPaymentMethods(userIds: string[]): Promise<PaymentMethod[]> {
+    return this.paymentMethodModel.find({ user: { $in: userIds } }).lean();
   }
 }

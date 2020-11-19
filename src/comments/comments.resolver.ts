@@ -6,13 +6,14 @@ import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts';
-import { getTaggedUsersFromComment } from './logic';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
 import { AddCommentInput } from './contracts/inputs';
 import { PostsLoader } from 'src/posts/posts.dataloader';
+import { getTaggedUsersFromComment } from './comments.logic';
+import { UsersLoader } from 'src/users/users.dataloaders';
 
 @Resolver(() => Comment)
 export class CommentsResolver {
@@ -21,6 +22,7 @@ export class CommentsResolver {
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly usersService: UsersService,
+    private readonly usersLoader: UsersLoader,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -60,11 +62,13 @@ export class CommentsResolver {
   @ResolveField()
   async user(@Root() comment: Comment): Promise<User> {
     if (typeof comment.user !== 'string') return comment.user;
-    return this.usersService.findById(comment.user);
+    return this.usersLoader.load(comment.user);
   }
 
   @ResolveField()
   async tags(@Root() comment: Comment): Promise<User[]> {
-    return this.usersService.findManyById(comment.tags as string[]);
+    return this.usersLoader.loadMany(comment.tags as string[]) as Promise<
+      User[]
+    >;
   }
 }

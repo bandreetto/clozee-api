@@ -18,4 +18,12 @@ export class CommentsService {
   async findByPost(postId: string): Promise<Comment[]> {
     return this.commentModel.find({ post: postId }).lean();
   }
+
+  async findByPosts(postsIds: string[]): Promise<Comment[]> {
+    return this.commentModel.find({ post: { $in: postsIds } }).lean();
+  }
+
+  async findManyByIds(commentIds: string[]): Promise<Comment[]> {
+    return this.commentModel.find({ _id: { $in: commentIds } }).lean();
+  }
 }

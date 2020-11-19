@@ -30,6 +30,12 @@ export class CategoriesService {
       .lean();
   }
 
+  async findByParents(parentIds: string[]): Promise<Category[]> {
+    return this.categoryModel.find({
+      parent: { $in: parentIds },
+    });
+  }
+
   async findCategoryParents(childCategoryId: string): Promise<Category[]> {
     const [parentCategories] = await this.categoryModel.aggregate([
       {

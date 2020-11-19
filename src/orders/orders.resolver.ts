@@ -20,21 +20,24 @@ import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
 import { User } from 'src/users/contracts';
+import { UsersLoader } from 'src/users/users.dataloaders';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { Order, Sale } from './contracts';
 import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
+import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
   constructor(
     private readonly usersService: UsersService,
+    private readonly usersLoader: UsersLoader,
     private readonly salesService: SalesService,
+    private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
-    private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
   ) {}
 
@@ -89,12 +92,12 @@ export class OrdersResolver {
   @ResolveField()
   async buyer(@Root() order: Order): Promise<User> {
     if (typeof order.buyer !== 'string') return order.buyer;
-    return this.usersService.findById(order.buyer);
+    return this.usersLoader.load(order.buyer);
   }
 
   @ResolveField()
   async posts(@Root() order: Order): Promise<Post[]> {
-    const sales = await this.salesService.findByOrder(order._id);
+    const sales = await this.salesLoader.byOrder.load(order._id);
     return this.postsLoader.loadMany(
       sales.map(s => s.post as string),
     ) as Promise<Post[]>;
@@ -102,7 +105,7 @@ export class OrdersResolver {
 
   @ResolveField()
   async total(@Root() order: Order): Promise<number> {
-    const sales = await this.salesService.findByOrder(order._id);
+    const sales = await this.salesLoader.byOrder.load(order._id);
     const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),
     )) as Post[];

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
-import { User } from 'src/users/contracts';
 import { Order } from './contracts';
 
 @Injectable()
@@ -15,10 +14,10 @@ export class OrdersService {
     return this.orderModel.findById(orderId).lean();
   }
 
-  async findUserOrders(userId: string): Promise<Order[]> {
+  async findManyByUsers(userIds: string[]): Promise<Order[]> {
     return this.orderModel
       .find({
-        buyer: userId,
+        buyer: { $in: userIds },
       })
       .sort({ createdAt: -1 })
       .lean();
