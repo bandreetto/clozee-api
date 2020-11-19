@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { PaymentMethod, User } from './contracts';
 import { UsersService } from './users.service';
-import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
 import { descend, sort } from 'ramda';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
@@ -19,10 +18,8 @@ import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
 import { AddCreditCardInput, AddressInput } from './contracts/inputs';
-import { Order } from 'src/orders/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { UsersLoader } from './users.dataloaders';
-import { OrdersLoader } from 'src/orders/orders.dataloader';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -30,7 +27,6 @@ export class UsersResolver {
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
     private readonly postsLoader: PostsLoader,
-    private readonly ordersLoader: OrdersLoader,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -183,10 +179,5 @@ export class UsersResolver {
   @ResolveField()
   async paymentMethods(@Root() user: User): Promise<PaymentMethod[]> {
     return this.usersLoader.paymentMethods.load(user._id);
-  }
-
-  @ResolveField()
-  async orders(@Root() user: User): Promise<Order[]> {
-    return this.ordersLoader.byUser.load(user._id);
   }
 }

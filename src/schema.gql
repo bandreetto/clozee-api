@@ -238,6 +238,12 @@ type Query {
   """Returns all categories"""
   categories(roots: Boolean): [Category!]!
   order(orderId: String!): Order!
+
+  """The orders that the current user has bought."""
+  buyOrders: [Order!]!
+
+  """Orders that the current user has sold."""
+  sellOrders: [Order!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
@@ -269,8 +275,5 @@ type User {
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
-
-  """The orders that this user has made."""
-  orders: [Order!]!
   createdAt: DateTime!
 }

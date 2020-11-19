@@ -7,7 +7,6 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { Address, AddressSchema } from './address';
 import { Post } from 'src/posts/contracts';
 import { PaymentMethod } from './payment-method';
-import { Order } from 'src/orders/contracts';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -42,9 +41,6 @@ export class User {
     description: 'The ids of users credit cards',
   })
   paymentMethods?: PaymentMethod[];
-
-  @Field(() => [Order], { description: 'The orders that this user has made.' })
-  orders?: Order[];
 
   @Field()
   createdAt?: Date;
