@@ -13,4 +13,12 @@ export class PostsLoader extends DataLoader<string, Post> {
         .then(posts => reconciliateByKey('_id', ids, posts)),
     );
   }
+
+  byUser = new DataLoader<string, Post[]>((userIds: string[]) =>
+    this.postsService
+      .findManyByUsers(userIds)
+      .then(posts =>
+        userIds.map(userId => posts.filter(post => post.user === userId)),
+      ),
+  );
 }

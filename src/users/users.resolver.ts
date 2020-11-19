@@ -20,16 +20,17 @@ import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
 import { AddCreditCardInput, AddressInput } from './contracts/inputs';
 import { Order } from 'src/orders/contracts';
-import { OrdersService } from 'src/orders/orders.service';
 import { PostsLoader } from 'src/posts/posts.dataloader';
+import { UsersLoader } from './users.dataloaders';
+import { OrdersLoader } from 'src/orders/orders.dataloader';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(
     private readonly usersService: UsersService,
-    private readonly postsService: PostsService,
+    private readonly usersLoader: UsersLoader,
     private readonly postsLoader: PostsLoader,
-    private readonly ordersService: OrdersService,
+    private readonly ordersLoader: OrdersLoader,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -165,7 +166,7 @@ export class UsersResolver {
 
   @ResolveField()
   async posts(@Root() user: User): Promise<Post[]> {
-    const posts = await this.postsService.findManyByUser(user._id);
+    const posts = await this.postsLoader.byUser.load(user._id);
     return sort(
       descend(post => post.createdAt),
       posts,
@@ -174,18 +175,18 @@ export class UsersResolver {
 
   @ResolveField()
   async savedPosts(@Root() user: User): Promise<Post[]> {
-    const savedPosts = await this.usersService.getUserSavedPosts(user._id);
+    const savedPosts = await this.usersLoader.savedPosts.load(user._id);
     const postsIds = savedPosts.map(s => s.post);
     return this.postsLoader.loadMany(postsIds) as Promise<Post[]>;
   }
 
   @ResolveField()
   async paymentMethods(@Root() user: User): Promise<PaymentMethod[]> {
-    return this.usersService.getUserPaymentMethods(user._id);
+    return this.usersLoader.paymentMethods.load(user._id);
   }
 
   @ResolveField()
   async orders(@Root() user: User): Promise<Order[]> {
-    return this.ordersService.findUserOrders(user._id);
+    return this.ordersLoader.byUser.load(user._id);
   }
 }
