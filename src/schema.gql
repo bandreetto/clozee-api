@@ -240,10 +240,10 @@ type Query {
   order(orderId: String!): Order!
 
   """The orders that the current user has bought."""
-  buyOrders: [Order!]!
+  myOrders: [Order!]!
 
   """Orders that the current user has sold."""
-  sellOrders: [Order!]!
+  mySales: [Order!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""

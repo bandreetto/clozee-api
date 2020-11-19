@@ -53,7 +53,7 @@ export class OrdersResolver {
   @Query(() => [Order], {
     description: 'The orders that the current user has bought.',
   })
-  buyOrders(@CurrentUser() user: TokenUser) {
+  myOrders(@CurrentUser() user: TokenUser) {
     return this.ordersService.findByBuyer(user._id);
   }
 
@@ -61,7 +61,7 @@ export class OrdersResolver {
   @Query(() => [Order], {
     description: 'Orders that the current user has sold.',
   })
-  async sellOrders(@CurrentUser() user: TokenUser) {
+  async mySales(@CurrentUser() user: TokenUser) {
     const userPosts = await this.postsService.findManyByUser(user._id);
     const userSales = await this.salesService.findManyByPosts(
       userPosts.map(post => post._id),
