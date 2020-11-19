@@ -10,11 +10,19 @@ export class OrdersService {
     private readonly orderModel: Model<Order & Document>,
   ) {}
 
-  async findById(orderId: string) {
+  async findById(orderId: string): Promise<Order> {
     return this.orderModel.findById(orderId).lean();
   }
 
-  async findManyByUsers(userIds: string[]): Promise<Order[]> {
+  async findManyByIds(orderIds: string[]): Promise<Order[]> {
+    return this.orderModel.find({ _id: { $in: orderIds } }).lean();
+  }
+
+  async findByBuyer(userId: string): Promise<Order[]> {
+    return this.orderModel.find({ buyer: userId }).lean();
+  }
+
+  async findManyByBuyers(userIds: string[]): Promise<Order[]> {
     return this.orderModel
       .find({
         buyer: { $in: userIds },

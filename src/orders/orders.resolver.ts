@@ -12,6 +12,7 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
+import { uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
@@ -38,6 +39,7 @@ export class OrdersResolver {
     private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
+    private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
   ) {}
 
@@ -45,6 +47,27 @@ export class OrdersResolver {
   @Query(() => Order)
   order(@Args('orderId') orderId: string): Promise<Order> {
     return this.ordersService.findById(orderId);
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => [Order], {
+    description: 'The orders that the current user has bought.',
+  })
+  myOrders(@CurrentUser() user: TokenUser) {
+    return this.ordersService.findByBuyer(user._id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => [Order], {
+    description: 'Orders that the current user has sold.',
+  })
+  async mySales(@CurrentUser() user: TokenUser) {
+    const userPosts = await this.postsService.findManyByUser(user._id);
+    const userSales = await this.salesService.findManyByPosts(
+      userPosts.map(post => post._id),
+    );
+    const orderIds = userSales.map(sale => sale.order) as string[];
+    return this.ordersService.findManyByIds(uniq(orderIds));
   }
 
   @UseGuards(AuthGuard)

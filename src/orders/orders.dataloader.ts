@@ -9,7 +9,7 @@ export class OrdersLoader {
 
   byUser = new DataLoader<string, Order[]>((userIds: string[]) =>
     this.ordersService
-      .findManyByUsers(userIds)
+      .findManyByBuyers(userIds)
       .then(orders =>
         userIds.map(userId => orders.filter(order => order.buyer === userId)),
       ),
