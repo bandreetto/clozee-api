@@ -14,6 +14,7 @@ import { AddCommentInput } from './contracts/inputs';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { getTaggedUsersFromComment } from './comments.logic';
 import { UsersLoader } from 'src/users/users.dataloaders';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Resolver(() => Comment)
 export class CommentsResolver {
@@ -23,6 +24,7 @@ export class CommentsResolver {
     private readonly postsLoader: PostsLoader,
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -44,13 +46,19 @@ export class CommentsResolver {
     const tags = users
       .filter(user => usernames.some(username => user.username === username))
       .map(user => user._id);
-    return this.commentsService.create({
+    const createdComment = await this.commentsService.create({
       _id: v4(),
       body: input.body,
       post: input.post,
       user: user._id,
       tags,
     });
+    this.eventEmitter.emit('comment.created', {
+      comment: createdComment,
+      post,
+      user,
+    });
+    return createdComment;
   }
 
   @ResolveField()
