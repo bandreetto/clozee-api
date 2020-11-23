@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { join } from 'path';
 import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
@@ -14,6 +15,7 @@ import { TokenMiddleware } from './common/middlewares';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
 import { CountersModule } from './counters/counters.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -24,7 +26,9 @@ import { CountersModule } from './counters/counters.module';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      installSubscriptionHandlers: true,
     }),
+    EventEmitterModule.forRoot(),
     UsersModule,
     PostsModule,
     CommentsModule,
@@ -33,6 +37,7 @@ import { CountersModule } from './counters/counters.module';
     CategoriesModule,
     OrdersModule,
     CountersModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
