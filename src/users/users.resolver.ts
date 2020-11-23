@@ -118,7 +118,7 @@ export class UsersResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => String, {
+  @Mutation(() => User, {
     description: 'Returns the user with the updated avatar url.',
   })
   async updateUserAvatar(
