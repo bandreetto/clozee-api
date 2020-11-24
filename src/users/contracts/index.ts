@@ -21,6 +21,10 @@ export class User {
 
   @Prop()
   @Field({ nullable: true })
+  email?: string;
+
+  @Prop()
+  @Field({ nullable: true })
   cpf?: string;
 
   @Prop()

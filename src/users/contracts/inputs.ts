@@ -50,6 +50,9 @@ export class UpdateUserInfoInput {
   name?: string;
 
   @Field({ nullable: true })
+  email?: string;
+
+  @Field({ nullable: true })
   cpf?: string;
 
   @Field({ nullable: true })
