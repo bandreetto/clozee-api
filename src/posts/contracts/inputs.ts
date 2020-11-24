@@ -1,4 +1,4 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, Int } from '@nestjs/graphql';
 import { POST_CONDITIONS } from './enums';
 
 @InputType()
@@ -12,7 +12,7 @@ export class AddPostInput {
   @Field()
   description: string;
 
-  @Field(() => [String], { description: 'An array of urls for post images' })
+  @Field(() => [String], { description: 'An array of urls for post images.' })
   images: string[];
 
   @Field(() => String, {
@@ -21,11 +21,13 @@ export class AddPostInput {
   category: string;
 
   @Field(() => POST_CONDITIONS, {
-    description: "The condition of this post's product",
+    description: "The condition of this post's product.",
   })
   condition: POST_CONDITIONS;
 
-  @Field({ description: 'Price of the item being announced in cents' })
+  @Field(() => Int, {
+    description: 'Price of the item being announced in cents.',
+  })
   price: number;
 }
 
@@ -36,4 +38,10 @@ export class UpdatePostFields {
 
   @Field({ nullable: true })
   description?: string;
+
+  @Field(() => Int, {
+    nullable: true,
+    description: 'The new price of the item in cents.',
+  })
+  price: number;
 }
