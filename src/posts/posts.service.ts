@@ -52,4 +52,19 @@ export class PostsService {
       ...(query.createdAt ? { createdAt: { $lt: query.createdAt } } : null),
     });
   }
+
+  async updatePost(
+    postId: string,
+    fieldsToUpdate: Partial<Post>,
+  ): Promise<Post> {
+    return this.postModel
+      .findByIdAndUpdate(
+        postId,
+        {
+          $set: fieldsToUpdate,
+        },
+        { new: true },
+      )
+      .lean();
+  }
 }
