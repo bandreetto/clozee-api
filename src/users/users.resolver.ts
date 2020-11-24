@@ -17,7 +17,11 @@ import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { v4 } from 'uuid';
-import { AddCreditCardInput, AddressInput } from './contracts/inputs';
+import {
+  AddCreditCardInput,
+  AddressInput,
+  UpdateUserInfoInput,
+} from './contracts/inputs';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { UsersLoader } from './users.dataloaders';
 
@@ -98,6 +102,15 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
+  updateUserInfo(
+    @Args('input') input: UpdateUserInfoInput,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    return this.usersService.updateUser(user._id, input);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
   updateAddress(
     @Args('address') newAddress: AddressInput,
     @CurrentUser() user: TokenUser,
@@ -125,10 +138,9 @@ export class UsersResolver {
     @Args('newAvatarUrl') newAvatarUrl: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    const updatedUser = await this.usersService.updateAvatar(
-      user._id,
-      newAvatarUrl,
-    );
+    const updatedUser = await this.usersService.updateUser(user._id, {
+      avatar: newAvatarUrl,
+    });
     return updatedUser;
   }
 

@@ -19,6 +19,14 @@ export class User {
   @Field({ nullable: true })
   name?: string;
 
+  @Prop()
+  @Field({ nullable: true })
+  cpf?: string;
+
+  @Prop()
+  @Field({ nullable: true })
+  phoneNumber?: string;
+
   @Field(() => [Post])
   posts?: Post[];
 

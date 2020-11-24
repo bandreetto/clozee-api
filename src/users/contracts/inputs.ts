@@ -43,3 +43,15 @@ export class AddCreditCardInput {
   @Field({ description: "The card's flag." })
   flag: string;
 }
+
+@InputType()
+export class UpdateUserInfoInput {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field({ nullable: true })
+  cpf?: string;
+
+  @Field({ nullable: true })
+  phoneNumber?: string;
+}

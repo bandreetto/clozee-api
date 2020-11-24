@@ -57,16 +57,21 @@ export class UsersService {
     return updatedUser as User;
   }
 
-  async updateAvatar(userId: string, newAvatarUrl: string) {
+  async updateUser(
+    userId: string,
+    fieldsToUpdate: Partial<User>,
+  ): Promise<User> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(
         userId,
-        { $set: { avatar: newAvatarUrl } },
+        {
+          $set: fieldsToUpdate,
+        },
         { new: true },
       )
-      .lean<User>();
+      .lean();
 
-    return updatedUser as User;
+    return updatedUser;
   }
 
   async filter(
