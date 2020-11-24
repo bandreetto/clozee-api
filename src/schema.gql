@@ -106,6 +106,8 @@ enum POST_CONDITIONS {
 type User {
   _id: String!
   name: String
+  cpf: String
+  phoneNumber: String
   posts: [Post!]!
   savedPosts: [Post!]!
   username: String!
@@ -217,13 +219,14 @@ type Query {
 type Mutation {
   savePost(postId: String!): User!
   unsavePost(postId: String!): User!
+  updateUserInfo(input: UpdateUserInfoInput!): User!
   updateAddress(address: AddressInput!): User!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
   uploadAvatarUrl: String!
 
   """Returns the user with the updated avatar url."""
-  updateUserAvatar(newAvatarUrl: String!): String!
+  updateUserAvatar(newAvatarUrl: String!): User!
   addCreditCard(input: AddCreditCardInput!): User!
   deletePaymentMethod(paymentMethodId: String!): User!
   addComment(input: AddCommentInput!): Comment!
@@ -235,6 +238,12 @@ type Mutation {
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
+}
+
+input UpdateUserInfoInput {
+  name: String
+  cpf: String
+  phoneNumber: String
 }
 
 input AddressInput {
