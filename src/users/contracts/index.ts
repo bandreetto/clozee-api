@@ -1,6 +1,7 @@
 export * from './address';
 export * from './saved-post';
 export * from './payment-method';
+export * from './bank';
 
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';
