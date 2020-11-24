@@ -10,7 +10,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts';
-import { UseGuards } from '@nestjs/common';
+import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
@@ -18,7 +18,7 @@ import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { Post } from './contracts';
-import { AddPostInput } from './contracts/inputs';
+import { AddPostInput, UpdatePostFields } from './contracts/inputs';
 import { Category } from 'src/categories/contracts';
 import { CommentsLoader } from 'src/comments/comments.dataloader';
 import { UsersLoader } from 'src/users/users.dataloaders';
@@ -71,6 +71,19 @@ export class PostsResolver {
       _id: v4(),
       user: user._id,
     });
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Post)
+  async editPost(
+    @Args('postId') postId: string,
+    @Args('updateFields') updateFields: UpdatePostFields,
+    @CurrentUser() user: TokenUser,
+  ): Promise<Post> {
+    const userPosts = await this.postsService.findManyByUser(user._id);
+    if (!userPosts.find(userPost => userPost._id === postId))
+      throw new ForbiddenException('You can only edit your posts.');
+    return this.postsService.updatePost(postId, updateFields);
   }
 
   @ResolveField()

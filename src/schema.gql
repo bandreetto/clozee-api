@@ -235,6 +235,7 @@ type Mutation {
   """Returns a pre-signed S3 URL that allows the avatar upload."""
   uploadPostImage: String!
   addPost(addPostInput: AddPostInput!): Post!
+  editPost(updateFields: UpdatePostFields!, postId: String!): Post!
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
@@ -302,6 +303,11 @@ input AddPostInput {
 
   """Price of the item being announced in cents"""
   price: Float!
+}
+
+input UpdatePostFields {
+  title: String
+  description: String
 }
 
 input SignUpInput {

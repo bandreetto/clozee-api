@@ -28,3 +28,12 @@ export class AddPostInput {
   @Field({ description: 'Price of the item being announced in cents' })
   price: number;
 }
+
+@InputType()
+export class UpdatePostFields {
+  @Field({ nullable: true })
+  title?: string;
+
+  @Field({ nullable: true })
+  description?: string;
+}
