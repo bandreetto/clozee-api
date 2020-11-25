@@ -43,6 +43,11 @@ type PaymentMethod {
   flag: String!
 }
 
+type Bank {
+  _id: String!
+  name: String!
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -204,6 +209,7 @@ type Query {
     """Filter posts by user id"""
     user: String!
   ): [Post!]!
+  banks: [Bank!]!
   feed(
     """The first N elements to return after the cursor."""
     first: Float!

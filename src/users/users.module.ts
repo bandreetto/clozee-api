@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   Address,
   AddressSchema,
+  Bank,
+  BankSchema,
   Coordinates,
   CoordinatesSchema,
   PaymentMethod,
@@ -17,6 +19,8 @@ import { UsersResolver } from './users.resolver';
 import { PostsModule } from 'src/posts/posts.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { UsersLoader } from './users.dataloaders';
+import { BanksService } from './banks.service';
+import { BanksResolver } from './banks.resolver';
 
 @Module({
   imports: [
@@ -41,11 +45,21 @@ import { UsersLoader } from './users.dataloaders';
         name: PaymentMethod.name,
         schema: PaymentMethodSchema,
       },
+      {
+        name: Bank.name,
+        schema: BankSchema,
+      },
     ]),
     forwardRef(() => PostsModule),
     forwardRef(() => OrdersModule),
   ],
-  providers: [UsersService, UsersResolver, UsersLoader],
+  providers: [
+    UsersService,
+    UsersResolver,
+    UsersLoader,
+    BanksResolver,
+    BanksService,
+  ],
   exports: [UsersService, UsersLoader],
 })
 export class UsersModule {}
