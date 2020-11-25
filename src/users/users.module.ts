@@ -5,6 +5,8 @@ import {
   AddressSchema,
   Bank,
   BankSchema,
+  BankInfo,
+  BankInfoSchema,
   Coordinates,
   CoordinatesSchema,
   PaymentMethod,
@@ -21,6 +23,7 @@ import { OrdersModule } from 'src/orders/orders.module';
 import { UsersLoader } from './users.dataloaders';
 import { BanksService } from './banks.service';
 import { BanksResolver } from './banks.resolver';
+import { BankInfoResolver } from './bank-info.resolver';
 
 @Module({
   imports: [
@@ -49,6 +52,10 @@ import { BanksResolver } from './banks.resolver';
         name: Bank.name,
         schema: BankSchema,
       },
+      {
+        name: BankInfo.name,
+        schema: BankInfoSchema,
+      },
     ]),
     forwardRef(() => PostsModule),
     forwardRef(() => OrdersModule),
@@ -59,6 +66,7 @@ import { BanksResolver } from './banks.resolver';
     UsersLoader,
     BanksResolver,
     BanksService,
+    BankInfoResolver,
   ],
   exports: [UsersService, UsersLoader],
 })

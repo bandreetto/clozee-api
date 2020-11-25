@@ -48,6 +48,34 @@ type Bank {
   name: String!
 }
 
+type BankInfo {
+  """The user banking institution."""
+  bank: Bank!
+
+  """User's bank agency."""
+  agency: String!
+
+  """The agency verifying digit."""
+  agencyDv: String
+
+  """User's bank account number."""
+  account: String!
+
+  """The bank account verifying digit."""
+  accountDv: String
+
+  """The user's bank account type"""
+  accountType: ACCOUNT_TYPES!
+}
+
+"""Bank account types."""
+enum ACCOUNT_TYPES {
+  CURRENT
+  SAVINGS
+  JOINT_CURRENT
+  JOINT_SAVINGS
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -114,6 +142,7 @@ type User {
   email: String
   cpf: String
   phoneNumber: String
+  bankInfo: BankInfo
   posts: [Post!]!
   savedPosts: [Post!]!
   username: String!
@@ -250,6 +279,29 @@ input UpdateUserInfoInput {
   email: String
   cpf: String
   phoneNumber: String
+
+  """The user's banking info."""
+  bankInfo: BankInfoInput
+}
+
+input BankInfoInput {
+  """The bank number."""
+  bank: String!
+
+  """User's bank agency."""
+  agency: String!
+
+  """The agency verifying digit."""
+  agencyDv: String
+
+  """User's bank account number."""
+  account: String!
+
+  """The bank account verifying digit."""
+  accountDv: String
+
+  """The user's bank account type"""
+  accountType: ACCOUNT_TYPES!
 }
 
 input AddressInput {

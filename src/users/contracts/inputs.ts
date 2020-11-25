@@ -1,4 +1,5 @@
 import { Field, Float, InputType } from '@nestjs/graphql';
+import { ACCOUNT_TYPES } from './enum';
 
 @InputType()
 export class CoordinatesInput {
@@ -45,6 +46,32 @@ export class AddCreditCardInput {
 }
 
 @InputType()
+export class BankInfoInput {
+  @Field({ description: 'The bank number.' })
+  bank: string;
+
+  @Field({ description: "User's bank agency." })
+  agency: string;
+
+  @Field({ nullable: true, description: 'The agency verifying digit.' })
+  agencyDv: string;
+
+  @Field({ description: "User's bank account number." })
+  account: string;
+
+  @Field({
+    nullable: true,
+    description: 'The bank account verifying digit.',
+  })
+  accountDv: string;
+
+  @Field(() => ACCOUNT_TYPES, {
+    description: "The user's bank account type",
+  })
+  accountType: ACCOUNT_TYPES;
+}
+
+@InputType()
 export class UpdateUserInfoInput {
   @Field({ nullable: true })
   name?: string;
@@ -57,4 +84,7 @@ export class UpdateUserInfoInput {
 
   @Field({ nullable: true })
   phoneNumber?: string;
+
+  @Field({ nullable: true, description: "The user's banking info." })
+  bankInfo?: BankInfoInput;
 }
