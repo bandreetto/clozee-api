@@ -21,13 +21,15 @@ export class NotificationsResolver {
   @OnEvent('comment.created')
   async handleCommentCreated(payload: CommentCreatedPayload) {
     if (!payload.comment.tags.length) return;
-    const tagNotifications: CommentTagNotification[] = (payload.comment
-      .tags as string[]).map(userTagged => ({
-      _id: v4(),
-      kind: CommentTagNotification.name,
-      comment: payload.comment._id,
-      user: userTagged,
-    }));
+    const commentTags = payload.comment.tags as string[];
+    const tagNotifications: CommentTagNotification[] = commentTags.map(
+      userTagged => ({
+        _id: v4(),
+        kind: CommentTagNotification.name,
+        comment: payload.comment._id,
+        user: userTagged,
+      }),
+    );
     const createdNotifications = await this.notificationsService.createMany(
       tagNotifications,
     );
