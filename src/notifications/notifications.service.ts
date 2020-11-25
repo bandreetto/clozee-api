@@ -14,12 +14,10 @@ export class NotificationsService {
     return this.notificationModel.find({ user: userId }).lean();
   }
 
-  async createNotification<T extends Notification>(
-    notification: T,
-  ): Promise<T> {
-    const createdNotification = await this.notificationModel.create(
-      notification,
-    );
-    return createdNotification.toObject();
+  async createMany<T extends Notification>(notifications: T[]): Promise<T[]> {
+    const createdNotifications = (await this.notificationModel.insertMany(
+      notifications,
+    )) as Array<Notification & Document>;
+    return createdNotifications.map(o => o.toObject());
   }
 }

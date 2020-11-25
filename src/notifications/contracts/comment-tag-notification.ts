@@ -19,10 +19,6 @@ export class CommentTagNotification implements Notification {
     description: 'The comment that the user was tagged on.',
   })
   comment: string | Comment;
-
-  @Prop({ type: String, required: true })
-  @Field(() => Post, { description: 'The post that the comment was made.' })
-  post: string | Post;
 }
 
 export const CommentTagNotificationSchema = SchemaFactory.createForClass(
