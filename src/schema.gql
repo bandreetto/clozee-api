@@ -181,9 +181,6 @@ type CommentTagNotification implements Notification {
 
   """The comment that the user was tagged on."""
   comment: Comment!
-
-  """The post that the comment was made."""
-  post: Post!
 }
 
 type Query {

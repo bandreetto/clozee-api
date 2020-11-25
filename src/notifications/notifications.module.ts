@@ -28,7 +28,6 @@ import { NotificationsService } from './notifications.service';
       },
     ]),
     CommentsModule,
-    PostsModule,
   ],
   providers: [
     NotificationsResolver,
