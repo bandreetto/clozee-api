@@ -10,21 +10,21 @@ export class BankInfo {
   @Field(() => Bank, { description: 'The user banking institution.' })
   bank: string | Bank;
 
-  @Prop({ required: true, minlength: 5, maxlength: 5 })
+  @Prop({ required: true, maxlength: 5 })
   @Field({ description: "User's bank agency." })
   agency: string;
 
   @Prop({ maxlength: 1 })
   @Field({ nullable: true, description: 'The agency verifying digit.' })
-  agencyDv: string;
+  agencyDv?: string;
 
-  @Prop({ minlength: 13, maxlength: 13 })
+  @Prop({ required: true, maxlength: 13 })
   @Field({ description: "User's bank account number." })
   account: string;
 
   @Prop({ maxlength: 1 })
   @Field({ nullable: true, description: 'The bank account verifying digit.' })
-  accountDv: string;
+  accountDv?: string;
 
   @Prop({ required: true, default: ACCOUNT_TYPES.CURRENT })
   @Field(() => ACCOUNT_TYPES, { description: "The user's bank account type" })
