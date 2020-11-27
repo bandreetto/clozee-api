@@ -16,6 +16,9 @@ import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
 import { CountersModule } from './counters/counters.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { JwtService } from '@nestjs/jwt';
+import { Token } from './auth/contracts';
+import { isAccessToken } from './auth/auth.logic';
 
 @Module({
   imports: [
@@ -24,9 +27,38 @@ import { NotificationsModule } from './notifications/notifications.module';
       useNewUrlParser: true,
       useCreateIndex: true,
     }),
-    GraphQLModule.forRoot({
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      installSubscriptionHandlers: true,
+    GraphQLModule.forRootAsync({
+      imports: [AuthModule],
+      useFactory: (jwtService: JwtService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        installSubscriptionHandlers: true,
+        context: ({ req, res, payload, connection }) => ({
+          req,
+          res,
+          payload,
+          connection,
+        }),
+        subscriptions: {
+          onConnect: async (connectionParams: any) => {
+            const token = connectionParams.authToken;
+            if (!token) return {};
+            return jwtService
+              .verifyAsync<Token>(token, {
+                complete: true,
+              })
+              .then(decoded => {
+                if (!isAccessToken(decoded)) return {};
+                return {
+                  user: {
+                    _id: decoded.payload.sub,
+                    username: decoded.payload.username,
+                  },
+                };
+              });
+          },
+        },
+      }),
+      inject: [JwtService],
     }),
     EventEmitterModule.forRoot(),
     UsersModule,

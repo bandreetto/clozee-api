@@ -8,7 +8,6 @@ import {
 } from '@nestjs/graphql';
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
-import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts';
 import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';

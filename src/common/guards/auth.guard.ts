@@ -10,8 +10,9 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const ctx = GqlExecutionContext.create(context);
-    const req = ctx.getContext().req;
-    if (!req.user) throw new UnauthorizedException();
+    const { req, connection } = ctx.getContext();
+    if (!req?.user && !connection?.context?.user)
+      throw new UnauthorizedException();
     return true;
   }
 }

@@ -377,8 +377,5 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification(
-    """The id of the user."""
-    user: String!
-  ): Notification!
+  notification: Notification!
 }

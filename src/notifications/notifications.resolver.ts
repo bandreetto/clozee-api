@@ -1,8 +1,8 @@
 import { Inject, UseGuards } from '@nestjs/common';
-import { Args, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { Query, Resolver, Subscription } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
-import { TokenUser } from 'src/common/types';
+import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
 import { Notification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PubSub } from 'graphql-subscriptions';
@@ -40,15 +40,17 @@ export class NotificationsResolver {
     );
   }
 
+  @UseGuards(AuthGuard)
   @Subscription(() => Notification, {
     filter: (
       payload: { notification: Notification },
-      variables: { user: string },
-    ) => payload.notification.user === variables.user,
+      _variables,
+      connectionContext: AuthorizedConnectionContext,
+    ) =>
+      payload.notification.user ===
+      connectionContext.connection.context.user._id,
   })
-  notification(
-    @Args('user', { description: 'The id of the user.' }) _user: string,
-  ) {
+  notification() {
     return this.pubSub.asyncIterator('notification');
   }
 
