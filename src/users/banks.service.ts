@@ -12,4 +12,8 @@ export class BanksService {
   async find(): Promise<Bank[]> {
     return this.bankModel.find().lean();
   }
+
+  async findById(bankId: string): Promise<Bank> {
+    return this.bankModel.findById(bankId).lean();
+  }
 }

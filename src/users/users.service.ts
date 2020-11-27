@@ -67,7 +67,7 @@ export class UsersService {
         {
           $set: fieldsToUpdate,
         },
-        { new: true },
+        { new: true, runValidators: true },
       )
       .lean();
 
