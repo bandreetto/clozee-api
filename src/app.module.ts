@@ -11,14 +11,15 @@ import { CommentsModule } from './comments/comments.module';
 import { FeedModule } from './feed/feed.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
-import { TokenMiddleware } from './common/middlewares';
+import {
+  TokenMiddleware,
+  WebSocketTokenMiddleware,
+} from './common/middlewares';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
 import { CountersModule } from './counters/counters.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { JwtService } from '@nestjs/jwt';
-import { Token } from './auth/contracts';
-import { isAccessToken } from './auth/auth.logic';
 
 @Module({
   imports: [
@@ -32,30 +33,9 @@ import { isAccessToken } from './auth/auth.logic';
       useFactory: (jwtService: JwtService) => ({
         autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
         installSubscriptionHandlers: true,
-        context: ({ req, res, payload, connection }) => ({
-          req,
-          res,
-          payload,
-          connection,
-        }),
+        context: context => context,
         subscriptions: {
-          onConnect: async (connectionParams: any) => {
-            const token = connectionParams.authToken;
-            if (!token) return {};
-            return jwtService
-              .verifyAsync<Token>(token, {
-                complete: true,
-              })
-              .then(decoded => {
-                if (!isAccessToken(decoded)) return {};
-                return {
-                  user: {
-                    _id: decoded.payload.sub,
-                    username: decoded.payload.username,
-                  },
-                };
-              });
-          },
+          onConnect: WebSocketTokenMiddleware(jwtService),
         },
       }),
       inject: [JwtService],
