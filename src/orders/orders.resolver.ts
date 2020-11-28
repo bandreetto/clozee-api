@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   Args,
   Mutation,
@@ -41,6 +42,7 @@ export class OrdersResolver {
     private readonly countersService: CountersService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -76,9 +78,10 @@ export class OrdersResolver {
     @Args('input') input: CheckoutInput,
     @CurrentUser() tokenUser: TokenUser,
   ): Promise<Order> {
-    const [user, paymentMethods] = await Promise.all([
+    const [user, paymentMethods, posts] = await Promise.all([
       this.usersService.findById(tokenUser._id),
       this.usersService.getUserPaymentMethods(tokenUser._id),
+      this.postsService.findManyByIds(input.posts),
     ]);
     if (!user) throw new UnauthorizedException(); // Just a sanity check
     if (!user.address)
@@ -96,6 +99,12 @@ export class OrdersResolver {
         HttpStatus.BAD_REQUEST,
       );
 
+    if (posts.some(post => post.user !== posts[0].user))
+      throw new HttpException(
+        'You can only buy posts from the same seller in a checkout.',
+        HttpStatus.BAD_REQUEST,
+      );
+
     const orderId = v4();
     const newSales: Sale[] = input.posts.map(post => ({
       _id: v4(),
@@ -103,13 +112,15 @@ export class OrdersResolver {
       order: orderId,
     }));
     await this.salesService.createMany(newSales);
-    return this.ordersService.create({
+    const order = await this.ordersService.create({
       _id: orderId,
       number: await this.countersService.getCounterAndIncrement('orders'),
       buyer: user._id,
       paymentMethod: paymentMethod._id,
       address: user.address,
     });
+    this.eventEmitter.emit('order.created', { order, posts });
+    return order;
   }
 
   @ResolveField()

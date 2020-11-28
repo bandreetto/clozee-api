@@ -3,13 +3,14 @@ import { Query, Resolver, Subscription } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
-import { Notification } from './contracts';
+import { Notification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PubSub } from 'graphql-subscriptions';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
 import { CommentTagNotification } from './contracts';
 import { OnEvent } from '@nestjs/event-emitter';
 import { v4 } from 'uuid';
+import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
 
 @Resolver(() => Notification)
 export class NotificationsResolver {
@@ -38,6 +39,23 @@ export class NotificationsResolver {
         notification,
       }),
     );
+  }
+
+  @OnEvent('order.created')
+  async handleOrderCreated(payload: OrderCreatedPayload) {
+    const seller = payload.posts[0].user as string;
+    const notification: SaleNotification = {
+      _id: v4(),
+      kind: SaleNotification.name,
+      user: seller,
+      order: payload.order._id,
+    };
+    const createdNotification = await this.notificationsService.create(
+      notification,
+    );
+    this.pubSub.publish('notification', {
+      notification: createdNotification,
+    });
   }
 
   @UseGuards(AuthGuard)

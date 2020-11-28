@@ -17,6 +17,11 @@ export class NotificationsService {
       .lean();
   }
 
+  async create<T extends Notification>(notification: T): Promise<T> {
+    const newNotification = await this.notificationModel.create(notification);
+    return newNotification.toObject();
+  }
+
   async createMany<T extends Notification>(notifications: T[]): Promise<T[]> {
     const createdNotifications = (await this.notificationModel.insertMany(
       notifications,
