@@ -40,3 +40,11 @@ export interface TokenUser {
   _id: string;
   username: string;
 }
+
+export interface AuthorizedConnectionContext {
+  connection: {
+    context: {
+      user: TokenUser;
+    };
+  };
+}

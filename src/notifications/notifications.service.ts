@@ -11,7 +11,10 @@ export class NotificationsService {
   ) {}
 
   async findByUser(userId: string): Promise<Notification[]> {
-    return this.notificationModel.find({ user: userId }).lean();
+    return this.notificationModel
+      .find({ user: userId })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async createMany<T extends Notification>(notifications: T[]): Promise<T[]> {

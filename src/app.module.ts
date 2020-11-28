@@ -11,11 +11,15 @@ import { CommentsModule } from './comments/comments.module';
 import { FeedModule } from './feed/feed.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
-import { TokenMiddleware } from './common/middlewares';
+import {
+  TokenMiddleware,
+  WebSocketTokenMiddleware,
+} from './common/middlewares';
 import { CategoriesModule } from './categories/categories.module';
 import { OrdersModule } from './orders/orders.module';
 import { CountersModule } from './counters/counters.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -24,9 +28,17 @@ import { NotificationsModule } from './notifications/notifications.module';
       useNewUrlParser: true,
       useCreateIndex: true,
     }),
-    GraphQLModule.forRoot({
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      installSubscriptionHandlers: true,
+    GraphQLModule.forRootAsync({
+      imports: [AuthModule],
+      useFactory: (jwtService: JwtService) => ({
+        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        installSubscriptionHandlers: true,
+        context: context => context,
+        subscriptions: {
+          onConnect: WebSocketTokenMiddleware(jwtService),
+        },
+      }),
+      inject: [JwtService],
     }),
     EventEmitterModule.forRoot(),
     UsersModule,

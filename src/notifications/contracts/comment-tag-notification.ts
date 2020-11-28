@@ -1,7 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Comment } from 'src/comments/contracts';
-import { Post } from 'src/posts/contracts';
 import { Notification } from '.';
 
 @Schema()
