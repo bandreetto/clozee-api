@@ -43,9 +43,6 @@ export class AddCreditCardInput {
 
   @Field({ description: "The card's flag." })
   flag: string;
-
-  @Field({ description: 'The document of the card owner.' })
-  holderDocument: string;
 }
 
 @InputType()
@@ -72,6 +69,9 @@ export class BankInfoInput {
     description: "The user's bank account type",
   })
   accountType: ACCOUNT_TYPES;
+
+  @Field({ description: 'The name of the account holder.' })
+  holderName: string;
 
   @Field({ description: 'The document number of the account holder.' })
   holderDocument: string;

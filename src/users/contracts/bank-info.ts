@@ -31,6 +31,10 @@ export class BankInfo {
   accountType: ACCOUNT_TYPES;
 
   @Prop({ required: true })
+  @Field({ description: 'The name of the account holder.' })
+  holderName: string;
+
+  @Prop({ required: true })
   @Field({ description: 'The document number of the account holder.' })
   holderDocument: string;
 }
