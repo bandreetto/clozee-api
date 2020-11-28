@@ -43,6 +43,9 @@ export class AddCreditCardInput {
 
   @Field({ description: "The card's flag." })
   flag: string;
+
+  @Field({ description: 'The document of the card owner.' })
+  holderDocument: string;
 }
 
 @InputType()

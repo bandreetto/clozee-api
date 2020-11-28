@@ -22,6 +22,10 @@ export class PaymentMethod {
 
   @Prop({ required: true, index: true })
   user: string;
+
+  @Prop({ required: true })
+  @Field({ description: 'The document of the card owner.' })
+  holderDocument: string;
 }
 
 export const PaymentMethodSchema = SchemaFactory.createForClass(PaymentMethod);

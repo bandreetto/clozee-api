@@ -41,6 +41,9 @@ type PaymentMethod {
 
   """The card's flag."""
   flag: String!
+
+  """The document of the card owner."""
+  holderDocument: String!
 }
 
 type Bank {
@@ -345,6 +348,9 @@ input AddCreditCardInput {
 
   """The card's flag."""
   flag: String!
+
+  """The document of the card owner."""
+  holderDocument: String!
 }
 
 input AddCommentInput {
