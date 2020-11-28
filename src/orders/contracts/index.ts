@@ -1,4 +1,4 @@
-export * from './sales';
+export * from './sale';
 
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';

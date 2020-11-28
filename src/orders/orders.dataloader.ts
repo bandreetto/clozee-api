@@ -1,11 +1,18 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
+import { reconciliateByKey } from 'src/common/reconciliators';
 import { Order } from './contracts';
 import { OrdersService } from './orders.service';
 
 @Injectable({ scope: Scope.REQUEST })
-export class OrdersLoader {
-  constructor(private readonly ordersService: OrdersService) {}
+export class OrdersLoader extends DataLoader<string, Order> {
+  constructor(private readonly ordersService: OrdersService) {
+    super((ids: string[]) =>
+      this.ordersService
+        .findManyByIds(ids)
+        .then(orders => reconciliateByKey('_id', ids, orders)),
+    );
+  }
 
   byUser = new DataLoader<string, Order[]>((userIds: string[]) =>
     this.ordersService

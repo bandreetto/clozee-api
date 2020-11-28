@@ -2,15 +2,19 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PubSub } from 'graphql-subscriptions';
 import { CommentsModule } from 'src/comments/comments.module';
+import { OrdersModule } from 'src/orders/orders.module';
 import { CommentTagNotificationResolver } from './comment-tag-notification.resolver';
 import {
   CommentTagNotification,
   CommentTagNotificationSchema,
   Notification,
   NotificationSchema,
+  SaleNotification,
+  SaleNotificationSchema,
 } from './contracts';
 import { NotificationsResolver } from './notifications.resolver';
 import { NotificationsService } from './notifications.service';
+import { SaleNotificationResolver } from './sale-notification.resolver';
 
 @Module({
   imports: [
@@ -23,14 +27,20 @@ import { NotificationsService } from './notifications.service';
             name: CommentTagNotification.name,
             schema: CommentTagNotificationSchema,
           },
+          {
+            name: SaleNotification.name,
+            schema: SaleNotificationSchema,
+          },
         ],
       },
     ]),
     CommentsModule,
+    OrdersModule,
   ],
   providers: [
     NotificationsResolver,
     CommentTagNotificationResolver,
+    SaleNotificationResolver,
     NotificationsService,
     {
       provide: 'PUB_SUB',

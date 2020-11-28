@@ -217,6 +217,17 @@ type CommentTagNotification implements Notification {
   comment: Comment!
 }
 
+type SaleNotification implements Notification {
+  _id: String!
+  kind: String!
+
+  """The moment this notification was sent."""
+  createdAt: DateTime!
+
+  """The order of the sales."""
+  order: Order!
+}
+
 type Query {
   me: User!
   user(id: String!): User!

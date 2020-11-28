@@ -20,5 +20,6 @@ export const WebSocketTokenMiddleware = (jwtService: JwtService) =>
             username: decoded.payload.username,
           },
         };
-      });
+      })
+      .catch(() => ({}));
   };
