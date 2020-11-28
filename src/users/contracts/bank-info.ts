@@ -27,8 +27,12 @@ export class BankInfo {
   accountDv: string;
 
   @Prop({ required: true, default: ACCOUNT_TYPES.CURRENT })
-  @Field(() => ACCOUNT_TYPES, { description: "The user's bank account type" })
+  @Field(() => ACCOUNT_TYPES, { description: "The user's bank account type." })
   accountType: ACCOUNT_TYPES;
+
+  @Prop({ required: true })
+  @Field({ description: 'The document number of the account holder.' })
+  holderDocument: string;
 }
 
 export const BankInfoSchema = SchemaFactory.createForClass(BankInfo);

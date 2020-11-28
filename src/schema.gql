@@ -64,8 +64,11 @@ type BankInfo {
   """The bank account verifying digit."""
   accountDv: String
 
-  """The user's bank account type"""
+  """The user's bank account type."""
   accountType: ACCOUNT_TYPES!
+
+  """The document number of the account holder."""
+  holderDocument: String!
 }
 
 """Bank account types."""
@@ -313,6 +316,9 @@ input BankInfoInput {
 
   """The user's bank account type"""
   accountType: ACCOUNT_TYPES!
+
+  """The document number of the account holder."""
+  holderDocument: String!
 }
 
 input AddressInput {
