@@ -67,6 +67,9 @@ type BankInfo {
   """The user's bank account type."""
   accountType: ACCOUNT_TYPES!
 
+  """The name of the account holder."""
+  holderName: String!
+
   """The document number of the account holder."""
   holderDocument: String!
 }
@@ -316,6 +319,9 @@ input BankInfoInput {
 
   """The user's bank account type"""
   accountType: ACCOUNT_TYPES!
+
+  """The name of the account holder."""
+  holderName: String!
 
   """The document number of the account holder."""
   holderDocument: String!

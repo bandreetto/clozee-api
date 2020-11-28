@@ -70,6 +70,9 @@ export class BankInfoInput {
   })
   accountType: ACCOUNT_TYPES;
 
+  @Field({ description: 'The name of the account holder.' })
+  holderName: string;
+
   @Field({ description: 'The document number of the account holder.' })
   holderDocument: string;
 }
