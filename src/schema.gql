@@ -391,6 +391,16 @@ input UpdatePostFields {
 
   """The new price of the item in cents."""
   price: Int
+  size: String
+
+  """An array of urls for the new post images."""
+  images: [String!]
+
+  """The new category id of this post."""
+  category: String
+
+  """The new condition of the post's product"""
+  condition: POST_CONDITIONS
 }
 
 input SignUpInput {
