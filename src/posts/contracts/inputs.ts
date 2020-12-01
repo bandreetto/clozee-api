@@ -43,5 +43,26 @@ export class UpdatePostFields {
     nullable: true,
     description: 'The new price of the item in cents.',
   })
-  price: number;
+  price?: number;
+
+  @Field({ nullable: true })
+  size?: string;
+
+  @Field(() => [String], {
+    nullable: true,
+    description: 'An array of urls for the new post images.',
+  })
+  images?: string[];
+
+  @Field({
+    nullable: true,
+    description: 'The new category id of this post.',
+  })
+  category?: string;
+
+  @Field(() => POST_CONDITIONS, {
+    nullable: true,
+    description: "The new condition of the post's product",
+  })
+  condition?: POST_CONDITIONS;
 }
