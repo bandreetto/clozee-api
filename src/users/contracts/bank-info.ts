@@ -22,7 +22,7 @@ export class BankInfo {
   @Field({ description: "User's bank account number." })
   account: string;
 
-  @Prop({ maxlength: 1 })
+  @Prop({ maxlength: 2 })
   @Field({ nullable: true, description: 'The bank account verifying digit.' })
   accountDv?: string;
 
