@@ -58,6 +58,9 @@ export class Post {
 
   @Field()
   createdAt?: Date;
+
+  @Prop({ default: false })
+  deleted?: boolean;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

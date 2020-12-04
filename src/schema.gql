@@ -286,6 +286,7 @@ type Mutation {
   uploadPostImage: String!
   addPost(addPostInput: AddPostInput!): Post!
   editPost(updateFields: UpdatePostFields!, postId: String!): Post!
+  deletePost(postId: String!): Post!
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!

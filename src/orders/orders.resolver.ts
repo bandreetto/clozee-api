@@ -1,6 +1,5 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -85,24 +84,19 @@ export class OrdersResolver {
     ]);
     if (!user) throw new UnauthorizedException(); // Just a sanity check
     if (!user.address)
-      throw new HttpException(
+      throw new BadRequestException(
         'User must have an address to be able to buy.',
-        HttpStatus.BAD_REQUEST,
       );
 
     const paymentMethod = paymentMethods.find(
       p => p._id === input.paymentMethodId,
     );
     if (!paymentMethod)
-      throw new HttpException(
-        'Could not find this payment method.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('Could not find this payment method.');
 
     if (posts.some(post => post.user !== posts[0].user))
-      throw new HttpException(
+      throw new BadRequestException(
         'You can only buy posts from the same seller in a checkout.',
-        HttpStatus.BAD_REQUEST,
       );
 
     const orderId = v4();

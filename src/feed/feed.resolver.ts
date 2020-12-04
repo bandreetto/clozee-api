@@ -24,7 +24,7 @@ export class FeedResolver {
       createdAt: afterDate,
     });
     const connection = fromPostsToConnection(
-      posts,
+      posts.filter(post => !post.deleted),
       postsCount - args.first > 0,
     );
     return connection;

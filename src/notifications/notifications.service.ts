@@ -28,4 +28,8 @@ export class NotificationsService {
     )) as Array<Notification & Document>;
     return createdNotifications.map(o => o.toObject());
   }
+
+  async deleteCommentTagNotifications(commentsIds: string[]): Promise<void> {
+    await this.notificationModel.deleteMany({ comment: { $in: commentsIds } });
+  }
 }
