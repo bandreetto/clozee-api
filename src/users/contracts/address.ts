@@ -25,6 +25,10 @@ export class Address {
 
   @Prop()
   @Field({ nullable: true })
+  complement?: string;
+
+  @Prop()
+  @Field({ nullable: true })
   district?: string;
 
   @Prop()

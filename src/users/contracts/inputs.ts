@@ -18,6 +18,9 @@ export class AddressInput {
   number?: number;
 
   @Field({ nullable: true })
+  complement?: string;
+
+  @Field({ nullable: true })
   district?: string;
 
   @Field({ nullable: true })
