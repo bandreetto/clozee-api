@@ -9,7 +9,12 @@ import {
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
 import { User } from 'src/users/contracts';
-import { ForbiddenException, UseGuards } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  GoneException,
+  UseGuards,
+} from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
@@ -23,6 +28,8 @@ import { CommentsLoader } from 'src/comments/comments.dataloader';
 import { UsersLoader } from 'src/users/users.dataloaders';
 import { CategoriesLoader } from 'src/categories/categories.dataloader';
 import { SalesLoader } from 'src/orders/sales.dataloader';
+import { SalesService } from 'src/orders/sales.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -31,19 +38,25 @@ export class PostsResolver {
     private readonly usersLoader: UsersLoader,
     private readonly commentsLoader: CommentsLoader,
     private readonly categoriesLoader: CategoriesLoader,
+    private readonly salesService: SalesService,
     private readonly salesLoader: SalesLoader,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Query(() => Post)
-  post(@Args('postId') postId: string): Promise<Post> {
-    return this.postsService.findById(postId);
+  async post(@Args('postId') postId: string): Promise<Post> {
+    const post = await this.postsService.findById(postId);
+    if (post.deleted) throw new GoneException('This post was deleted.');
+    return post;
   }
 
   @Query(() => [Post])
   posts(
     @Args('user', { description: 'Filter posts by user id' }) userId: string,
   ) {
-    return this.postsService.findManyByUser(userId);
+    return this.postsService
+      .findManyByUser(userId)
+      .then(posts => posts.filter(post => !post.deleted));
   }
 
   @UseGuards(AuthGuard)
@@ -82,7 +95,27 @@ export class PostsResolver {
     const userPosts = await this.postsService.findManyByUser(user._id);
     if (!userPosts.find(userPost => userPost._id === postId))
       throw new ForbiddenException('You can only edit your posts.');
-    return this.postsService.updatePost(postId, updateFields);
+    return this.postsService.updateOne(postId, updateFields);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Post)
+  async deletePost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<Post> {
+    const userPosts = await this.postsService.findManyByUser(user._id);
+    if (!userPosts.some(userPost => userPost._id === postId))
+      throw new ForbiddenException('You can only delete your own posts.');
+
+    const [postSale] = await this.salesService.findManyByPosts([postId]);
+    if (postSale) throw new ConflictException('You cannot delete a sold post.');
+
+    const deletedPost = await this.postsService.updateOne(postId, {
+      deleted: true,
+    });
+    this.eventEmitter.emit('post.deleted', deletedPost);
+    return deletedPost;
   }
 
   @ResolveField()

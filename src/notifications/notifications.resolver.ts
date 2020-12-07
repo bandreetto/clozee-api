@@ -11,12 +11,15 @@ import { CommentTagNotification } from './contracts';
 import { OnEvent } from '@nestjs/event-emitter';
 import { v4 } from 'uuid';
 import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
+import { Post } from 'src/posts/contracts';
+import { CommentsService } from 'src/comments/comments.service';
 
 @Resolver(() => Notification)
 export class NotificationsResolver {
   constructor(
     private readonly notificationsService: NotificationsService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
+    private readonly commentsService: CommentsService,
   ) {}
 
   @OnEvent('comment.created')
@@ -56,6 +59,14 @@ export class NotificationsResolver {
     this.pubSub.publish('notification', {
       notification: createdNotification,
     });
+  }
+
+  @OnEvent('post.deleted')
+  async deletePostCommentNotification(payload: Post) {
+    const comments = await this.commentsService.findByPost(payload._id);
+    this.notificationsService.deleteCommentTagNotifications(
+      comments.map(comment => comment._id),
+    );
   }
 
   @UseGuards(AuthGuard)

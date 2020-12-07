@@ -10,7 +10,7 @@ import { PaymentMethod, User } from './contracts';
 import { UsersService } from './users.service';
 import { Post } from 'src/posts/contracts';
 import { descend, sort } from 'ramda';
-import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
@@ -151,10 +151,7 @@ export class UsersResolver {
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
     if (input.lastDigits.length !== 4)
-      throw new HttpException(
-        'Last digits must be a string of length 4',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('Last digits must be a string of length 4');
     await this.usersService.addPaymentMethod(user._id, {
       ...input,
       _id: v4(),
@@ -175,9 +172,10 @@ export class UsersResolver {
   @ResolveField()
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsLoader.byUser.load(user._id);
+    const notDeletedPosts = posts.filter(post => !post.deleted);
     return sort(
       descend(post => post.createdAt),
-      posts,
+      notDeletedPosts,
     );
   }
 
@@ -185,7 +183,10 @@ export class UsersResolver {
   async savedPosts(@Root() user: User): Promise<Post[]> {
     const savedPosts = await this.usersLoader.savedPosts.load(user._id);
     const postsIds = savedPosts.map(s => s.post);
-    return this.postsLoader.loadMany(postsIds) as Promise<Post[]>;
+    const posts = await Promise.all(
+      postsIds.map(post => this.postsLoader.load(post)),
+    );
+    return posts.filter(post => !post.deleted);
   }
 
   @ResolveField()

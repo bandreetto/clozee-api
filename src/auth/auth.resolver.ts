@@ -1,4 +1,8 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { randomBytes, scryptSync } from 'crypto';
 import { User } from 'src/users/contracts';
@@ -47,10 +51,7 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
     if (await this.usersService.existsWithUsername(input.username)) {
-      throw new HttpException(
-        'This username already exists.',
-        HttpStatus.CONFLICT,
-      );
+      throw new ConflictException('This username already exists.');
     }
 
     const createdUser = await this.usersService.create({
@@ -86,7 +87,7 @@ export class AuthResolver {
   ): Promise<AuthResponse> {
     const user = await this.usersService.findByUsername(username);
 
-    if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+    if (!user) throw new NotFoundException('User not found.');
 
     const { salt, passwordHash } = await this.authService.findByUser(user._id);
     const loginPasswordHash = scryptSync(
@@ -95,7 +96,7 @@ export class AuthResolver {
       SCRYPT_KEYLEN,
     ).toString('base64');
     if (passwordHash !== loginPasswordHash)
-      throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+      throw new NotFoundException('User not found.');
 
     return {
       me: user,
@@ -110,14 +111,13 @@ export class AuthResolver {
       complete: true,
     }) as Token;
     if (!isRefreshToken(decodedToken))
-      throw new HttpException(
+      throw new BadRequestException(
         'You can only refresh tokens with a refresh type token.',
-        HttpStatus.BAD_REQUEST,
       );
 
     const { sub } = this.jwtService.verify(refreshToken);
     const user = await this.usersService.findById(sub);
-    if (!user) throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
+    if (!user) throw new NotFoundException('User not found.');
 
     return this.createAccessToken(user);
   }

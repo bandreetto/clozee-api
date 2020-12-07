@@ -6,7 +6,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/contracts';
-import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
+import { NotFoundException, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
@@ -36,9 +36,8 @@ export class CommentsResolver {
     const post = await this.postsService.findById(input.post);
 
     if (!post)
-      throw new HttpException(
+      throw new NotFoundException(
         `Could not find a post with the id ${input.post}`,
-        HttpStatus.NOT_FOUND,
       );
 
     const usernames = getTaggedUsersFromComment(input.body);

@@ -26,7 +26,7 @@ export class PostsService {
   }
 
   async findById(postId: string): Promise<Post> {
-    return this.postModel.findById(postId).lean();
+    return this.postModel.findOne({ _id: postId }).lean();
   }
 
   async findManyByIds(postsIds: string[]): Promise<Post[]> {
@@ -47,13 +47,17 @@ export class PostsService {
       .lean<Post>();
   }
 
-  async countAfter(query: { createdAt?: Date }): Promise<number> {
+  async countAfter(query: {
+    createdAt?: Date;
+    includeDeleted?: boolean;
+  }): Promise<number> {
     return this.postModel.countDocuments({
       ...(query.createdAt ? { createdAt: { $lt: query.createdAt } } : null),
+      deleted: query.includeDeleted || false,
     });
   }
 
-  async updatePost(
+  async updateOne(
     postId: string,
     fieldsToUpdate: Partial<Post>,
   ): Promise<Post> {
