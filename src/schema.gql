@@ -6,6 +6,9 @@ interface Notification {
   _id: String!
   kind: String!
 
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
+
   """The moment this notification was sent."""
   createdAt: DateTime!
 }
@@ -217,6 +220,9 @@ type CommentTagNotification implements Notification {
   _id: String!
   kind: String!
 
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
+
   """The moment this notification was sent."""
   createdAt: DateTime!
 
@@ -227,6 +233,9 @@ type CommentTagNotification implements Notification {
 type SaleNotification implements Notification {
   _id: String!
   kind: String!
+
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
 
   """The moment this notification was sent."""
   createdAt: DateTime!
@@ -291,6 +300,9 @@ type Mutation {
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
+
+  """Mark all user notifications as seen."""
+  clearNotifications: Int!
 }
 
 input UpdateUserInfoInput {
