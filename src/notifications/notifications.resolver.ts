@@ -1,5 +1,5 @@
 import { Inject, UseGuards } from '@nestjs/common';
-import { Query, Resolver, Subscription } from '@nestjs/graphql';
+import { Int, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
@@ -32,6 +32,7 @@ export class NotificationsResolver {
         kind: CommentTagNotification.name,
         comment: payload.comment._id,
         user: userTagged,
+        unseen: true,
       }),
     );
     const createdNotifications = await this.notificationsService.createMany(
@@ -52,6 +53,7 @@ export class NotificationsResolver {
       kind: SaleNotification.name,
       user: seller,
       order: payload.order._id,
+      unseen: true,
     };
     const createdNotification = await this.notificationsService.create(
       notification,
@@ -87,5 +89,15 @@ export class NotificationsResolver {
   @Query(() => [Notification])
   notifications(@CurrentUser() tokenUser: TokenUser): Promise<Notification[]> {
     return this.notificationsService.findByUser(tokenUser._id);
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Int, {
+    description: 'Mark all user notifications as seen.',
+  })
+  clearNotifications(@CurrentUser() user: TokenUser): Promise<number> {
+    return this.notificationsService.updateManyByUser(user._id, {
+      unseen: false,
+    });
   }
 }

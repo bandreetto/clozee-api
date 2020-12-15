@@ -33,6 +33,12 @@ export class Notification {
   kind: string;
 
   @Prop()
+  @Field({
+    description: 'Flag indicating if this notification is new and/or unseen.',
+  })
+  unseen: boolean;
+
+  @Prop()
   user: string;
 
   @Field({ description: 'The moment this notification was sent.' })

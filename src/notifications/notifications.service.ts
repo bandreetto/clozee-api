@@ -17,6 +17,16 @@ export class NotificationsService {
       .lean();
   }
 
+  async updateManyByUser(
+    userId,
+    updateFields: Partial<Notification>,
+  ): Promise<number> {
+    const result: any = await this.notificationModel
+      .updateMany({ user: userId }, { $set: updateFields }, { new: true })
+      .lean();
+    return result.nModified;
+  }
+
   async create<T extends Notification>(notification: T): Promise<T> {
     const newNotification = await this.notificationModel.create(notification);
     return newNotification.toObject();

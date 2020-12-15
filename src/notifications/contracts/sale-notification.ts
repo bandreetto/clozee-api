@@ -11,6 +11,7 @@ export class SaleNotification implements Notification {
   _id: string;
   kind: string;
   user: string;
+  unseen: boolean;
   createdAt?: Date;
 
   @Prop({ type: String, required: true })
