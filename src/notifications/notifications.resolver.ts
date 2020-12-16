@@ -92,12 +92,16 @@ export class NotificationsResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => Int, {
+  @Mutation(() => [Notification], {
     description: 'Mark all user notifications as seen.',
   })
-  clearNotifications(@CurrentUser() user: TokenUser): Promise<number> {
-    return this.notificationsService.updateManyByUser(user._id, {
+  async clearNotifications(
+    @CurrentUser() tokenUser: TokenUser,
+  ): Promise<Notification[]> {
+    await this.notificationsService.updateManyByUser(tokenUser._id, {
       unseen: false,
     });
+
+    return this.notificationsService.findByUser(tokenUser._id);
   }
 }
