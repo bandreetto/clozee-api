@@ -56,6 +56,12 @@ export class Post {
   })
   sold?: boolean;
 
+  @Field({
+    description:
+      'A boolean indicating whether this post is saved by the current user or not. If the request is not authenticated, this returns false.',
+  })
+  saved?: boolean;
+
   @Field()
   createdAt?: Date;
 
