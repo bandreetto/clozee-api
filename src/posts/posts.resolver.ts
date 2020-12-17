@@ -139,4 +139,17 @@ export class PostsResolver {
   async sold(@Root() post: Post): Promise<boolean> {
     return !!(await this.salesLoader.byPost.load(post._id));
   }
+
+  @ResolveField()
+  async saved(
+    @Root() post: Post,
+    @CurrentUser() tokenUser: TokenUser,
+  ): Promise<boolean> {
+    if (!tokenUser) return false;
+
+    const userSavedPosts = await this.usersLoader.savedPosts.load(
+      tokenUser._id,
+    );
+    return userSavedPosts.some(savedPost => savedPost.post === post._id);
+  }
 }

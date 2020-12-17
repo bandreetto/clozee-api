@@ -302,7 +302,7 @@ type Mutation {
   refreshToken(token: String!): String!
 
   """Mark all user notifications as seen."""
-  clearNotifications: Int!
+  clearNotifications: [Notification!]!
 }
 
 input UpdateUserInfoInput {
