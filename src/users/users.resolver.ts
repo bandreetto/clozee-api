@@ -182,7 +182,9 @@ export class UsersResolver {
   @ResolveField()
   async savedPosts(@Root() user: User): Promise<Post[]> {
     const savedPosts = await this.usersLoader.savedPosts.load(user._id);
-    const postsIds = savedPosts.map(s => s.post);
+    const postsIds = savedPosts
+      .sort(descend(post => post.updatedAt))
+      .map(s => s.post);
     const posts = await Promise.all(
       postsIds.map(post => this.postsLoader.load(post)),
     );
