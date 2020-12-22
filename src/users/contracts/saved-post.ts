@@ -8,6 +8,8 @@ export class SavedPost {
   post: string;
   @Prop({ default: true })
   saved: boolean;
+
+  updatedAt?: Date;
 }
 export const SavedPostSchema = SchemaFactory.createForClass(SavedPost);
 SavedPostSchema.index({
