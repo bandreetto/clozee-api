@@ -1,22 +1,14 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { Connection, Edge, PageInfo } from 'src/common/types';
-import { Post } from 'src/posts/contracts';
+export * from './pagination';
 
-@ObjectType()
-export class FeedPostEdge implements Edge<Post> {
-  @Field(() => Post)
-  node: Post;
-  @Field({ description: 'An opaque cursor representing this edge position.' })
-  cursor: string;
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+@Schema({ timestamps: true })
+export class Feed {
+  @Prop()
+  _id: string;
+
+  @Prop()
+  post: string;
 }
 
-@ObjectType()
-export class FeedPostConnection implements Connection<Post> {
-  @Field(() => [FeedPostEdge], {
-    description:
-      'An array of post edges containing the node (Post) and its cursor.',
-  })
-  edges: FeedPostEdge[];
-  @Field()
-  pageInfo: PageInfo;
-}
+export const FeedSchema = SchemaFactory.createForClass(Feed);

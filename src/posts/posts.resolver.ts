@@ -78,11 +78,15 @@ export class PostsResolver {
     @Args('addPostInput') input: AddPostInput,
     @CurrentUser() user: TokenUser,
   ) {
-    return this.postsService.create({
+    const createdPost = await this.postsService.create({
       ...input,
       _id: v4(),
       user: user._id,
     });
+
+    this.eventEmitter.emit('post.created', createdPost);
+
+    return createdPost;
   }
 
   @UseGuards(AuthGuard)

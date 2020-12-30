@@ -1,5 +1,5 @@
 import { Inject, UseGuards } from '@nestjs/common';
-import { Int, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
