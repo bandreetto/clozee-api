@@ -27,7 +27,7 @@ export class FeedService {
 
   async countAfter(date: Date): Promise<number> {
     return this.feedModel.countDocuments({
-      createdAt: { $lt: date },
+      ...(date ? { createdAt: { $lt: date } } : null),
     });
   }
 }

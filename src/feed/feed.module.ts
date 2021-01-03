@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PostsModule } from 'src/posts/posts.module';
 import { Feed, FeedSchema } from './contracts';
+import { FeedConsumer } from './feed.consumer';
 import { FeedResolver } from './feed.resolver';
 import { FeedService } from './feed.service';
 
@@ -15,6 +16,6 @@ import { FeedService } from './feed.service';
     ]),
     PostsModule,
   ],
-  providers: [FeedResolver, FeedService],
+  providers: [FeedResolver, FeedService, FeedConsumer],
 })
 export class FeedModule {}
