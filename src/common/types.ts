@@ -2,9 +2,9 @@ import { ArgsType, Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class PageInfo {
-  @Field({ description: 'The first cursor of this page.' })
+  @Field({ description: 'The first cursor of this page.', nullable: true })
   startCursor: string;
-  @Field({ description: 'The last cursor of this page.' })
+  @Field({ description: 'The last cursor of this page.', nullable: true })
   endCursor: string;
   @Field({
     description:

@@ -171,10 +171,10 @@ type User {
 
 type PageInfo {
   """The first cursor of this page."""
-  startCursor: String!
+  startCursor: String
 
   """The last cursor of this page."""
-  endCursor: String!
+  endCursor: String
 
   """A boolean indicating if there are more edges after this page."""
   hasNextPage: Boolean!
