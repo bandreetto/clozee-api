@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feed } from './contracts';
 import { Model, Document } from 'mongoose';
@@ -33,5 +33,14 @@ export class FeedService {
 
   async deleteByPost(post: string): Promise<Feed> {
     return this.feedModel.findOneAndDelete({ post }).lean();
+  }
+
+  async deleteManyByPosts(posts: string[]): Promise<void> {
+    const result = await this.feedModel.deleteMany({ post: { $in: posts } });
+    if (!result.ok)
+      throw new InternalServerErrorException({
+        message: 'Could not delete some posts from the DB',
+        posts,
+      });
   }
 }
