@@ -30,4 +30,8 @@ export class FeedService {
       ...(date ? { createdAt: { $lt: date } } : null),
     });
   }
+
+  async deleteByPost(post: string): Promise<Feed> {
+    return this.feedModel.findOneAndDelete({ post }).lean();
+  }
 }

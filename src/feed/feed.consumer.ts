@@ -9,10 +9,15 @@ export class FeedConsumer {
   constructor(private readonly feedService: FeedService) {}
 
   @OnEvent('post.created')
-  handlePostCreated(post: Post) {
+  handlePostCreated(payload: Post) {
     return this.feedService.create({
       _id: v4(),
-      post: post._id,
+      post: payload._id,
     });
+  }
+
+  @OnEvent('post.deleted')
+  handlePostDeleted(payload: Post) {
+    return this.feedService.deleteByPost(payload._id);
   }
 }
