@@ -3,28 +3,32 @@ import { PaginationArgs } from 'src/common/types';
 import { PostsService } from 'src/posts/posts.service';
 import { FeedPostConnection } from './contracts';
 import { fromPostsToConnection } from './feed.logic';
+import { FeedService } from './feed.service';
 
 @Resolver()
 export class FeedResolver {
-  constructor(private postsService: PostsService) {}
+  constructor(
+    private postsService: PostsService,
+    private feedService: FeedService,
+  ) {}
 
   @Query(() => FeedPostConnection)
   async feed(@Args() args: PaginationArgs): Promise<FeedPostConnection> {
-    let afterDate: Date;
+    let date: Date;
     if (args.after) {
       const decodedCursor = Buffer.from(args.after, 'base64').toString();
-      afterDate = new Date(decodedCursor);
+      date = new Date(decodedCursor);
     }
-    const posts = await this.postsService.findSortedBy(
-      args.first,
-      'createdAt',
-      afterDate,
+    const feedPosts = await this.feedService.findSortedByDate(args.first, date);
+    const posts = await this.postsService.findManyByIds(
+      feedPosts.map(f => f.post),
     );
-    const postsCount = await this.postsService.countAfter({
-      createdAt: afterDate,
-    });
+    const orderedPosts = feedPosts.map(feedPost =>
+      posts.find(post => post._id === feedPost.post),
+    );
+    const postsCount = await this.feedService.countAfter(date);
     const connection = fromPostsToConnection(
-      posts.filter(post => !post.deleted),
+      orderedPosts,
       postsCount - args.first > 0,
     );
     return connection;

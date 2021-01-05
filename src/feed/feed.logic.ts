@@ -12,8 +12,8 @@ export function fromPostsToConnection(
   return {
     edges,
     pageInfo: {
-      startCursor: edges[0].cursor,
-      endCursor: edges[edges.length - 1].cursor,
+      startCursor: edges[0]?.cursor,
+      endCursor: edges[edges.length - 1]?.cursor,
       hasNextPage,
     },
   };
