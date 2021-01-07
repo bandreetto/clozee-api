@@ -12,6 +12,7 @@ import {
   SaleNotification,
   SaleNotificationSchema,
 } from './contracts';
+import { NotificationsConsumer } from './notifications.consumer';
 import { NotificationsResolver } from './notifications.resolver';
 import { NotificationsService } from './notifications.service';
 import { SaleNotificationResolver } from './sale-notification.resolver';
@@ -42,6 +43,7 @@ import { SaleNotificationResolver } from './sale-notification.resolver';
     CommentTagNotificationResolver,
     SaleNotificationResolver,
     NotificationsService,
+    NotificationsConsumer,
     {
       provide: 'PUB_SUB',
       useValue: new PubSub(),
