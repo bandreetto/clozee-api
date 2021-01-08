@@ -430,5 +430,5 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification: Notification!
+  notification(deviceToken: String!): Notification!
 }

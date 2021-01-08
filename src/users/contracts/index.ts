@@ -56,6 +56,9 @@ export class User {
   @Field(() => Address, { nullable: true })
   address?: Address;
 
+  @Prop()
+  deviceToken?: string;
+
   @Field(() => [PaymentMethod], {
     description: 'The ids of users credit cards',
   })
