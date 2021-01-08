@@ -1,19 +1,22 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { OnEvent } from "@nestjs/event-emitter";
-import { PubSub } from "graphql-subscriptions";
-import { CommentCreatedPayload } from "src/comments/contracts/payloads";
-import { OrderCreatedPayload } from "src/orders/contracts/payloads";
-import { Post } from "src/posts/contracts";
-import { v4 } from "uuid";
-import { CommentTagNotification, SaleNotification } from "./contracts";
-import { NotificationsService } from "./notifications.service";
+import { Inject, Injectable } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
+import { PubSub } from 'graphql-subscriptions';
+import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
+import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
+import { Post } from 'src/posts/contracts';
+import { v4 } from 'uuid';
+import { CommentTagNotification, SaleNotification } from './contracts';
+import { NotificationsService } from './notifications.service';
 import { CommentsService } from '../comments/comments.service';
+import { admin } from 'src/common/firebase-admin';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class NotificationsConsumer {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly commentsService: CommentsService,
+    private readonly usersService: UsersService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -33,11 +36,25 @@ export class NotificationsConsumer {
     const createdNotifications = await this.notificationsService.createMany(
       tagNotifications,
     );
-    createdNotifications.map(notification =>
+    const users = await this.usersService.findManyByIds([
+      payload.comment.user as string,
+      ...createdNotifications.map(t => t.user),
+    ]);
+    const taggingUser = users.find(user => user._id === payload.comment.user);
+
+    createdNotifications.map(notification => {
       this.pubSub.publish('notification', {
         notification,
-      }),
-    );
+      });
+
+      const taggedUser = users.find(user => user._id === notification.user);
+      admin.messaging().sendToDevice(taggedUser.deviceToken, {
+        notification: {
+          title: `@${taggingUser.username} marcou você em um comentário`,
+          body: payload.comment.body,
+        },
+      });
+    });
   }
 
   @OnEvent('order.created')
