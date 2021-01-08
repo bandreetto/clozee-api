@@ -78,6 +78,7 @@ export class NotificationsConsumer {
     const createdNotification = await this.notificationsService.create(
       notification,
     );
+
     /**
      * Graphql Subscription
      */
