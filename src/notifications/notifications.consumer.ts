@@ -59,20 +59,42 @@ export class NotificationsConsumer {
 
   @OnEvent('order.created')
   async handleOrderCreated(payload: OrderCreatedPayload) {
-    const seller = payload.posts[0].user as string;
+    const sellerId = payload.posts[0].user as string;
     const notification: SaleNotification = {
       _id: v4(),
       kind: SaleNotification.name,
-      user: seller,
+      user: sellerId,
       order: payload.order._id,
       unseen: true,
     };
     const createdNotification = await this.notificationsService.create(
       notification,
     );
+    /**
+     * Graphql Subscription
+     */
     this.pubSub.publish('notification', {
       notification: createdNotification,
     });
+
+    /**
+     * Push Notifications
+     */
+    const seller = await this.usersService.findById(sellerId);
+    await admin.messaging().sendAll(
+      payload.posts.map(post => ({
+        token: seller.deviceToken,
+        notification: {
+          title: 'Parabéns! Você realizou uma venda!',
+          body: `O post ${post.title} foi vendido!`,
+        },
+        android: {
+          notification: {
+            imageUrl: post.images[0],
+          },
+        },
+      })),
+    );
   }
 
   @OnEvent('post.deleted')
