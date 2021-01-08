@@ -36,25 +36,33 @@ export class NotificationsConsumer {
     const createdNotifications = await this.notificationsService.createMany(
       tagNotifications,
     );
+
+    /**
+     * Graphql Subscription
+     */
+    createdNotifications.forEach(notification => {
+      this.pubSub.publish('notification', {
+        notification,
+      });
+    });
+
+    /**
+     * Push Notifications
+     */
     const users = await this.usersService.findManyByIds([
       payload.comment.user as string,
       ...createdNotifications.map(t => t.user),
     ]);
     const taggingUser = users.find(user => user._id === payload.comment.user);
-
-    createdNotifications.map(notification => {
-      this.pubSub.publish('notification', {
-        notification,
-      });
-
-      const taggedUser = users.find(user => user._id === notification.user);
-      admin.messaging().sendToDevice(taggedUser.deviceToken, {
+    admin.messaging().sendAll(
+      createdNotifications.map(notification => ({
+        token: users.find(user => user._id === notification.user).deviceToken,
         notification: {
           title: `@${taggingUser.username} marcou você em um comentário`,
           body: payload.comment.body,
         },
-      });
-    });
+      })),
+    );
   }
 
   @OnEvent('order.created')
