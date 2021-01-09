@@ -6,13 +6,11 @@ import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
 import { Notification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PubSub } from 'graphql-subscriptions';
-import { UsersService } from 'src/users/users.service';
 
 @Resolver(() => Notification)
 export class NotificationsResolver {
   constructor(
     private readonly notificationsService: NotificationsService,
-    private readonly usersService: UsersService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
