@@ -294,6 +294,8 @@ type Mutation {
   updateUserAvatar(newAvatarUrl: String!): User!
   addCreditCard(input: AddCreditCardInput!): User!
   deletePaymentMethod(paymentMethodId: String!): User!
+  addDeviceToken(deviceToken: String!): User!
+  removeDeviceToken: User!
   addComment(input: AddCommentInput!): Comment!
   checkout(input: CheckoutInput!): Order!
 
@@ -430,5 +432,5 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification(deviceToken: String!): Notification!
+  notification: Notification!
 }

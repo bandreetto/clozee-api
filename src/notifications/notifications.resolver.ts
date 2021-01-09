@@ -26,12 +26,7 @@ export class NotificationsResolver {
       payload.notification.user ===
       connectionContext.connection.context.user._id,
   })
-  async notification(
-    @Args('deviceToken') deviceToken: string,
-    @CurrentUser() user: TokenUser,
-  ) {
-    await this.usersService.updateUser(user._id, { deviceToken });
-
+  notification() {
     return this.pubSub.asyncIterator('notification');
   }
 
