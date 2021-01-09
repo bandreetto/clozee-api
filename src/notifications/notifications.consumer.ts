@@ -90,7 +90,7 @@ export class NotificationsConsumer {
      * Push Notifications
      */
     const seller = await this.usersService.findById(sellerId);
-    await admin.messaging().sendAll(
+    admin.messaging().sendAll(
       payload.posts.map(post => ({
         token: seller.deviceToken,
         notification: {
