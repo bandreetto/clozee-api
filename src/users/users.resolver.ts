@@ -169,6 +169,21 @@ export class UsersResolver {
     return this.usersService.findById(user._id);
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  addDeviceToken(
+    @Args('deviceToken') deviceToken: string,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
+    return this.usersService.updateUser(user._id, { deviceToken });
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  removeDeviceToken(@CurrentUser() user: TokenUser): Promise<User> {
+    return this.usersService.updateUser(user._id, { deviceToken: null });
+  }
+
   @ResolveField()
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsLoader.byUser.load(user._id);
