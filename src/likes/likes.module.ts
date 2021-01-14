@@ -4,7 +4,6 @@ import { Like, LikeSchema } from './contracts';
 import { LikesResolver } from './likes.resolver';
 import { LikesService } from './likes.service';
 import { PostsModule } from '../posts/posts.module';
-import { UsersModule } from '../users/users.module';
 import { LikesLoader } from './likes.dataloader';
 
 @Module({
@@ -15,7 +14,6 @@ import { LikesLoader } from './likes.dataloader';
         schema: LikeSchema,
       },
     ]),
-    forwardRef(() => UsersModule),
     forwardRef(() => PostsModule),
   ],
   providers: [LikesResolver, LikesService, LikesLoader],
