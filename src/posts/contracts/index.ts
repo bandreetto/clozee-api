@@ -62,6 +62,9 @@ export class Post {
   })
   saved?: boolean;
 
+  @Field({ description: 'The amount of likes this post had.' })
+  likes?: number;
+
   @Field()
   createdAt?: Date;
 

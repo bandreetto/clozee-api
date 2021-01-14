@@ -140,6 +140,9 @@ type Post {
   A boolean indicating whether this post is saved by the current user or not. If the request is not authenticated, this returns false.
   """
   saved: Boolean!
+
+  """The amount of likes this post had."""
+  likes: Float!
   createdAt: DateTime!
 }
 
@@ -298,6 +301,8 @@ type Mutation {
   removeDeviceToken: User!
   addComment(input: AddCommentInput!): Comment!
   checkout(input: CheckoutInput!): Order!
+  likePost(postId: String!): Post!
+  unlikePost(postId: String!): Post!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
   uploadPostImage: String!
@@ -310,8 +315,6 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
-  likePost(postId: String!): Post!
-  unlikePost(postId: String!): Post!
 }
 
 input UpdateUserInfoInput {

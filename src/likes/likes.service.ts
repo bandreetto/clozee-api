@@ -12,4 +12,15 @@ export class LikesService {
   async upsertLike({ _id, ...like }: Like): Promise<Like> {
     return this.likeModel.findByIdAndUpdate(_id, like, { upsert: true }).lean();
   }
+
+  async countByPost(
+    postIds: string[],
+  ): Promise<{ _id: string; count: number }[]> {
+    return this.likeModel.aggregate([
+      {
+        $match: { post: { $in: postIds } },
+      },
+      { $group: { _id: '$post', count: { $sum: 1 } } },
+    ]);
+  }
 }
