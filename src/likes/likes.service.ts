@@ -18,7 +18,7 @@ export class LikesService {
   ): Promise<{ _id: string; count: number }[]> {
     return this.likeModel.aggregate([
       {
-        $match: { post: { $in: postIds } },
+        $match: { post: { $in: postIds }, deleted: false },
       },
       { $group: { _id: '$post', count: { $sum: 1 } } },
     ]);
