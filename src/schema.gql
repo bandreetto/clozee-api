@@ -310,6 +310,8 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
+  likePost(postId: String!): Post!
+  unlikePost(postId: String!): Post!
 }
 
 input UpdateUserInfoInput {
