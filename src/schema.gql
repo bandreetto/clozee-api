@@ -143,6 +143,11 @@ type Post {
 
   """The amount of likes this post had."""
   likes: Float!
+
+  """
+  A boolean indicating if the current user has liked this post. If the request is not authenticated then this returns false.
+  """
+  liked: Boolean!
   createdAt: DateTime!
 }
 

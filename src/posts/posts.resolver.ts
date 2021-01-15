@@ -163,4 +163,13 @@ export class PostsResolver {
   async likes(@Root() post: Post): Promise<number> {
     return this.likesLoader.countByPost.load(post._id);
   }
+
+  @ResolveField()
+  async liked(
+    @Root() post: Post,
+    @CurrentUser() user: TokenUser,
+  ): Promise<boolean> {
+    if (!user) return false;
+    return this.likesLoader.load(`${post._id}:${user._id}`).then(Boolean);
+  }
 }

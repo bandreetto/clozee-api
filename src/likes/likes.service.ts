@@ -9,6 +9,10 @@ export class LikesService {
     @InjectModel(Like.name) private readonly likeModel: Model<Like & Document>,
   ) {}
 
+  async findManyByIds(ids: string[]): Promise<Like[]> {
+    return this.likeModel.find({ _id: { $in: ids }, deleted: false }).lean();
+  }
+
   async upsertLike({ _id, ...like }: Like): Promise<Like> {
     return this.likeModel.findByIdAndUpdate(_id, like, { upsert: true }).lean();
   }
