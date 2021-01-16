@@ -62,6 +62,15 @@ export class Post {
   })
   saved?: boolean;
 
+  @Field({ description: 'The amount of likes this post had.' })
+  likes?: number;
+
+  @Field({
+    description:
+      'A boolean indicating if the current user has liked this post. If the request is not authenticated then this returns false.',
+  })
+  liked?: boolean;
+
   @Field()
   createdAt?: Date;
 

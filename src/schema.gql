@@ -140,6 +140,14 @@ type Post {
   A boolean indicating whether this post is saved by the current user or not. If the request is not authenticated, this returns false.
   """
   saved: Boolean!
+
+  """The amount of likes this post had."""
+  likes: Float!
+
+  """
+  A boolean indicating if the current user has liked this post. If the request is not authenticated then this returns false.
+  """
+  liked: Boolean!
   createdAt: DateTime!
 }
 
@@ -298,6 +306,8 @@ type Mutation {
   removeDeviceToken: User!
   addComment(input: AddCommentInput!): Comment!
   checkout(input: CheckoutInput!): Order!
+  likePost(postId: String!): Post!
+  unlikePost(postId: String!): Post!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
   uploadPostImage: String!

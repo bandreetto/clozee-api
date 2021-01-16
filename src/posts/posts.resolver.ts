@@ -30,6 +30,7 @@ import { CategoriesLoader } from 'src/categories/categories.dataloader';
 import { SalesLoader } from 'src/orders/sales.dataloader';
 import { SalesService } from 'src/orders/sales.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LikesLoader } from '../likes/likes.dataloader';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -40,6 +41,7 @@ export class PostsResolver {
     private readonly categoriesLoader: CategoriesLoader,
     private readonly salesService: SalesService,
     private readonly salesLoader: SalesLoader,
+    private readonly likesLoader: LikesLoader,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -155,5 +157,19 @@ export class PostsResolver {
       tokenUser._id,
     );
     return userSavedPosts.some(savedPost => savedPost.post === post._id);
+  }
+
+  @ResolveField()
+  async likes(@Root() post: Post): Promise<number> {
+    return this.likesLoader.countByPost.load(post._id);
+  }
+
+  @ResolveField()
+  async liked(
+    @Root() post: Post,
+    @CurrentUser() user: TokenUser,
+  ): Promise<boolean> {
+    if (!user) return false;
+    return this.likesLoader.load(`${post._id}:${user._id}`).then(Boolean);
   }
 }
