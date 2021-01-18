@@ -15,6 +15,7 @@ import { TokenUser } from 'src/common/types';
 import configuration from 'src/config/configuration';
 import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
+import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
 import { PaymentMethod, User } from './contracts';
 import {
@@ -31,6 +32,7 @@ export class UsersResolver {
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
     private readonly postsLoader: PostsLoader,
+    private readonly postsService: PostsService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -83,7 +85,7 @@ export class UsersResolver {
       post: postId,
       saved: true,
     });
-    return this.postsLoader.load(postId);
+    return this.postsService.findById(postId);
   }
 
   @UseGuards(AuthGuard)
@@ -97,7 +99,7 @@ export class UsersResolver {
       post: postId,
       saved: false,
     });
-    return this.postsLoader.load(postId);
+    return this.postsService.findById(postId);
   }
 
   @UseGuards(AuthGuard)
