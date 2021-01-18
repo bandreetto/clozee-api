@@ -73,7 +73,7 @@ export class UsersResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => User)
+  @Mutation(() => Post)
   async savePost(
     @Args('postId') postId: string,
     @CurrentUser() user: TokenUser,
@@ -87,7 +87,7 @@ export class UsersResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => User)
+  @Mutation(() => Post)
   async unsavePost(
     @Args('postId') postId: string,
     @CurrentUser() user: TokenUser,
