@@ -1,29 +1,30 @@
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import {
-  Resolver,
   Args,
+  Mutation,
   Query,
   ResolveField,
+  Resolver,
   Root,
-  Mutation,
 } from '@nestjs/graphql';
-import { PaymentMethod, User } from './contracts';
-import { UsersService } from './users.service';
-import { Post } from 'src/posts/contracts';
 import { descend, sort } from 'ramda';
-import { BadRequestException, UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/common/guards';
 import { CurrentUser } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
+import { AuthGuard } from 'src/common/guards';
 import { S3Client } from 'src/common/s3';
+import { TokenUser } from 'src/common/types';
 import configuration from 'src/config/configuration';
+import { Post } from 'src/posts/contracts';
+import { PostsLoader } from 'src/posts/posts.dataloader';
+import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
+import { PaymentMethod, User } from './contracts';
 import {
   AddCreditCardInput,
   AddressInput,
   UpdateUserInfoInput,
 } from './contracts/inputs';
-import { PostsLoader } from 'src/posts/posts.dataloader';
 import { UsersLoader } from './users.dataloaders';
+import { UsersService } from './users.service';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -31,6 +32,7 @@ export class UsersResolver {
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
     private readonly postsLoader: PostsLoader,
+    private readonly postsService: PostsService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -73,31 +75,31 @@ export class UsersResolver {
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => User)
+  @Mutation(() => Post)
   async savePost(
     @Args('postId') postId: string,
     @CurrentUser() user: TokenUser,
-  ): Promise<User> {
+  ): Promise<Post> {
     await this.usersService.upsertSavedPost({
       user: user._id,
       post: postId,
       saved: true,
     });
-    return this.usersService.findById(user._id);
+    return this.postsService.findById(postId);
   }
 
   @UseGuards(AuthGuard)
-  @Mutation(() => User)
+  @Mutation(() => Post)
   async unsavePost(
     @Args('postId') postId: string,
     @CurrentUser() user: TokenUser,
-  ): Promise<User> {
+  ): Promise<Post> {
     await this.usersService.upsertSavedPost({
       user: user._id,
       post: postId,
       saved: false,
     });
-    return this.usersService.findById(user._id);
+    return this.postsService.findById(postId);
   }
 
   @UseGuards(AuthGuard)
