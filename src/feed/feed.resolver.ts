@@ -23,9 +23,10 @@ export class FeedResolver {
     const posts = await this.postsService.findManyByIds(
       feedPosts.map(f => f.post),
     );
-    const orderedPosts = feedPosts.map(feedPost =>
-      posts.find(post => post._id === feedPost.post),
-    );
+    const orderedPosts = feedPosts.map(feedPost => ({
+      feedPost,
+      post: posts.find(post => post._id === feedPost.post),
+    }));
     const postsCount = await this.feedService.countAfter(date);
     const connection = fromPostsToConnection(
       orderedPosts,

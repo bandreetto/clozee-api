@@ -9,6 +9,9 @@ export class Feed {
 
   @Prop()
   post: string;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const FeedSchema = SchemaFactory.createForClass(Feed);

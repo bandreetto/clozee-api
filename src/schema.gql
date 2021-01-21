@@ -290,8 +290,8 @@ type Query {
 }
 
 type Mutation {
-  savePost(postId: String!): User!
-  unsavePost(postId: String!): User!
+  savePost(postId: String!): Post!
+  unsavePost(postId: String!): Post!
   updateUserInfo(input: UpdateUserInfoInput!): User!
   updateAddress(address: AddressInput!): User!
 
