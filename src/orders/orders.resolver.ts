@@ -1,6 +1,8 @@
 import {
   BadRequestException,
+  HttpStatus,
   UnauthorizedException,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -120,9 +122,35 @@ export class OrdersResolver {
     return order;
   }
 
+  @UseGuards(AuthGuard)
   @Query(() => DeliveryInfo)
-  deliveryInfo(): Promise<DeliveryInfo> {
-    return this.correiosService.getDeliveryPriceAndTime();
+  async deliveryInfo(
+    @Args('seller') sellerId: string,
+    @CurrentUser() tokenUser: TokenUser,
+  ): Promise<DeliveryInfo> {
+    if (sellerId === tokenUser._id)
+      throw new BadRequestException({
+        message: 'Seller cannot be the current user.',
+      });
+
+    const [seller, buyer] = await this.usersService.findManyByIds([
+      sellerId,
+      tokenUser._id,
+    ]);
+    if (!seller.address?.zipCode)
+      throw new UnprocessableEntityException({
+        message: 'Seller must have an address with zipCode.',
+        sellerId,
+      });
+    if (!buyer.address?.zipCode)
+      throw new UnprocessableEntityException({
+        message: 'Requesting user must have an address with zipCode.',
+        userId: tokenUser._id,
+      });
+    return this.correiosService.getDeliveryPriceAndTime(
+      seller.address.zipCode,
+      buyer.address.zipCode,
+    );
   }
 
   @ResolveField()

@@ -281,7 +281,7 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
-  deliveryInfo: DeliveryInfo!
+  deliveryInfo(seller: String!): DeliveryInfo!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""

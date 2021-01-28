@@ -18,3 +18,7 @@ export interface CorreiosResponse {
 export interface CorreiosValue {
   _text: string;
 }
+
+export enum CORREIOS_SERVICE_CODES {
+  PAC = '04510',
+}
