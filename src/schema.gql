@@ -205,7 +205,7 @@ type Order {
 
 type DeliveryInfo {
   """The delivery fare in Reais."""
-  price: Float!
+  price: String!
 
   """The expected delivery time in business days."""
   deliveryTime: Int!

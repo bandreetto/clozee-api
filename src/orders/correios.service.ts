@@ -11,7 +11,7 @@ export class CorreiosService {
     const xmlResponse = await this.httpClient
       .get('http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx', {
         params: {
-          sCepOrigem: '09751040',
+          sCepOrigem: '70002900',
           sCepDestino: '04547000',
           nVlPeso: 1,
           nCdFormato: 1,
@@ -31,7 +31,7 @@ export class CorreiosService {
       compact: true,
     }) as CorreiosResponse;
     return {
-      price: Number(result.Servicos.cServico.Valor._text.replace(',', '.')),
+      price: result.Servicos.cServico.Valor._text,
       deliveryTime: Number(result.Servicos.cServico.PrazoEntrega._text),
     };
   }
