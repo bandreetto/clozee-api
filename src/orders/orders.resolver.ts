@@ -25,7 +25,9 @@ import { UsersLoader } from 'src/users/users.dataloaders';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { Order, Sale } from './contracts';
+import { DeliveryInfo } from './contracts/delivery-info';
 import { CheckoutInput } from './contracts/inputs';
+import { CorreiosService } from './correios.service';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
@@ -41,6 +43,7 @@ export class OrdersResolver {
     private readonly countersService: CountersService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
+    private readonly correiosService: CorreiosService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -115,6 +118,11 @@ export class OrdersResolver {
     });
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
+  }
+
+  @Query(() => DeliveryInfo)
+  deliveryInfo(): Promise<DeliveryInfo> {
+    return this.correiosService.getDeliveryPriceAndTime();
   }
 
   @ResolveField()

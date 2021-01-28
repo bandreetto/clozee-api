@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module, forwardRef, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CountersModule } from 'src/counters/counters.module';
 import { PostsModule } from 'src/posts/posts.module';
@@ -9,6 +9,7 @@ import { OrdersResolver } from './orders.resolver';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
+import { CorreiosService } from './correios.service';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SalesService } from './sales.service';
         schema: OrderSchema,
       },
     ]),
+    HttpModule,
     CountersModule,
     forwardRef(() => UsersModule),
     forwardRef(() => PostsModule),
@@ -32,6 +34,7 @@ import { SalesService } from './sales.service';
     OrdersResolver,
     OrdersService,
     OrdersLoader,
+    CorreiosService,
   ],
   exports: [SalesService, SalesLoader, OrdersService, OrdersLoader],
 })
