@@ -203,6 +203,14 @@ type Order {
   createdAt: DateTime!
 }
 
+type DeliveryInfo {
+  """The delivery fare in Reais."""
+  price: String!
+
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
+}
+
 type FeedPostEdge {
   node: Post!
 
@@ -273,6 +281,7 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
+  deliveryInfo(seller: String!): DeliveryInfo!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   UnauthorizedException,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -25,7 +26,9 @@ import { UsersLoader } from 'src/users/users.dataloaders';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { Order, Sale } from './contracts';
+import { DeliveryInfo } from './contracts/delivery-info';
 import { CheckoutInput } from './contracts/inputs';
+import { CorreiosService } from './correios.service';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
@@ -41,6 +44,7 @@ export class OrdersResolver {
     private readonly countersService: CountersService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
+    private readonly correiosService: CorreiosService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -115,6 +119,37 @@ export class OrdersResolver {
     });
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
+  }
+
+  @UseGuards(AuthGuard)
+  @Query(() => DeliveryInfo)
+  async deliveryInfo(
+    @Args('seller') sellerId: string,
+    @CurrentUser() tokenUser: TokenUser,
+  ): Promise<DeliveryInfo> {
+    if (sellerId === tokenUser._id)
+      throw new BadRequestException({
+        message: 'Seller cannot be the current user.',
+      });
+
+    const [seller, buyer] = await this.usersService.findManyByIds([
+      sellerId,
+      tokenUser._id,
+    ]);
+    if (!seller.address?.zipCode)
+      throw new UnprocessableEntityException({
+        message: 'Seller must have an address with zipCode.',
+        sellerId,
+      });
+    if (!buyer.address?.zipCode)
+      throw new UnprocessableEntityException({
+        message: 'Requesting user must have an address with zipCode.',
+        userId: tokenUser._id,
+      });
+    return this.correiosService.getDeliveryPriceAndTime(
+      seller.address.zipCode,
+      buyer.address.zipCode,
+    );
   }
 
   @ResolveField()
