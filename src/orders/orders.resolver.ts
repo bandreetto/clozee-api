@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
   UseGuards,
@@ -132,10 +133,13 @@ export class OrdersResolver {
         message: 'Seller cannot be the current user.',
       });
 
-    const [seller, buyer] = await this.usersService.findManyByIds([
-      sellerId,
-      tokenUser._id,
+    const [seller, buyer] = await Promise.all([
+      this.usersLoader.load(sellerId),
+      this.usersLoader.load(tokenUser._id),
     ]);
+    if (!seller)
+      throw new NotFoundException('Could not find a seller with this id.');
+
     if (!seller.address?.zipCode)
       throw new UnprocessableEntityException({
         message: 'Seller must have an address with zipCode.',
