@@ -44,14 +44,12 @@ export class UsersService {
     userId: string,
     newAddress: Partial<Address>,
   ): Promise<User> {
-    const fieldsToUpdate = Object.entries(newAddress)
-      .filter(([_key, value]) => value)
-      .reduce(
-        (acc, [key, value]) => ({ ...acc, [`address.${key}`]: value }),
-        {},
-      );
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(userId, { $set: fieldsToUpdate }, { new: true })
+      .findByIdAndUpdate(
+        userId,
+        { $set: { address: newAddress } },
+        { new: true },
+      )
       .lean<User>();
 
     return updatedUser as User;

@@ -15,13 +15,13 @@ export class Coordinates {
 @Schema({ _id: false })
 @ObjectType()
 export class Address {
-  @Prop({ required: true })
-  @Field()
-  street: string;
+  @Prop()
+  @Field({ nullable: true })
+  street?: string;
 
-  @Prop({ required: true })
-  @Field()
-  number: number;
+  @Prop()
+  @Field({ nullable: true })
+  number?: number;
 
   @Prop()
   @Field({ nullable: true })
@@ -35,17 +35,17 @@ export class Address {
   @Field({ nullable: true })
   zipCode?: string;
 
-  @Prop({ required: true })
-  @Field()
-  city: string;
+  @Prop()
+  @Field({ nullable: true })
+  city?: string;
 
-  @Prop({ required: true })
-  @Field()
-  state: string;
+  @Prop()
+  @Field({ nullable: true })
+  state?: string;
 
   @Prop()
   @Field(() => Coordinates, { nullable: true })
-  coordinates: Coordinates;
+  coordinates?: Coordinates;
 }
 
 export const CoordinatesSchema = SchemaFactory.createForClass(Coordinates);
