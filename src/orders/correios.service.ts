@@ -34,7 +34,7 @@ export class CorreiosService {
       compact: true,
     }) as CorreiosResponse;
     return {
-      price: result.Servicos.cServico.Valor._text,
+      price: Number(result.Servicos.cServico.Valor._text.replace(',', '')),
       deliveryTime: Number(result.Servicos.cServico.PrazoEntrega._text),
     };
   }
