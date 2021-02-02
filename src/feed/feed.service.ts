@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feed } from './contracts';
 import { Model, Document } from 'mongoose';
+import { FeedTags } from 'src/users/contracts/feed-tags';
 
 @Injectable()
 export class FeedService {
@@ -15,10 +16,20 @@ export class FeedService {
     return feed.toObject();
   }
 
-  async findSortedByDate(first: number, before: Date): Promise<Feed[]> {
+  async findSortedByDate(
+    first: number,
+    before: Date,
+    feedTags: FeedTags,
+  ): Promise<Feed[]> {
     return this.feedModel
       .find({
         ...(before ? { createdAt: { $lt: before } } : null),
+        ...(feedTags.sizes.length
+          ? { 'tags.size': { $in: feedTags.sizes } }
+          : null),
+        ...(feedTags.genders.length
+          ? { 'tags.gender': { $in: feedTags.genders } }
+          : null),
       })
       .sort({ createdAt: -1 })
       .limit(first)

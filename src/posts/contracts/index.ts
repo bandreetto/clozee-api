@@ -3,7 +3,7 @@ import { ObjectType, Field } from '@nestjs/graphql';
 import { User } from 'src/users/contracts';
 import { Comment } from 'src/comments/contracts';
 import { Category } from 'src/categories/contracts';
-import { POST_CONDITIONS } from './enums';
+import { POST_CONDITIONS, SIZES } from './enums';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -20,9 +20,11 @@ export class Post {
   @Field()
   title: string;
 
-  @Prop({ required: true })
-  @Field()
-  size: string;
+  @Prop({ type: SIZES, required: true })
+  @Field(() => SIZES, {
+    description: 'Size of the product being announced on this post.',
+  })
+  size: SIZES;
 
   @Prop()
   @Field({ nullable: true })

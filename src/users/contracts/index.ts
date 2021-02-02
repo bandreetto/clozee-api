@@ -10,6 +10,7 @@ import { Address, AddressSchema } from './address';
 import { Post } from 'src/posts/contracts';
 import { PaymentMethod } from './payment-method';
 import { BankInfo, BankInfoSchema } from './bank-info';
+import { FeedTags, FeedTagsSchema } from './feed-tags';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -56,6 +57,11 @@ export class User {
   @Field(() => Address, { nullable: true })
   address?: Address;
 
+  @Prop({ type: FeedTagsSchema })
+  @Field(() => FeedTags, { description: "Tags used to customize user's feed." })
+  feedTags?: FeedTags;
+
+  @Field()
   @Prop()
   deviceToken?: string;
 

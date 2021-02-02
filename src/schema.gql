@@ -24,13 +24,13 @@ type Coordinates {
 }
 
 type Address {
-  street: String!
-  number: Float!
+  street: String
+  number: Float
   complement: String
   district: String
   zipCode: String
-  city: String!
-  state: String!
+  city: String
+  state: String
   coordinates: Coordinates
 }
 
@@ -117,7 +117,9 @@ type Post {
   _id: String!
   user: User!
   title: String!
-  size: String!
+
+  """Size of the product being announced on this post."""
+  size: SIZES!
   description: String
 
   """An array of urls for post images."""
@@ -151,12 +153,34 @@ type Post {
   createdAt: DateTime!
 }
 
+"""Possible product sizes"""
+enum SIZES {
+  P
+  M
+  G
+}
+
 """Possible post's product conditions."""
 enum POST_CONDITIONS {
   NEW
   USED_NEW
   USED_GOOD
   USED_FAIR
+}
+
+type FeedTags {
+  """User sizes preferences."""
+  sizes: [SIZES!]!
+
+  """User clothing model preference."""
+  genders: [GENDER_TAGS!]
+}
+
+"""Possible gender tags to be used on feed customization."""
+enum GENDER_TAGS {
+  MALE
+  FEMALE
+  NEUTRAL
 }
 
 type User {
@@ -171,6 +195,10 @@ type User {
   username: String!
   avatar: String
   address: Address
+
+  """Tags used to customize user's feed."""
+  feedTags: FeedTags!
+  deviceToken: String!
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
@@ -204,8 +232,8 @@ type Order {
 }
 
 type DeliveryInfo {
-  """The delivery fare in Reais."""
-  price: String!
+  """The delivery fare in cents."""
+  price: Int!
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
@@ -289,6 +317,8 @@ type Query {
   ): [Post!]!
   banks: [Bank!]!
   feed(
+    tags: FeedTagsInput
+
     """The first N elements to return after the cursor."""
     first: Float!
 
@@ -298,7 +328,16 @@ type Query {
   notifications: [Notification!]!
 }
 
+input FeedTagsInput {
+  """User's preferred sizes."""
+  sizes: [SIZES!]!
+
+  """Users prefered clothing models."""
+  genders: [GENDER_TAGS!]!
+}
+
 type Mutation {
+  updateUserFeedTags(tags: FeedTagsInput!): User!
   savePost(postId: String!): Post!
   unsavePost(postId: String!): Post!
   updateUserInfo(input: UpdateUserInfoInput!): User!
@@ -410,7 +449,7 @@ input CheckoutInput {
 
 input AddPostInput {
   title: String!
-  size: String!
+  size: SIZES!
   description: String!
 
   """An array of urls for post images."""

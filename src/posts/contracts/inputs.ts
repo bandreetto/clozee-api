@@ -1,13 +1,13 @@
 import { InputType, Field, Int } from '@nestjs/graphql';
-import { POST_CONDITIONS } from './enums';
+import { POST_CONDITIONS, SIZES } from './enums';
 
 @InputType()
 export class AddPostInput {
   @Field()
   title: string;
 
-  @Field()
-  size: string;
+  @Field(() => SIZES)
+  size: SIZES;
 
   @Field()
   description: string;
@@ -46,7 +46,7 @@ export class UpdatePostFields {
   price?: number;
 
   @Field({ nullable: true })
-  size?: string;
+  size?: SIZES;
 
   @Field(() => [String], {
     nullable: true,
