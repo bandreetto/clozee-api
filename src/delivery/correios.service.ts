@@ -1,7 +1,9 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { xml2js } from 'xml-js';
-import { DeliveryInfo } from './contracts/delivery-info';
-import { CorreiosResponse, CORREIOS_SERVICE_CODES } from './contracts/dtos';
+import {
+  CorreiosResponse,
+  CORREIOS_SERVICE_CODES,
+} from '../orders/contracts/dtos';
 
 @Injectable()
 export class CorreiosService {
@@ -10,7 +12,7 @@ export class CorreiosService {
   async getDeliveryPriceAndTime(
     originCpf: string,
     destinationCpf: string,
-  ): Promise<DeliveryInfo> {
+  ): Promise<{ price: number; deliveryTime: number }> {
     const xmlResponse = await this.httpClient
       .get('http://ws.correios.com.br/calculador/CalcPrecoPrazo.aspx', {
         params: {

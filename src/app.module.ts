@@ -21,6 +21,7 @@ import { CountersModule } from './counters/counters.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { JwtService } from '@nestjs/jwt';
 import { LikesModule } from './likes/likes.module';
+import { DeliveryModule } from './delivery/delivery.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { LikesModule } from './likes/likes.module';
     CountersModule,
     NotificationsModule,
     LikesModule,
+    DeliveryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
