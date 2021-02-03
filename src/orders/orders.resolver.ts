@@ -27,12 +27,11 @@ import { UsersLoader } from 'src/users/users.dataloaders';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { Order, Sale } from './contracts';
-import { DeliveryInfo } from './contracts/delivery-info';
 import { CheckoutInput } from './contracts/inputs';
-import { CorreiosService } from './correios.service';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
+import { DeliveryService } from 'src/delivery/delivery.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -45,7 +44,7 @@ export class OrdersResolver {
     private readonly countersService: CountersService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
-    private readonly correiosService: CorreiosService,
+    private readonly deliveryService: DeliveryService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -104,6 +103,25 @@ export class OrdersResolver {
         'You can only buy posts from the same seller in a checkout.',
       );
 
+    const seller = await this.usersService.findById(posts[0].user as string);
+    const delivery = await this.deliveryService.findById(
+      `${user._id}:${seller._id}`,
+    );
+    if (!delivery)
+      throw new BadRequestException({
+        message:
+          'No delivery info found for this buyer and seller. Create a delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
+        buyer: user._id,
+        seller: posts[0].user,
+      });
+    if (
+      delivery.buyersZipCode !== user.address.zipCode ||
+      delivery.sellersZipCode !== seller.address.zipCode
+    )
+      throw new BadRequestException(
+        'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
+      );
+
     const orderId = v4();
     const newSales: Sale[] = input.posts.map(post => ({
       _id: v4(),
@@ -116,44 +134,15 @@ export class OrdersResolver {
       number: await this.countersService.getCounterAndIncrement('orders'),
       buyer: user._id,
       paymentMethod: paymentMethod._id,
-      address: user.address,
+      buyersAddress: user.address,
+      sellersAddress: seller.address,
+      deliveryInfo: {
+        price: delivery.price,
+        deliveryTime: delivery.deliveryTime,
+      },
     });
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
-  }
-
-  @UseGuards(AuthGuard)
-  @Query(() => DeliveryInfo)
-  async deliveryInfo(
-    @Args('seller') sellerId: string,
-    @CurrentUser() tokenUser: TokenUser,
-  ): Promise<DeliveryInfo> {
-    if (sellerId === tokenUser._id)
-      throw new BadRequestException({
-        message: 'Seller cannot be the current user.',
-      });
-
-    const [seller, buyer] = await Promise.all([
-      this.usersLoader.load(sellerId),
-      this.usersLoader.load(tokenUser._id),
-    ]);
-    if (!seller)
-      throw new NotFoundException('Could not find a seller with this id.');
-
-    if (!seller.address?.zipCode)
-      throw new UnprocessableEntityException({
-        message: 'Seller must have an address with zipCode.',
-        sellerId,
-      });
-    if (!buyer.address?.zipCode)
-      throw new UnprocessableEntityException({
-        message: 'Requesting user must have an address with zipCode.',
-        userId: tokenUser._id,
-      });
-    return this.correiosService.getDeliveryPriceAndTime(
-      seller.address.zipCode,
-      buyer.address.zipCode,
-    );
   }
 
   @ResolveField()
@@ -172,6 +161,16 @@ export class OrdersResolver {
 
   @ResolveField()
   async total(@Root() order: Order): Promise<number> {
+    const sales = await this.salesLoader.byOrder.load(order._id);
+    const posts = (await this.postsLoader.loadMany(
+      sales.map(s => s.post as string),
+    )) as Post[];
+    const postsTotal = posts.reduce((total, post) => total + post.price, 0);
+    return postsTotal + order.deliveryInfo.price;
+  }
+
+  @ResolveField()
+  async itemsPrice(@Root() order: Order): Promise<number> {
     const sales = await this.salesLoader.byOrder.load(order._id);
     const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),

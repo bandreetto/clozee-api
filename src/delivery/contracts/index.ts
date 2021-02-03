@@ -1,9 +1,20 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ _id: false })
+@Schema({ timestamps: true })
 @ObjectType()
-export class DeliveryInfo {
+export class Delivery {
+  @Prop()
+  _id: string;
+
+  @Prop({ required: true })
+  @Field()
+  buyersZipCode: string;
+
+  @Prop({ required: true })
+  @Field()
+  sellersZipCode: string;
+
   @Prop({ required: true })
   @Field(() => Int, { description: 'The delivery fare in cents.' })
   price: number;
@@ -15,4 +26,4 @@ export class DeliveryInfo {
   deliveryTime: number;
 }
 
-export const DeliveryInfoSchema = SchemaFactory.createForClass(DeliveryInfo);
+export const DeliverySchema = SchemaFactory.createForClass(Delivery);

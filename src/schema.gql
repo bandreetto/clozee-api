@@ -216,19 +216,15 @@ type PageInfo {
   hasNextPage: Boolean!
 }
 
-type Order {
-  _id: String!
-  number: Int!
-  buyer: User!
-  paymentMethod: String!
-  address: Address!
+type Delivery {
+  buyersZipCode: String!
+  sellersZipCode: String!
 
-  """The posts of this order."""
-  posts: [Post!]!
+  """The delivery fare in cents."""
+  price: Int!
 
-  """The total price of this order in cents."""
-  total: Float!
-  createdAt: DateTime!
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
 }
 
 type DeliveryInfo {
@@ -237,6 +233,26 @@ type DeliveryInfo {
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
+}
+
+type Order {
+  _id: String!
+  number: Int!
+  buyer: User!
+  paymentMethod: String!
+  buyersAddress: Address!
+  sellersAddress: Address!
+  deliveryInfo: DeliveryInfo!
+
+  """The posts of this order."""
+  posts: [Post!]!
+
+  """The total price of this order in cents."""
+  total: Float!
+
+  """The sum of the post's prices for this order."""
+  itemsPrice: Float!
+  createdAt: DateTime!
 }
 
 type FeedPostEdge {
@@ -309,7 +325,6 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
-  deliveryInfo(seller: String!): DeliveryInfo!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
@@ -353,6 +368,11 @@ type Mutation {
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
   addComment(input: AddCommentInput!): Comment!
+
+  """
+  Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
+  """
+  deliveryInfo(seller: String!): Delivery!
   checkout(input: CheckoutInput!): Order!
   likePost(postId: String!): Post!
   unlikePost(postId: String!): Post!
