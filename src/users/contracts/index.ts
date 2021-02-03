@@ -57,7 +57,7 @@ export class User {
   @Field(() => Address, { nullable: true })
   address?: Address;
 
-  @Prop({ type: FeedTagsSchema })
+  @Prop({ type: FeedTagsSchema, default: {} })
   @Field(() => FeedTags, { description: "Tags used to customize user's feed." })
   feedTags?: FeedTags;
 

@@ -1,4 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { FeedTagsInput } from 'src/users/contracts/inputs';
 
 @InputType()
 export class SignUpInput {
@@ -8,4 +9,9 @@ export class SignUpInput {
   password: string;
   @Field({ nullable: true })
   avatarUrl: string;
+  @Field(() => FeedTagsInput, {
+    nullable: true,
+    description: "Tags used to customize user's feed",
+  })
+  feedTags: FeedTagsInput;
 }

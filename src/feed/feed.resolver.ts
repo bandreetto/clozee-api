@@ -23,7 +23,6 @@ export class FeedResolver {
   async feed(
     @Args() args: PaginationArgs,
     @Args('tags', { nullable: true }) feedTags: FeedTagsInput,
-    @CurrentUser() tokenUser: TokenUser,
   ): Promise<FeedPostConnection> {
     let date: Date;
     if (args.after) {
@@ -31,10 +30,7 @@ export class FeedResolver {
       date = new Date(decodedCursor);
     }
     let tags: FeedTags;
-    if (tokenUser) {
-      const user = await this.usersService.findById(tokenUser._id);
-      tags = user.feedTags;
-    } else if (feedTags) {
+    if (feedTags) {
       tags = feedTags;
     } else {
       tags = {
