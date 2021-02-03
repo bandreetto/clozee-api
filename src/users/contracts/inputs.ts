@@ -1,5 +1,6 @@
 import { Field, Float, InputType } from '@nestjs/graphql';
-import { ACCOUNT_TYPES } from './enum';
+import { SIZES } from 'src/posts/contracts/enums';
+import { ACCOUNT_TYPES, GENDER_TAGS } from './enum';
 
 @InputType()
 export class CoordinatesInput {
@@ -96,4 +97,15 @@ export class UpdateUserInfoInput {
 
   @Field({ nullable: true, description: "The user's banking info." })
   bankInfo?: BankInfoInput;
+}
+
+@InputType()
+export class FeedTagsInput {
+  @Field(() => [SIZES], { description: "User's preferred sizes." })
+  sizes: SIZES[];
+
+  @Field(() => [GENDER_TAGS], {
+    description: 'Users prefered clothing models.',
+  })
+  genders: GENDER_TAGS[];
 }

@@ -7,7 +7,7 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
-import { descend, sort } from 'ramda';
+import { descend, sort, uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { S3Client } from 'src/common/s3';
@@ -18,10 +18,12 @@ import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
 import { PaymentMethod, User } from './contracts';
+import { FeedTags } from './contracts/feed-tags';
 import {
   AddCreditCardInput,
   AddressInput,
   UpdateUserInfoInput,
+  FeedTagsInput,
 } from './contracts/inputs';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
@@ -72,6 +74,22 @@ export class UsersResolver {
       return [...usersResult, ...expandedSearch];
     }
     return usersResult;
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  updateUserFeedTags(
+    @Args('tags') tagsInput: FeedTagsInput,
+    @CurrentUser() { _id }: TokenUser,
+  ): Promise<User> {
+    const feedTags: FeedTags = {
+      sizes: uniq(tagsInput.sizes),
+      genders: uniq(tagsInput.genders),
+    };
+
+    return this.usersService.updateUser(_id, {
+      feedTags,
+    });
   }
 
   @UseGuards(AuthGuard)
