@@ -86,6 +86,28 @@ enum ACCOUNT_TYPES {
   JOINT_SAVINGS
 }
 
+type FeedTags {
+  """User sizes preferences."""
+  sizes: [SIZES!]!
+
+  """User clothing model preference."""
+  genders: [GENDER_TAGS!]
+}
+
+"""Possible product sizes"""
+enum SIZES {
+  P
+  M
+  G
+}
+
+"""Possible gender tags to be used on feed customization."""
+enum GENDER_TAGS {
+  MALE
+  FEMALE
+  NEUTRAL
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -153,34 +175,12 @@ type Post {
   createdAt: DateTime!
 }
 
-"""Possible product sizes"""
-enum SIZES {
-  P
-  M
-  G
-}
-
 """Possible post's product conditions."""
 enum POST_CONDITIONS {
   NEW
   USED_NEW
   USED_GOOD
   USED_FAIR
-}
-
-type FeedTags {
-  """User sizes preferences."""
-  sizes: [SIZES!]!
-
-  """User clothing model preference."""
-  genders: [GENDER_TAGS!]
-}
-
-"""Possible gender tags to be used on feed customization."""
-enum GENDER_TAGS {
-  MALE
-  FEMALE
-  NEUTRAL
 }
 
 type User {
@@ -507,6 +507,9 @@ input SignUpInput {
   username: String!
   password: String!
   avatarUrl: String
+
+  """Tags used to customize user's feed"""
+  feedTags: FeedTagsInput
 }
 
 type Subscription {

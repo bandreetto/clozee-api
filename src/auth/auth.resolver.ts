@@ -60,6 +60,7 @@ export class AuthResolver {
       avatar:
         input.avatarUrl ||
         `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
+      feedTags: input.feedTags,
     });
     const salt = randomBytes(SALT_LEN);
     const passwordHash = scryptSync(
