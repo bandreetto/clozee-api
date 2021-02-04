@@ -3,6 +3,7 @@ export * from './saved-post';
 export * from './payment-method';
 export * from './bank';
 export * from './bank-info';
+export * from './feed-tags';
 
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field } from '@nestjs/graphql';

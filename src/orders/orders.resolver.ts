@@ -1,8 +1,6 @@
 import {
   BadRequestException,
-  NotFoundException,
   UnauthorizedException,
-  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';

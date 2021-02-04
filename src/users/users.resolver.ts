@@ -17,8 +17,7 @@ import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
-import { PaymentMethod, User } from './contracts';
-import { FeedTags } from './contracts/feed-tags';
+import { PaymentMethod, User, FeedTags } from './contracts';
 import {
   AddCreditCardInput,
   AddressInput,

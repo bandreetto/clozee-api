@@ -17,7 +17,6 @@ import { FeedService } from './feed.service';
       },
     ]),
     PostsModule,
-    UsersModule,
     CategoriesModule,
   ],
   providers: [FeedResolver, FeedService, FeedConsumer],

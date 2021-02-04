@@ -6,7 +6,7 @@ import { Post } from 'src/posts/contracts';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { LikesService } from './likes.service';
 import { PostsService } from '../posts/posts.service';
-import { Like } from './contracts/index';
+import { Like } from './contracts';
 
 @Resolver(() => Like)
 export class LikesResolver {

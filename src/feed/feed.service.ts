@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feed } from './contracts';
 import { Model, Document } from 'mongoose';
-import { FeedTags } from 'src/users/contracts/feed-tags';
+import { FeedTags } from 'src/users/contracts';
 
 @Injectable()
 export class FeedService {

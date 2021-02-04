@@ -1,12 +1,10 @@
 import { Args, Resolver, Query } from '@nestjs/graphql';
-import { CurrentUser } from 'src/common/decorators';
-import { PaginationArgs, TokenUser } from 'src/common/types';
+import { PaginationArgs } from 'src/common/types';
 import { SIZES } from 'src/posts/contracts/enums';
 import { PostsService } from 'src/posts/posts.service';
+import { FeedTags } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
-import { FeedTags } from 'src/users/contracts/feed-tags';
 import { FeedTagsInput } from 'src/users/contracts/inputs';
-import { UsersService } from 'src/users/users.service';
 import { FeedPostConnection } from './contracts';
 import { fromPostsToConnection } from './feed.logic';
 import { FeedService } from './feed.service';
@@ -16,7 +14,6 @@ export class FeedResolver {
   constructor(
     private postsService: PostsService,
     private feedService: FeedService,
-    private usersService: UsersService,
   ) {}
 
   @Query(() => FeedPostConnection)
