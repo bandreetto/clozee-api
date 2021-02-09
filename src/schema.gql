@@ -225,6 +225,7 @@ type PageInfo {
 }
 
 type Delivery {
+  _id: String!
   buyersZipCode: String!
   sellersZipCode: String!
 
@@ -380,7 +381,7 @@ type Mutation {
   """
   Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
   """
-  deliveryInfo(seller: String!): Delivery!
+  updateDeliveryInfo(seller: String!): Delivery!
   checkout(input: CheckoutInput!): Order!
   likePost(postId: String!): Post!
   unlikePost(postId: String!): Post!
@@ -473,6 +474,9 @@ input CheckoutInput {
 
   """The id of the user's payment method to use on the checkout."""
   paymentMethodId: String!
+
+  """The id of the delivery info for this checkout."""
+  deliveryInfoId: String!
 }
 
 input AddPostInput {
