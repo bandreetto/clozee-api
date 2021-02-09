@@ -98,6 +98,7 @@ export class NotificationsConsumer {
         message:
           'Skipping push notification as seller does not have a device token registered.',
         sellerId: seller._id,
+        order: payload.order.number,
       });
     const fcmNotifications = payload.posts.map(post => ({
       token: seller.deviceToken,
