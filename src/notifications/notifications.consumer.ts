@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PubSub } from 'graphql-subscriptions';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
@@ -13,6 +13,8 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class NotificationsConsumer {
+  logger = new Logger(NotificationsConsumer.name);
+
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly commentsService: CommentsService,
@@ -54,15 +56,16 @@ export class NotificationsConsumer {
       ...createdNotifications.map(t => t.user),
     ]);
     const taggingUser = users.find(user => user._id === payload.comment.user);
-    admin.messaging().sendAll(
-      createdNotifications.map(notification => ({
-        token: users.find(user => user._id === notification.user).deviceToken,
-        notification: {
-          title: `@${taggingUser.username} marcou você em um comentário`,
-          body: payload.comment.body,
-        },
-      })),
-    );
+    await admin.messaging().sendMulticast({
+      tokens: users
+        .filter(u => createdNotifications.map(n => n.user).includes(u._id))
+        .map(u => u.deviceToken),
+      notification: {
+        title: `@${taggingUser.username} marcou você em um comentário`,
+        body: payload.comment.body,
+      },
+      android: { priority: 'high' },
+    });
   }
 
   @OnEvent('order.created')
@@ -90,20 +93,26 @@ export class NotificationsConsumer {
      * Push Notifications
      */
     const seller = await this.usersService.findById(sellerId);
-    admin.messaging().sendAll(
-      payload.posts.map(post => ({
-        token: seller.deviceToken,
+    if (!seller.deviceToken)
+      return this.logger.warn({
+        message:
+          'Skipping push notification as seller does not have a device token registered.',
+        sellerId: seller._id,
+      });
+    const fcmNotifications = payload.posts.map(post => ({
+      token: seller.deviceToken,
+      notification: {
+        title: 'Parabéns! Você realizou uma venda!',
+        body: `O post ${post.title} foi vendido!`,
+      },
+      android: {
         notification: {
-          title: 'Parabéns! Você realizou uma venda!',
-          body: `O post ${post.title} foi vendido!`,
+          imageUrl: post.images[0],
         },
-        android: {
-          notification: {
-            imageUrl: post.images[0],
-          },
-        },
-      })),
-    );
+        priority: 'high' as const,
+      },
+    }));
+    await admin.messaging().sendAll(fcmNotifications);
   }
 
   @OnEvent('post.deleted')
