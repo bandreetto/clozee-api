@@ -5,6 +5,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 @ObjectType()
 export class Delivery {
   @Prop()
+  @Field()
   _id: string;
 
   @Prop({ required: true })

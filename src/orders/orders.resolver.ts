@@ -102,9 +102,7 @@ export class OrdersResolver {
       );
 
     const seller = await this.usersService.findById(posts[0].user as string);
-    const delivery = await this.deliveryService.findById(
-      `${user._id}:${seller._id}`,
-    );
+    const delivery = await this.deliveryService.findById(input.deliveryInfoId);
     if (!delivery)
       throw new BadRequestException({
         message:

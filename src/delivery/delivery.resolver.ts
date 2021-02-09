@@ -26,7 +26,7 @@ export class DeliveryResolver {
     description:
       'Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.',
   })
-  async deliveryInfo(
+  async updateDeliveryInfo(
     @Args('seller') sellerId: string,
     @CurrentUser() tokenUser: TokenUser,
   ): Promise<Delivery> {
