@@ -5,8 +5,8 @@ import { PostsService } from 'src/posts/posts.service';
 import { FeedTags } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
 import { FeedTagsInput } from 'src/users/contracts/inputs';
-import { FeedPostConnection } from './contracts';
-import { fromPostsToConnection } from './feed.logic';
+import { Feed, FeedPostConnection } from './contracts';
+import { decodeCursor, fromPostsToConnection } from './feed.logic';
 import { FeedService } from './feed.service';
 
 @Resolver()
@@ -20,11 +20,11 @@ export class FeedResolver {
   async feed(
     @Args() args: PaginationArgs,
     @Args('tags', { nullable: true }) feedTags: FeedTagsInput,
+    @Args('searchTerm', { nullable: true }) searchTerm: string,
   ): Promise<FeedPostConnection> {
-    let date: Date;
+    let date: Date, score: number;
     if (args.after) {
-      const decodedCursor = Buffer.from(args.after, 'base64').toString();
-      date = new Date(decodedCursor);
+      [date, score] = decodeCursor(args.after);
     }
     let tags: FeedTags;
     if (feedTags) {
@@ -36,11 +36,25 @@ export class FeedResolver {
       };
     }
 
-    const feedPosts = await this.feedService.findSortedByDate(
-      args.first,
-      date,
-      tags,
-    );
+    let feedPosts: Feed[], postsCount: number;
+    if (searchTerm) {
+      [feedPosts, postsCount] = await Promise.all([
+        this.feedService.searchByTerm(
+          searchTerm,
+          tags,
+          args.first,
+          score,
+          date,
+        ),
+        this.feedService.countBySearchTerm(searchTerm, tags, score, date),
+      ]);
+    } else {
+      [feedPosts, postsCount] = await Promise.all([
+        this.feedService.findSortedByDate(args.first, date, tags),
+        this.feedService.countByDate(date, tags),
+      ]);
+    }
+
     const posts = await this.postsService.findManyByIds(
       feedPosts.map(f => f.post),
     );
@@ -48,7 +62,6 @@ export class FeedResolver {
       feedPost,
       post: posts.find(post => post._id === feedPost.post),
     }));
-    const postsCount = await this.feedService.countAfter(date);
     const connection = fromPostsToConnection(
       orderedPosts,
       postsCount - args.first > 0,
