@@ -8,11 +8,8 @@ export class Tags {
   size: SIZES;
   @Prop({ enum: Object.values(GENDER_TAGS), required: true })
   gender: GENDER_TAGS;
+  @Prop()
+  searchTerms: string[];
 }
 
 export const TagsSchema = SchemaFactory.createForClass(Tags);
-
-TagsSchema.index({
-  size: 1,
-  gender: 1,
-});

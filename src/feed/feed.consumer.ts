@@ -22,9 +22,10 @@ export class FeedConsumer {
       typeof payload.category === 'string'
         ? payload.category
         : payload.category._id;
-    const categoryAncestrals = await this.categoriesService.findCategoryParents(
-      categoryId,
-    );
+    const [category, categoryAncestrals] = await Promise.all([
+      this.categoriesService.findById(categoryId),
+      this.categoriesService.findCategoryParents(categoryId),
+    ]);
     const categoryAncestralsIds = categoryAncestrals.map(c => c._id);
 
     let gender: GENDER_TAGS;
@@ -40,6 +41,12 @@ export class FeedConsumer {
       tags: {
         size: payload.size,
         gender,
+        searchTerms: [
+          payload.title,
+          payload.description,
+          category.name,
+          ...categoryAncestrals.map(c => c.name),
+        ],
       },
     });
   }

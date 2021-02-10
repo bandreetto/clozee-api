@@ -341,6 +341,7 @@ type Query {
   ): [Post!]!
   banks: [Bank!]!
   feed(
+    searchTerm: String
     tags: FeedTagsInput
 
     """The first N elements to return after the cursor."""
