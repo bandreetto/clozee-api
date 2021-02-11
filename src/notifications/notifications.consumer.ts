@@ -10,6 +10,8 @@ import { NotificationsService } from './notifications.service';
 import { CommentsService } from '../comments/comments.service';
 import { admin } from 'src/common/firebase-admin';
 import { UsersService } from 'src/users/users.service';
+import { MailService } from './mail.service';
+import { formatEmailCurrency } from './notifications.logic';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -19,6 +21,7 @@ export class NotificationsConsumer {
     private readonly notificationsService: NotificationsService,
     private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
+    private readonly mailService: MailService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -53,7 +56,7 @@ export class NotificationsConsumer {
      */
     const users = await this.usersService.findManyByIds([
       payload.comment.user as string,
-      ...createdNotifications.map(t => t.user),
+      ...createdNotifications.map(n => n.user),
     ]);
     const taggingUser = users.find(user => user._id === payload.comment.user);
     await admin.messaging().sendMulticast({
@@ -89,10 +92,34 @@ export class NotificationsConsumer {
       notification: createdNotification,
     });
 
+    const seller = await this.usersService.findById(sellerId);
+    const buyer = await this.usersService.findById(
+      payload.order.buyer as string,
+    );
+    /**
+     * Emails
+     */
+    const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
+    this.mailService.sendSellerMail(
+      seller,
+      payload.order,
+      payload.posts,
+      subTotal,
+      0,
+      subTotal + payload.order.deliveryInfo.price,
+    );
+    this.mailService.sendBuyerEmail(
+      buyer,
+      payload.order,
+      payload.posts,
+      subTotal,
+      0,
+      subTotal + payload.order.deliveryInfo.price,
+    );
+
     /**
      * Push Notifications
      */
-    const seller = await this.usersService.findById(sellerId);
     if (!seller.deviceToken)
       return this.logger.warn({
         message:

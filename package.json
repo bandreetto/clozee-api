@@ -30,6 +30,7 @@
     "@nestjs/jwt": "^7.2.0",
     "@nestjs/mongoose": "^7.1.0",
     "@nestjs/platform-express": "^7.5.4",
+    "@sendgrid/client": "^7.4.2",
     "apollo-server-express": "^2.19.0",
     "aws-sdk": "^2.783.0",
     "class-transformer": "^0.3.0",

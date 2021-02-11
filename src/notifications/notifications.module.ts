@@ -17,6 +17,7 @@ import { NotificationsConsumer } from './notifications.consumer';
 import { NotificationsResolver } from './notifications.resolver';
 import { NotificationsService } from './notifications.service';
 import { SaleNotificationResolver } from './sale-notification.resolver';
+import { MailService } from './mail.service';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { SaleNotificationResolver } from './sale-notification.resolver';
       provide: 'PUB_SUB',
       useValue: new PubSub(),
     },
+    MailService,
   ],
 })
 export class NotificationsModule {}
