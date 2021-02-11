@@ -14,4 +14,7 @@ export default {
     privateKey: () => process.env.FIREBASE_PRIVATE_KEY,
     clientEmail: () => process.env.FIREBASE_CLIENT_EMAIL,
   },
+  sendgrid: {
+    key: () => process.env.SENDGRID_API_KEY,
+  },
 };
