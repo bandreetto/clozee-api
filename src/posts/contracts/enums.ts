@@ -24,6 +24,7 @@ export enum SIZES {
   s43 = '43',
   s44 = '44',
   s45 = '45',
+  other = 'other',
 }
 
 registerEnumType(SIZES, {
