@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
+import { ascend } from 'ramda';
 import { AuthGuard } from 'src/common/guards';
 import { CategoriesLoader } from './categories.dataloader';
 import { CategoriesService } from './categories.service';
@@ -22,8 +23,9 @@ export class CategoriesResolver {
   }
 
   @ResolveField()
-  children(@Root() category: Category) {
-    return this.categoriesLoader.byParent.load(category._id);
+  async children(@Root() category: Category) {
+    const categories = await this.categoriesLoader.byParent.load(category._id);
+    return categories.sort(ascend(cat => cat.name));
   }
 
   @ResolveField()

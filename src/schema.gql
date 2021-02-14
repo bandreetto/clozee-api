@@ -107,6 +107,7 @@ enum SIZES {
   s43
   s44
   s45
+  other
 }
 
 """Possible gender tags to be used on feed customization."""
