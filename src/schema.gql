@@ -96,9 +96,18 @@ type FeedTags {
 
 """Possible product sizes"""
 enum SIZES {
+  PP
   P
   M
   G
+  GG
+  GGG
+  unique
+  s33
+  s34
+  s35
+  s36
+  s37
   s38
   s39
   s40
@@ -107,6 +116,18 @@ enum SIZES {
   s43
   s44
   s45
+  s46
+  s48
+  s50
+  s52
+  s54
+  s56
+  s58
+  s60
+  s62
+  s64
+  s66
+  s68
   other
 }
 

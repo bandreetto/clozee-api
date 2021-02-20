@@ -13,9 +13,18 @@ registerEnumType(POST_CONDITIONS, {
 });
 
 export enum SIZES {
+  PP = 'PP',
   P = 'P',
   M = 'M',
   G = 'G',
+  GG = 'GG',
+  GGG = 'GGG',
+  unique = 'Único',
+  s33 = '33',
+  s34 = '34',
+  s35 = '35',
+  s36 = '36',
+  s37 = '37',
   s38 = '38',
   s39 = '39',
   s40 = '40',
@@ -24,7 +33,19 @@ export enum SIZES {
   s43 = '43',
   s44 = '44',
   s45 = '45',
-  other = 'other',
+  s46 = '46',
+  s48 = '48',
+  s50 = '50',
+  s52 = '52',
+  s54 = '54',
+  s56 = '56',
+  s58 = '58',
+  s60 = '60',
+  s62 = '62',
+  s64 = '64',
+  s66 = '66',
+  s68 = '68',
+  other = 'Outro',
 }
 
 registerEnumType(SIZES, {
