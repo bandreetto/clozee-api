@@ -96,39 +96,39 @@ type FeedTags {
 
 """Possible product sizes"""
 enum SIZES {
+  UNIQUE
   PP
   P
   M
   G
   GG
   GGG
-  unique
-  s33
-  s34
-  s35
-  s36
-  s37
-  s38
-  s39
-  s40
-  s41
-  s42
-  s43
-  s44
-  s45
-  s46
-  s48
-  s50
-  s52
-  s54
-  s56
-  s58
-  s60
-  s62
-  s64
-  s66
-  s68
-  other
+  S33
+  S34
+  S35
+  S36
+  S37
+  S38
+  S39
+  S40
+  S41
+  S42
+  S43
+  S44
+  S45
+  S46
+  S48
+  S50
+  S52
+  S54
+  S56
+  S58
+  S60
+  S62
+  S64
+  S66
+  S68
+  OTHER
 }
 
 """Possible gender tags to be used on feed customization."""
