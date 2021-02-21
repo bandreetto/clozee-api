@@ -1,25 +1,25 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { UsersModule } from './users/users.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { GraphQLModule } from '@nestjs/graphql';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { GraphQLModule } from '@nestjs/graphql';
+import { JwtService } from '@nestjs/jwt';
+import { MongooseModule } from '@nestjs/mongoose';
 import { join } from 'path';
-import { PostsModule } from './posts/posts.module';
-import { CommentsModule } from './comments/comments.module';
-import { FeedModule } from './feed/feed.module';
 import { AuthModule } from './auth/auth.module';
-import configuration from './config/configuration';
+import { CategoriesModule } from './categories/categories.module';
+import { CommentsModule } from './comments/comments.module';
 import {
   TokenMiddleware,
   WebSocketTokenMiddleware,
 } from './common/middlewares';
-import { CategoriesModule } from './categories/categories.module';
-import { OrdersModule } from './orders/orders.module';
+import configuration from './config/configuration';
 import { CountersModule } from './counters/counters.module';
-import { NotificationsModule } from './notifications/notifications.module';
-import { JwtService } from '@nestjs/jwt';
-import { LikesModule } from './likes/likes.module';
 import { DeliveryModule } from './delivery/delivery.module';
+import { FeedModule } from './feed/feed.module';
+import { LikesModule } from './likes/likes.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { OrdersModule } from './orders/orders.module';
+import { PostsModule } from './posts/posts.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [

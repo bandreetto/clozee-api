@@ -286,19 +286,6 @@ type Order {
   createdAt: DateTime!
 }
 
-type FeedPostEdge {
-  node: Post!
-
-  """An opaque cursor representing this edge position."""
-  cursor: String!
-}
-
-type FeedPostConnection {
-  """An array of post edges containing the node (Post) and its cursor."""
-  edges: [FeedPostEdge!]!
-  pageInfo: PageInfo!
-}
-
 type AuthResponse {
   """The token's owner user."""
   me: User!
@@ -310,6 +297,19 @@ type AuthResponse {
 
   """A long lived token, used to get a new access token."""
   refreshToken: String!
+}
+
+type FeedPostEdge {
+  node: Post!
+
+  """An opaque cursor representing this edge position."""
+  cursor: String!
+}
+
+type FeedPostConnection {
+  """An array of post edges containing the node (Post) and its cursor."""
+  edges: [FeedPostEdge!]!
+  pageInfo: PageInfo!
 }
 
 type CommentTagNotification implements Notification {
