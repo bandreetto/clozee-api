@@ -1,4 +1,5 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
+import { ascend } from 'ramda';
 import configuration from 'src/config/configuration';
 import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
@@ -27,7 +28,7 @@ export class MenvService {
       Authorization: `Bearer ${configuration.menv.token()}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'User-Agent': 'bruno@clozee.com.br',
+      'User-Agent': `${configuration.menv.contactMail()}`,
     },
   };
 
@@ -70,7 +71,9 @@ export class MenvService {
       }
 
       const cheapestDeliveryOption = response.data.sort(
-        (a, b) => fromPriceToNumber(a.price) - fromPriceToNumber(b.price),
+        ascend<MenvCalculateResponse>(option =>
+          fromPriceToNumber(option.price),
+        ),
       )[0];
 
       return {
@@ -85,7 +88,7 @@ export class MenvService {
         originZipCode,
         destinationZipCode,
       });
-      return { price: 15, deliveryTime: 15, id: null };
+      throw new Error('Internal error');
     }
   }
 

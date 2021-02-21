@@ -5,6 +5,7 @@ import { Delivery, DeliverySchema } from './contracts';
 import { CorreiosService } from './correios.service';
 import { DeliveryResolver } from './delivery.resolver';
 import { DeliveryService } from './delivery.service';
+import { MenvService } from './melhor-envio.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { DeliveryService } from './delivery.service';
     HttpModule,
     forwardRef(() => UsersModule),
   ],
-  providers: [DeliveryResolver, CorreiosService, DeliveryService],
+  providers: [DeliveryResolver, CorreiosService, DeliveryService, MenvService],
   exports: [DeliveryService],
 })
 export class DeliveryModule {}
