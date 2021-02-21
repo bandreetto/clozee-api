@@ -253,12 +253,19 @@ type Delivery {
 
   """The delivery fare in cents."""
   price: Int!
+  menvServiceNumber: Float!
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
 }
 
 type DeliveryInfo {
+  """The menv delivery orderId."""
+  menvDeliveryOrderId: Int!
+
+  """The delivery label URL."""
+  deliveryLabelUrl: String!
+
   """The delivery fare in cents."""
   price: Int!
 

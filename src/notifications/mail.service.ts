@@ -24,6 +24,7 @@ export class MailService {
     subTotal: number,
     taxes: number,
     total: number,
+    labelUrl: string,
   ): Promise<void> {
     await this.sgClient
       .request({
@@ -43,7 +44,7 @@ export class MailService {
                 recipient_name: seller.username,
                 recipient_full_name: seller.name,
                 recipient_phone_number: seller.phoneNumber,
-                recipient_address_line_1: `${seller.address.state}, ${seller.address.number}`,
+                recipient_address_line_1: `${seller.address.street}, ${seller.address.number}`,
                 recipient_address_line_2: `${seller.address.city} - ${seller.address.state} | ${seller.address.zipCode}`,
                 orderItems: soldPosts.map(post => ({
                   name: post.title,
@@ -55,6 +56,7 @@ export class MailService {
                 delivery_fee: formatEmailCurrency(order.deliveryInfo.price),
                 taxes: formatEmailCurrency(taxes),
                 total: formatEmailCurrency(total),
+                label_url: labelUrl,
               },
             },
           ],
@@ -103,7 +105,7 @@ export class MailService {
                 username: buyer.username,
                 full_name: buyer.name,
                 phone_number: buyer.phoneNumber,
-                address_line_1: `${buyer.address.state}, ${buyer.address.number}`,
+                address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
                 address_line_2: `${buyer.address.city} - ${buyer.address.state} | ${buyer.address.zipCode}`,
                 orderItems: boughtPosts.map(post => ({
                   name: post.title,

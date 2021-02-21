@@ -5,6 +5,14 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 @ObjectType()
 export class DeliveryInfo {
   @Prop({ required: true })
+  @Field(() => Int, { description: 'The menv delivery orderId.' })
+  menvDeliveryOrderId: string;
+
+  @Prop({ required: false, default: null })
+  @Field(() => String, { description: 'The delivery label URL.' })
+  deliveryLabelUrl?: string;
+
+  @Prop({ required: true })
   @Field(() => Int, { description: 'The delivery fare in cents.' })
   price: number;
 

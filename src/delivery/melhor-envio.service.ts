@@ -64,13 +64,13 @@ export class MenvService {
         )
         .toPromise();
 
-      const deliveryOptions = response.data;
+      const deliveryOptions = response.data.filter(o => !!o.price);
 
       if (!deliveryOptions || deliveryOptions.length === 0) {
         throw new Error('No delivery options');
       }
 
-      const cheapestDeliveryOption = response.data.sort(
+      const cheapestDeliveryOption = deliveryOptions.sort(
         ascend<MenvCalculateResponse>(option =>
           fromPriceToNumber(option.price),
         ),
@@ -93,14 +93,14 @@ export class MenvService {
   }
 
   async addToCart(
-    deliveryId: number,
+    serviceNumber: number,
     sender: User,
     adressee: User,
     posts: Post[],
     orderNumber: number,
   ): Promise<{ orderId: string }> {
-    if (!deliveryId) {
-      throw new Error('Delivery ID not provided');
+    if (!serviceNumber) {
+      throw new Error('Service number not provided');
     }
 
     if (!sender || !adressee) {
@@ -111,70 +111,71 @@ export class MenvService {
       throw new Error('Posts must be provided to checkout delivery');
     }
 
+    const data = {
+      service: serviceNumber,
+      from: {
+        name: sender.username,
+        phone: sender.phoneNumber,
+        email: sender.email,
+        document: sender.cpf,
+        address: sender.address.street,
+        complement: sender.address.complement,
+        number: sender.address.number,
+        district: sender.address.district,
+        city: sender.address.city,
+        country_id: 'BR',
+        postal_code: formatZipCode(sender.address.zipCode),
+        note: '',
+      },
+      to: {
+        name: adressee.username,
+        phone: adressee.phoneNumber,
+        email: adressee.email,
+        document: adressee.cpf,
+        address: adressee.address.street,
+        complement: adressee.address.complement,
+        number: adressee.address.number,
+        district: adressee.address.district,
+        city: adressee.address.city,
+        state_abbr: 'RS',
+        country_id: 'BR',
+        postal_code: formatZipCode(adressee.address.zipCode),
+        note: '',
+      },
+      products: posts.map(post => ({
+        name: post.title,
+        quantity: 1,
+        unitary_value: post.price,
+      })),
+      volumes: [
+        {
+          height: 30,
+          width: 30,
+          length: 30,
+          weight: 1,
+        },
+      ],
+      options: {
+        insurance_value: posts.reduce((acc, post) => acc + post.price, 0),
+        receipt: false,
+        own_hand: false,
+        reverse: false,
+        non_commercial: false,
+        platform: 'Clozee',
+        tags: [
+          {
+            tag: `Número do pedido: ${orderNumber}`,
+            url: null,
+          },
+        ],
+      },
+    };
+
     try {
       const response = await this.httpClient
         .post<MenvAddToCartResponse>(
           `${configuration.menv.apiUrl()}/me/cart`,
-          {
-            service: 1,
-            from: {
-              name: sender.username,
-              phone: sender.phoneNumber,
-              email: sender.email,
-              document: sender.cpf,
-              address: sender.address.street,
-              complement: sender.address.complement,
-              number: sender.address.number,
-              district: sender.address.district,
-              city: sender.address.city,
-              country_id: 'BR',
-              postal_code: sender.address.zipCode,
-              note: '',
-            },
-            to: {
-              name: adressee.username,
-              phone: adressee.phoneNumber,
-              email: adressee.email,
-              document: adressee.cpf,
-              address: adressee.address.street,
-              complement: adressee.address.complement,
-              number: adressee.address.number,
-              district: adressee.address.district,
-              city: adressee.address.city,
-              // TODO: state_abbr
-              state_abbr: 'RS',
-              country_id: 'BR',
-              postal_code: adressee.address.zipCode,
-              note: '',
-            },
-            products: posts.map(post => ({
-              name: post.title,
-              quantity: 1,
-              unitary_value: post.price,
-            })),
-            volumes: [
-              {
-                height: 30,
-                width: 30,
-                length: 30,
-                weight: 1,
-              },
-            ],
-            options: {
-              insurance_value: posts.reduce((acc, post) => acc + post.price, 0),
-              receipt: false,
-              own_hand: false,
-              reverse: false,
-              non_commercial: false,
-              platform: 'Clozee',
-              tags: [
-                {
-                  tag: `Número do pedido: ${orderNumber}`,
-                  url: null,
-                },
-              ],
-            },
-          },
+          data,
           this.requestConfig,
         )
         .toPromise();
@@ -182,7 +183,7 @@ export class MenvService {
       return { orderId: response.data.id };
     } catch (error) {
       this.logger.error({
-        message: 'Error while trying to checkout delivery',
+        message: 'Error while trying to add delivery to cart',
         error,
       });
       return { orderId: null };
@@ -259,6 +260,7 @@ export class MenvService {
         .post<{ url: string }>(
           `${configuration.menv.apiUrl()}/me/shipment/print`,
           {
+            mode: 'public',
             orders,
           },
           this.requestConfig,
