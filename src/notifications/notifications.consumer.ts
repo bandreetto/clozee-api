@@ -131,14 +131,16 @@ export class NotificationsConsumer {
       subTotal + payload.order.deliveryInfo.price,
     );
 
+    const sellerTaxes = subTotal * TAX_PERCENTAGE;
+
     if (labelUrl) {
       this.mailService.sendSellerMail(
         seller,
         payload.order,
         payload.posts,
         subTotal,
-        subTotal * TAX_PERCENTAGE,
-        subTotal + payload.order.deliveryInfo.price,
+        sellerTaxes,
+        subTotal + payload.order.deliveryInfo.price + sellerTaxes,
         labelUrl,
       );
     }
