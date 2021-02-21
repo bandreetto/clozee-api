@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { JwtService } from '@nestjs/jwt';
 import { LikesModule } from './likes/likes.module';
 import { DeliveryModule } from './delivery/delivery.module';
+import { MelhorEnvioModule } from './melhor-envio/melhor-envio.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { DeliveryModule } from './delivery/delivery.module';
     NotificationsModule,
     LikesModule,
     DeliveryModule,
+    MelhorEnvioModule,
   ],
 })
 export class AppModule {

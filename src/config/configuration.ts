@@ -17,4 +17,8 @@ export default {
   sendgrid: {
     key: () => process.env.SENDGRID_API_KEY,
   },
+  menv: {
+    apiUrl: () => process.env.MELHOR_ENVIO_API,
+    token: () => process.env.MELHOR_ENVIO_TOKEN,
+  },
 };
