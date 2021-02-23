@@ -8,13 +8,16 @@ export class Feed {
   @Prop()
   _id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   post: string;
 
   @Prop({ type: TagsSchema, required: true })
   tags: Tags;
 
-  score?: number;
+  @Prop({ required: true })
+  score: number;
+
+  searchScore?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }

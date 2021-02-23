@@ -26,4 +26,8 @@ export class CommentsService {
   async findManyByIds(commentIds: string[]): Promise<Comment[]> {
     return this.commentModel.find({ _id: { $in: commentIds } }).lean();
   }
+
+  async countByPost(postId: string): Promise<number> {
+    return this.commentModel.find({ post: postId }).count();
+  }
 }

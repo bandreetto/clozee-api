@@ -16,7 +16,7 @@ export class LikesLoader extends DataLoader<string, Like> {
 
   countByPost = new DataLoader<string, number>((postIds: string[]) =>
     this.likesService
-      .countByPost(postIds)
+      .countByPosts(postIds)
       .then(postCounts =>
         reconciliateByKey('_id', postIds, postCounts).map(p => p?.count || 0),
       ),

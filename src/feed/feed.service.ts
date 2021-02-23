@@ -18,6 +18,10 @@ export class FeedService {
     return feed.toObject();
   }
 
+  async findByPost(postId: string): Promise<Feed> {
+    return this.feedModel.findOne({ post: postId }).lean();
+  }
+
   async findSortedByDate(
     first: number,
     before: Date,
@@ -69,7 +73,7 @@ export class FeedService {
       },
       {
         $addFields: {
-          score: { $meta: 'searchScore' },
+          searchScore: { $meta: 'searchScore' },
         },
       },
       {
@@ -83,12 +87,12 @@ export class FeedService {
               ? tags.genders
               : Object.values(GENDER_TAGS),
           },
-          score: { $lt: maxScore },
+          searchScore: { $lt: maxScore },
         },
       },
       {
         $sort: {
-          score: -1,
+          searchScore: -1,
           createdAt: -1,
         },
       },
@@ -138,6 +142,12 @@ export class FeedService {
       },
     ]);
     return result?.searchCount || 0;
+  }
+
+  async updateScore(feedId: string, newScore: number): Promise<Feed> {
+    return this.feedModel
+      .findByIdAndUpdate(feedId, { $set: { score: newScore } })
+      .lean();
   }
 
   async deleteByPost(post: string): Promise<Feed> {

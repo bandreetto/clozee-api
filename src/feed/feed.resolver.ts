@@ -22,9 +22,9 @@ export class FeedResolver {
     @Args('tags', { nullable: true }) feedTags: FeedTagsInput,
     @Args('searchTerm', { nullable: true }) searchTerm: string,
   ): Promise<FeedPostConnection> {
-    let date: Date, score: number;
+    let date: Date, searchScore: number;
     if (args.after) {
-      [date, score] = decodeCursor(args.after);
+      [date, searchScore] = decodeCursor(args.after);
     }
     let tags: FeedTags;
     if (feedTags) {
@@ -43,10 +43,10 @@ export class FeedResolver {
           searchTerm,
           tags,
           args.first,
-          score,
+          searchScore,
           date,
         ),
-        this.feedService.countBySearchTerm(searchTerm, tags, score, date),
+        this.feedService.countBySearchTerm(searchTerm, tags, searchScore, date),
       ]);
     } else {
       [feedPosts, postsCount] = await Promise.all([

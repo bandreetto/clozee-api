@@ -17,7 +17,7 @@ export class LikesService {
     return this.likeModel.findByIdAndUpdate(_id, like, { upsert: true }).lean();
   }
 
-  async countByPost(
+  async countByPosts(
     postIds: string[],
   ): Promise<{ _id: string; count: number }[]> {
     return this.likeModel.aggregate([
