@@ -25,6 +25,7 @@ export class Feed {
 export const FeedSchema = SchemaFactory.createForClass(Feed);
 
 FeedSchema.index({
+  score: -1,
   createdAt: -1,
   'tags.size': 1,
   'tags.gender': 1,

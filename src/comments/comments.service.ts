@@ -28,6 +28,6 @@ export class CommentsService {
   }
 
   async countByPost(postId: string): Promise<number> {
-    return this.commentModel.find({ post: postId }).count();
+    return this.commentModel.find({ post: postId }).countDocuments();
   }
 }
