@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Document } from 'mongoose';
+import { Document, Model } from 'mongoose';
 import { Order } from './contracts';
 
 @Injectable()
@@ -34,5 +34,11 @@ export class OrdersService {
   async create(order: Order): Promise<Order> {
     const newOrder = await this.orderModel.create(order);
     return newOrder.toObject();
+  }
+
+  async update(orderId: string, fields: Partial<Order>): Promise<Order> {
+    return this.orderModel
+      .findOneAndUpdate({ _id: orderId }, { $set: { ...fields } })
+      .lean();
   }
 }

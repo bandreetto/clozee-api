@@ -2,16 +2,18 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PubSub } from 'graphql-subscriptions';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
-import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
-import { Post } from 'src/posts/contracts';
-import { v4 } from 'uuid';
-import { CommentTagNotification, SaleNotification } from './contracts';
-import { NotificationsService } from './notifications.service';
-import { CommentsService } from '../comments/comments.service';
+import { TAX_PERCENTAGE } from 'src/common/contants';
 import { admin } from 'src/common/firebase-admin';
+import { MenvController } from 'src/delivery/melhor-envio.controller';
+import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
+import { OrdersService } from 'src/orders/orders.service';
+import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
+import { v4 } from 'uuid';
+import { CommentsService } from '../comments/comments.service';
+import { CommentTagNotification, SaleNotification } from './contracts';
 import { MailService } from './mail.service';
-import { formatEmailCurrency } from './notifications.logic';
+import { NotificationsService } from './notifications.service';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -22,6 +24,8 @@ export class NotificationsConsumer {
     private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
+    private readonly ordersService: OrdersService,
+    private readonly menvController: MenvController,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -96,18 +100,28 @@ export class NotificationsConsumer {
     const buyer = await this.usersService.findById(
       payload.order.buyer as string,
     );
+
+    const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
+
+    /**
+     * Menv Delivery
+     */
+
+    const labelUrl = await this.menvController.getLabelURLForOrder(
+      payload.order.deliveryInfo.menvDeliveryOrderId,
+    );
+
+    await this.ordersService.update(payload.order._id, {
+      deliveryInfo: {
+        ...payload.order.deliveryInfo,
+        deliveryLabelUrl: labelUrl,
+      },
+    });
+
     /**
      * Emails
      */
-    const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
-    this.mailService.sendSellerMail(
-      seller,
-      payload.order,
-      payload.posts,
-      subTotal,
-      0,
-      subTotal + payload.order.deliveryInfo.price,
-    );
+
     this.mailService.sendBuyerEmail(
       buyer,
       payload.order,
@@ -116,6 +130,20 @@ export class NotificationsConsumer {
       0,
       subTotal + payload.order.deliveryInfo.price,
     );
+
+    const sellerTaxes = subTotal * TAX_PERCENTAGE;
+
+    if (labelUrl) {
+      this.mailService.sendSellerMail(
+        seller,
+        payload.order,
+        payload.posts,
+        subTotal,
+        sellerTaxes,
+        subTotal + payload.order.deliveryInfo.price + sellerTaxes,
+        labelUrl,
+      );
+    }
 
     /**
      * Push Notifications

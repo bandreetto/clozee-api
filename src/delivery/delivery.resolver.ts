@@ -12,12 +12,14 @@ import { UsersLoader } from 'src/users/users.dataloaders';
 import { Delivery } from './contracts';
 import { CorreiosService } from './correios.service';
 import { DeliveryService } from './delivery.service';
+import { MenvService } from './melhor-envio.service';
 
 @Resolver()
 export class DeliveryResolver {
   constructor(
     private readonly usersLoader: UsersLoader,
     private readonly correiosService: CorreiosService,
+    private readonly menvService: MenvService,
     private readonly deliveryService: DeliveryService,
   ) {}
 
@@ -55,7 +57,8 @@ export class DeliveryResolver {
     const {
       price,
       deliveryTime,
-    } = await this.correiosService.getDeliveryPriceAndTime(
+      id,
+    } = await this.menvService.calculateDelivery(
       seller.address.zipCode,
       buyer.address.zipCode,
     );
@@ -66,6 +69,7 @@ export class DeliveryResolver {
       sellersZipCode: seller.address.zipCode,
       price,
       deliveryTime,
+      menvServiceNumber: id,
     });
   }
 }

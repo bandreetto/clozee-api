@@ -21,6 +21,10 @@ export class Delivery {
   price: number;
 
   @Prop({ required: true })
+  @Field()
+  menvServiceNumber: number;
+
+  @Prop({ required: true })
   @Field(() => Int, {
     description: 'The expected delivery time in business days.',
   })

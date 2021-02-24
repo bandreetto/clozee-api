@@ -17,6 +17,8 @@ import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
 import { CountersService } from 'src/counters/counters.service';
+import { DeliveryService } from 'src/delivery/delivery.service';
+import { MenvService } from 'src/delivery/melhor-envio.service';
 import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
@@ -29,7 +31,6 @@ import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { SalesService } from './sales.service';
-import { DeliveryService } from 'src/delivery/delivery.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -40,6 +41,7 @@ export class OrdersResolver {
     private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
+    private readonly menvService: MenvService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly deliveryService: DeliveryService,
@@ -118,6 +120,18 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
+    const orderNumber = await this.countersService.getCounterAndIncrement(
+      'orders',
+    );
+
+    const { orderId: menvOrderId } = await this.menvService.addToCart(
+      delivery.menvServiceNumber,
+      seller,
+      user,
+      posts,
+      orderNumber,
+    );
+
     const orderId = v4();
     const newSales: Sale[] = input.posts.map(post => ({
       _id: v4(),
@@ -127,7 +141,7 @@ export class OrdersResolver {
     await this.salesService.createMany(newSales);
     const order = await this.ordersService.create({
       _id: orderId,
-      number: await this.countersService.getCounterAndIncrement('orders'),
+      number: orderNumber,
       buyer: user._id,
       paymentMethod: paymentMethod._id,
       buyersAddress: user.address,
@@ -135,6 +149,7 @@ export class OrdersResolver {
       deliveryInfo: {
         price: delivery.price,
         deliveryTime: delivery.deliveryTime,
+        menvDeliveryOrderId: menvOrderId,
       },
     });
     this.eventEmitter.emit('order.created', { order, posts });
