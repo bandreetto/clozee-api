@@ -22,4 +22,8 @@ export default {
     token: () => process.env.MELHOR_ENVIO_TOKEN,
     contactMail: () => 'bruno@clozee.com.br',
   },
+  pagarme: {
+    recipientId: () => process.env.CLOZEE_RECIPIENT_ID,
+    token: () => process.env.CLOZEE_API_TOKEN,
+  },
 };

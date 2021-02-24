@@ -1,17 +1,17 @@
 export * from './address';
-export * from './saved-post';
-export * from './payment-method';
 export * from './bank';
 export * from './bank-info';
 export * from './feed-tags';
+export * from './payment-method';
+export * from './saved-post';
 
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectType, Field } from '@nestjs/graphql';
-import { Address, AddressSchema } from './address';
+import { Field, ObjectType } from '@nestjs/graphql';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from 'src/posts/contracts';
-import { PaymentMethod } from './payment-method';
+import { Address, AddressSchema } from './address';
 import { BankInfo, BankInfoSchema } from './bank-info';
 import { FeedTags, FeedTagsSchema } from './feed-tags';
+import { PaymentMethod } from './payment-method';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -19,6 +19,11 @@ export class User {
   @Prop()
   @Field()
   _id: string;
+
+  // TODO: implement seller recipient id
+  @Prop()
+  @Field({ nullable: true })
+  pagarmeRecipientId?: string;
 
   @Prop()
   @Field({ nullable: true })
