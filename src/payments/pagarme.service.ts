@@ -24,7 +24,12 @@ interface ICreateRecipient {
   seller: User;
 }
 
-interface ICreateRecipientResponse {
+interface IUpdateRecipient {
+  recipientId: User['pagarmeRecipientId'];
+  bankInfo: User['bankInfo'];
+}
+
+interface IRecipientResponse {
   recipientId: string;
 }
 
@@ -142,7 +147,9 @@ export class PagarmeService {
     return { trasactionId: response.tid };
   }
 
-  async createRecipient({ seller }: ICreateRecipient) {
+  async createRecipient({
+    seller,
+  }: ICreateRecipient): Promise<IRecipientResponse> {
     const response = await pagarme.client.recipients.create({
       transfer_enabled: true,
       transfer_day: '0',
@@ -157,6 +164,27 @@ export class PagarmeService {
         document_number: formatCPF(seller.bankInfo.holderDocument),
         legal_name: seller.bankInfo.holderName,
         type: fromAccountTypeToPagarmeType(seller.bankInfo.accountType),
+      },
+    });
+
+    return { recipientId: response.id };
+  }
+
+  async updateRecipient({
+    bankInfo,
+    recipientId,
+  }: IUpdateRecipient): Promise<IRecipientResponse> {
+    const response = await pagarme.client.recipients.update({
+      recipient_id: recipientId,
+      bank_account: {
+        agencia: bankInfo.agency,
+        agencia_dv: bankInfo.agencyDv,
+        bank_code: String(bankInfo.bank),
+        conta: bankInfo.account,
+        conta_dv: bankInfo.accountDv,
+        document_number: formatCPF(bankInfo.holderDocument),
+        legal_name: bankInfo.holderName,
+        type: fromAccountTypeToPagarmeType(bankInfo.accountType),
       },
     });
 
