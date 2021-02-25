@@ -8,13 +8,16 @@ export class Feed {
   @Prop()
   _id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   post: string;
 
   @Prop({ type: TagsSchema, required: true })
   tags: Tags;
 
-  score?: number;
+  @Prop({ required: true })
+  score: number;
+
+  searchScore?: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -22,6 +25,7 @@ export class Feed {
 export const FeedSchema = SchemaFactory.createForClass(Feed);
 
 FeedSchema.index({
+  score: -1,
   createdAt: -1,
   'tags.size': 1,
   'tags.gender': 1,
