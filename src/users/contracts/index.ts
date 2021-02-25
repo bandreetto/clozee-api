@@ -20,7 +20,6 @@ export class User {
   @Field()
   _id: string;
 
-  // TODO: implement seller recipient id
   @Prop()
   @Field({ nullable: true })
   pagarmeRecipientId?: string;

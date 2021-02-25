@@ -60,7 +60,7 @@ import { UsersService } from './users.service';
     ]),
     forwardRef(() => PostsModule),
     forwardRef(() => OrdersModule),
-    forwardRef(() => PaymentsModule),
+    PaymentsModule,
   ],
   providers: [
     UsersService,
