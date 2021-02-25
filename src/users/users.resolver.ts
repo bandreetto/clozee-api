@@ -205,10 +205,14 @@ export class UsersResolver {
     @Args('input') input: AddCreditCardInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    if (input.lastDigits.length !== 4)
-      throw new BadRequestException('Last digits must be a string of length 4');
+    if (!input.cardHash)
+      throw new BadRequestException('cardHash is required to add credit card');
+
+    const card = await this.pagarmeService.createCard(input.cardHash);
     await this.usersService.addPaymentMethod(user._id, {
-      ...input,
+      flag: card.brand,
+      cardId: card.id,
+      lastDigits: card.last_digits,
       _id: v4(),
     });
     return this.usersService.findById(user._id);

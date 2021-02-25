@@ -5,6 +5,7 @@ import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
 import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
 import {
+  ICreateCardResponse,
   IRecipientResponse,
   ITransaction,
   ITransactionResponse,
@@ -140,5 +141,14 @@ export class PagarmeService {
     });
 
     return { recipientId: response.id };
+  }
+
+  async createCard(cardHash: string): Promise<ICreateCardResponse> {
+    const response = await pagarme.client.cards.create(
+      {},
+      { card_hash: cardHash },
+    );
+
+    return response.data as ICreateCardResponse;
   }
 }
