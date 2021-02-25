@@ -1,66 +1,19 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpService, Injectable } from '@nestjs/common';
 import pagarme from 'pagarme';
-import { BankAccountTypes } from 'pagarme-js-types/src/client/bankAccounts/options';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
-import { Post } from 'src/posts/contracts';
-import { ACCOUNT_TYPES } from 'src/users/contracts/enum';
+import { User } from 'src/users/contracts';
 import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
-import { User } from './../users/contracts/index';
-
-interface ITransaction {
-  seller: User;
-  cardId: string;
-  buyer: User;
-  amount: number;
-  posts: Post[];
-}
-
-interface ITransactionResponse {
-  trasactionId: string;
-}
-
-interface ICreateRecipient {
-  seller: User;
-}
-
-interface IUpdateRecipient {
-  recipientId: User['pagarmeRecipientId'];
-  bankInfo: User['bankInfo'];
-}
-
-interface IRecipientResponse {
-  recipientId: string;
-}
-
-const formatZipCode = (zipCode: string) => {
-  return zipCode.replace(/\s/g, '').replace('-', '');
-};
-
-const formatCPF = (cpf: string) => {
-  return cpf.replace(/\./g, '').replace('-', '');
-};
-
-const fromAccountTypeToPagarmeType = (
-  accountType: ACCOUNT_TYPES,
-): BankAccountTypes => {
-  switch (accountType) {
-    case ACCOUNT_TYPES.CURRENT:
-      return 'conta_corrente';
-
-    case ACCOUNT_TYPES.SAVINGS:
-      return 'conta_poupanca';
-
-    case ACCOUNT_TYPES.JOINT_CURRENT:
-      return 'conta_corrente_conjunta';
-
-    case ACCOUNT_TYPES.JOINT_SAVINGS:
-      return 'conta_poupanca_conjunta';
-
-    default:
-      return 'conta_corrente';
-  }
-};
+import {
+  IRecipientResponse,
+  ITransaction,
+  ITransactionResponse,
+} from './contracts';
+import {
+  formatCPF,
+  formatZipCode,
+  fromAccountTypeToPagarmeType,
+} from './payments.logic';
 
 @Injectable()
 export class PagarmeService {
@@ -74,7 +27,7 @@ export class PagarmeService {
     posts,
   }: ITransaction): Promise<ITransactionResponse> {
     if (amount < MINIMUM_TRANSACTION_VALUE) {
-      throw new Error('Invalid transaction');
+      throw new BadRequestException('Invalid transaction');
     }
 
     const sellerAmount = amount * (1 - TAX_PERCENTAGE) - FIXED_TAX;
@@ -147,33 +100,31 @@ export class PagarmeService {
     return { trasactionId: response.tid };
   }
 
-  async createRecipient({
-    seller,
-  }: ICreateRecipient): Promise<IRecipientResponse> {
+  async createRecipient(user: User): Promise<IRecipientResponse> {
     const response = await pagarme.client.recipients.create({
       transfer_enabled: true,
       transfer_day: '0',
       transfer_interval: 'daily',
       metadata: {},
       bank_account: {
-        agencia: seller.bankInfo.agency,
-        agencia_dv: seller.bankInfo.agencyDv,
-        bank_code: String(seller.bankInfo.bank),
-        conta: seller.bankInfo.account,
-        conta_dv: seller.bankInfo.accountDv,
-        document_number: formatCPF(seller.bankInfo.holderDocument),
-        legal_name: seller.bankInfo.holderName,
-        type: fromAccountTypeToPagarmeType(seller.bankInfo.accountType),
+        agencia: user.bankInfo.agency,
+        agencia_dv: user.bankInfo.agencyDv,
+        bank_code: String(user.bankInfo.bank),
+        conta: user.bankInfo.account,
+        conta_dv: user.bankInfo.accountDv,
+        document_number: formatCPF(user.bankInfo.holderDocument),
+        legal_name: user.bankInfo.holderName,
+        type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
       },
     });
 
     return { recipientId: response.id };
   }
 
-  async updateRecipient({
-    bankInfo,
-    recipientId,
-  }: IUpdateRecipient): Promise<IRecipientResponse> {
+  async updateRecipient(
+    bankInfo: User['bankInfo'],
+    recipientId: string,
+  ): Promise<IRecipientResponse> {
     const response = await pagarme.client.recipients.update({
       recipient_id: recipientId,
       bank_account: {

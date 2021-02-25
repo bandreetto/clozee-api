@@ -13,17 +13,19 @@ import { AuthGuard } from 'src/common/guards';
 import { S3Client } from 'src/common/s3';
 import { TokenUser } from 'src/common/types';
 import configuration from 'src/config/configuration';
+import { PagarmeService } from 'src/payments/pagarme.service';
 import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
-import { PaymentMethod, User, FeedTags } from './contracts';
+import { FeedTags, PaymentMethod, User } from './contracts';
 import {
   AddCreditCardInput,
   AddressInput,
-  UpdateUserInfoInput,
   FeedTagsInput,
+  UpdateUserInfoInput,
 } from './contracts/inputs';
+import { isBankInputComplete } from './logic/is-bank-input-complete';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
 
@@ -34,6 +36,7 @@ export class UsersResolver {
     private readonly usersLoader: UsersLoader,
     private readonly postsLoader: PostsLoader,
     private readonly postsService: PostsService,
+    private readonly pagarmeService: PagarmeService,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -121,10 +124,43 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  updateUserInfo(
+  async updateUserInfo(
     @Args('input') input: UpdateUserInfoInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
+    if (input.bankInfo) {
+      if (!isBankInputComplete(input.bankInfo)) {
+        throw new BadRequestException('Bank info is not complete');
+      }
+
+      const userData = await this.usersService.findById(user._id);
+      const userAlreadyHasBankInfo = !!userData.bankInfo;
+      const isChangingHolderDocument =
+        userAlreadyHasBankInfo &&
+        userData.bankInfo.holderDocument !== input.bankInfo.holderDocument;
+
+      if (isChangingHolderDocument) {
+        throw new BadRequestException(
+          'Cannot update the account holder document',
+        );
+      }
+
+      let userRecipientId = userData.pagarmeRecipientId;
+
+      if (!userRecipientId) {
+        const { recipientId } = await this.pagarmeService.createRecipient(
+          userData,
+        );
+        await this.usersService.updateUser(user._id, {
+          pagarmeRecipientId: recipientId,
+        });
+      } else {
+        await this.pagarmeService.updateRecipient(
+          input.bankInfo,
+          userRecipientId,
+        );
+      }
+    }
     return this.usersService.updateUser(user._id, input);
   }
 
