@@ -24,6 +24,6 @@ export default {
   },
   pagarme: {
     recipientId: () => process.env.CLOZEE_RECIPIENT_ID,
-    token: () => process.env.CLOZEE_API_TOKEN,
+    token: () => process.env.PAGARME_API_TOKEN,
   },
 };
