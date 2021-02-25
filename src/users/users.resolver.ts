@@ -208,23 +208,7 @@ export class UsersResolver {
     if (!input.cardHash)
       throw new BadRequestException('cardHash is required to add credit card');
 
-    //TODO: registrar cartão na pagarme
-    // https://docs.pagar.me/reference#criando-um-cartao
-    const card = {
-      object: 'card',
-      id: 'card_cj428xxsx01dt3f6dvre6belx',
-      date_created: '2017-06-18T05:03:19.907Z',
-      date_updated: '2017-06-18T05:03:20.318Z',
-      brand: 'visa',
-      holder_name: 'Aardvark Silva',
-      first_digits: '401872',
-      last_digits: '8048',
-      country: 'RU',
-      fingerprint: 'TaApkY+9emV9',
-      customer: null,
-      valid: true,
-      expiration_date: '1122',
-    };
+    const card = await this.pagarmeService.createCard(input.cardHash);
     await this.usersService.addPaymentMethod(user._id, {
       flag: card.brand,
       cardId: card.id,
