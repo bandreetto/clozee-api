@@ -347,6 +347,10 @@ type SaleNotification implements Notification {
   order: Order!
 }
 
+type Session {
+  _id: String!
+}
+
 type Query {
   me: User!
   user(id: String!): User!
@@ -427,6 +431,7 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
+  startSession: Session!
 }
 
 input UpdateUserInfoInput {
