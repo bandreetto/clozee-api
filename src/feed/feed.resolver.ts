@@ -105,19 +105,22 @@ export class FeedResolver {
     @Args('post', { description: 'The post id.' }) post: string,
     @CurrentUser() user: TokenUser,
   ): string {
+    const seenPostId = v4();
     this.sessionsService
       .findByUser(user._id, true)
       .then(([session]) => {
         if (!session)
           throw new ForbiddenException('No open session found for this user.');
         return this.seenPostService.create({
-          _id: v4(),
+          _id: seenPostId,
           post,
           session: session._id,
         });
       })
       .then(() =>
-        this.logger.log(`Post ${post} marked as seen for user ${user._id}`),
+        this.logger.log(
+          `Post ${post} marked as seen for user ${user._id}. SeenPostId: ${seenPostId}`,
+        ),
       )
       .catch(error =>
         this.logger.error({
@@ -126,6 +129,6 @@ export class FeedResolver {
         }),
       );
 
-    return 'Accepted';
+    return seenPostId;
   }
 }
