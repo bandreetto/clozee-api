@@ -101,19 +101,31 @@ export class FeedResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => String)
-  async markPostAsSeen(
+  markPostAsSeen(
     @Args('post', { description: 'The post id.' }) post: string,
     @CurrentUser() user: TokenUser,
-  ): Promise<string> {
-    const [session] = await this.sessionsService.findByUser(user._id, true);
-    if (!session)
-      throw new ForbiddenException('No open session found for this user.');
-    return this.seenPostService
-      .create({
-        _id: v4(),
-        post,
-        session: session._id,
+  ): string {
+    this.sessionsService
+      .findByUser(user._id, true)
+      .then(([session]) => {
+        if (!session)
+          throw new ForbiddenException('No open session found for this user.');
+        return this.seenPostService.create({
+          _id: v4(),
+          post,
+          session: session._id,
+        });
       })
-      .then(seenPost => seenPost._id);
+      .then(() =>
+        this.logger.log(`Post ${post} marked as seen for user ${user._id}`),
+      )
+      .catch(error =>
+        this.logger.error({
+          message: `Failed to mark post ${post} as seen for user ${user._id}`,
+          error: error.toString(),
+        }),
+      );
+
+    return 'Accepted';
   }
 }
