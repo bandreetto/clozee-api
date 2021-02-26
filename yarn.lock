@@ -1905,12 +1905,12 @@
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.4.tgz#a59e851c1ba16c0513ea123830dd639a0a15cb6a"
   integrity sha512-+wYo+L6ZF6BMoEjtf8zB2esQsqdV6WsjRK/GP9WOgLPrq87PbNWgIxS76dS5uvl/QXtHGakZmwTznIfcPXcKlQ==
 
-"@types/ramda@^0.27.19":
-  version "0.27.19"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.27.19.tgz#20a96954ca63aa42f419f392745dde94fde7dbee"
-  integrity sha512-BAeH07a6pRfFyoTuwhWJeNNHucbMlwh+imkO2BKOTZ6wpAElOAPyhBdyP1hx4W4sCPDnV/5UetcjZ/RT5lcMTA==
+"@types/ramda@^0.27.38":
+  version "0.27.38"
+  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.27.38.tgz#797d5cdc9e00482e665dfea28142bb6c3c5f11e7"
+  integrity sha512-tZoQ0lv1WKkrpBHemL8yCkI9p8kUk/1PSMwhl0eeyqMQjD+2ePUtVLV8PpNS9Kq3OktObwOx9I3k+HumxTviRg==
   dependencies:
-    ts-toolbelt "^6.3.3"
+    ts-toolbelt "^6.15.1"
 
 "@types/range-parser@*":
   version "1.2.3"
@@ -9599,7 +9599,7 @@ ts-node@9.0.0:
     source-map-support "^0.5.17"
     yn "3.1.1"
 
-ts-toolbelt@^6.3.3:
+ts-toolbelt@^6.15.1:
   version "6.15.5"
   resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-6.15.5.tgz#cb3b43ed725cb63644782c64fbcad7d8f28c0a83"
   integrity sha512-FZIXf1ksVyLcfr7M317jbB67XFJhOO1YqdTcuGaq9q5jLUoTikukZ+98TPjKiP2jC5CgmYdWWYs0s2nLSU0/1A==
