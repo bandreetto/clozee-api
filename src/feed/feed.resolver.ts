@@ -31,6 +31,7 @@ export class FeedResolver {
     @Args() args: PaginationArgs,
     @Args('tags', { nullable: true }) feedTags: FeedTagsInput,
     @Args('searchTerm', { nullable: true }) searchTerm: string,
+    @CurrentUser() user: TokenUser,
   ): Promise<FeedPostConnection> {
     let date: Date, score: number;
     if (args.after) {
@@ -62,11 +63,17 @@ export class FeedResolver {
       ]);
       feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
     } else {
+      let postBlacklist;
+      if (user)
+        postBlacklist = await this.seenPostService.findBlacklistedPosts(
+          user._id,
+        );
       [feedPosts, postsCount] = await Promise.all([
         this.feedService.findSortedByScore(
           args.first,
           args.after && { maxScore: score, before: date },
           tags,
+          postBlacklist && postBlacklist.posts,
         ),
         this.feedService.countByScore(
           tags,
