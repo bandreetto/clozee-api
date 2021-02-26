@@ -10,6 +10,8 @@ import { FeedService } from './feed.service';
 import { CommentsService } from '../comments/comments.service';
 import { LikePayload } from '../likes/contracts/payloads';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
+import { SeenPostService } from './seen-post.service';
+import { Session } from 'src/sessions/contracts';
 
 const FEMALE_CATEGORY_ID = '9f09504e-9caa-43b5-b0fd-1c1da5d1606b';
 const MALE_CATEGORY_ID = '572edcbc-189e-40a2-94a6-e17167c8bc8e';
@@ -22,6 +24,7 @@ export class FeedConsumer {
     private readonly categoriesService: CategoriesService,
     private readonly likesService: LikesService,
     private readonly commentsService: CommentsService,
+    private readonly seenPostService: SeenPostService,
   ) {}
 
   @OnEvent('post.created', { async: true })
@@ -106,5 +109,23 @@ export class FeedConsumer {
   @OnEvent('order.created')
   handlePostSold(payload: OrderCreatedPayload) {
     return this.feedService.deleteManyByPosts(payload.posts.map(p => p._id));
+  }
+
+  @OnEvent('session.terminated', { async: true })
+  async addSeenPostsToBlacklist(payload: Session) {
+    try {
+      this.logger.log(
+        `Blacklisting posts from session ${payload._id} of user ${payload.user}`,
+      );
+      await this.seenPostService.mergeSessionPostsToBlacklist(
+        payload._id,
+        payload.user,
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while merging session seen posts to blacklist.',
+        error: error.toString(),
+      });
+    }
   }
 }
