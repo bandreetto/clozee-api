@@ -1,5 +1,7 @@
-import { Args, Resolver, Query } from '@nestjs/graphql';
-import { PaginationArgs } from 'src/common/types';
+import { ForbiddenException, Logger, UseGuards } from '@nestjs/common';
+import { Args, Resolver, Query, Mutation } from '@nestjs/graphql';
+import { CurrentUser } from 'src/common/decorators';
+import { PaginationArgs, TokenUser } from 'src/common/types';
 import { SIZES } from 'src/posts/contracts/enums';
 import { PostsService } from 'src/posts/posts.service';
 import { FeedTags } from 'src/users/contracts';
@@ -8,12 +10,20 @@ import { FeedTagsInput } from 'src/users/contracts/inputs';
 import { Feed, FeedPostConnection } from './contracts';
 import { decodeCursor, fromPostsToConnection } from './feed.logic';
 import { FeedService } from './feed.service';
+import { SeenPostService } from './seen-post.service';
+import { AuthGuard } from '../common/guards/auth.guard';
+import { SessionsService } from '../sessions/sessions.service';
+import { v4 } from 'uuid';
 
 @Resolver()
 export class FeedResolver {
+  logger = new Logger(FeedResolver.name);
+
   constructor(
-    private postsService: PostsService,
-    private feedService: FeedService,
+    private readonly postsService: PostsService,
+    private readonly feedService: FeedService,
+    private readonly seenPostService: SeenPostService,
+    private readonly sessionsService: SessionsService,
   ) {}
 
   @Query(() => FeedPostConnection)
@@ -21,10 +31,12 @@ export class FeedResolver {
     @Args() args: PaginationArgs,
     @Args('tags', { nullable: true }) feedTags: FeedTagsInput,
     @Args('searchTerm', { nullable: true }) searchTerm: string,
+    @CurrentUser() user: TokenUser,
   ): Promise<FeedPostConnection> {
     let date: Date, score: number;
     if (args.after) {
       [date, score] = decodeCursor(args.after);
+      this.logger.debug(`Paginating feed with date ${date} and score ${score}`);
     }
     let tags: FeedTags;
     if (feedTags) {
@@ -38,7 +50,8 @@ export class FeedResolver {
 
     let feedPosts: Feed[], postsCount: number;
     if (searchTerm) {
-      [feedPosts, postsCount] = await Promise.all([
+      let searchResult: Feed[];
+      [searchResult, postsCount] = await Promise.all([
         this.feedService.searchByTerm(
           searchTerm,
           tags,
@@ -48,10 +61,27 @@ export class FeedResolver {
         ),
         this.feedService.countBySearchTerm(searchTerm, tags, score, date),
       ]);
+      feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
     } else {
+      let postBlacklist;
+      if (user)
+        postBlacklist = await this.seenPostService.findBlacklistedPosts(
+          user._id,
+        );
       [feedPosts, postsCount] = await Promise.all([
-        this.feedService.findSortedByDate(args.first, date, tags),
-        this.feedService.countByDate(date, tags),
+        this.feedService.findSortedByScore(
+          args.first,
+          args.after && { maxScore: score, before: date },
+          tags,
+          postBlacklist && postBlacklist.posts,
+        ),
+        this.feedService.countByScore(
+          tags,
+          args.after && {
+            maxScore: score,
+            before: date,
+          },
+        ),
       ]);
     }
 
@@ -67,5 +97,38 @@ export class FeedResolver {
       postsCount - args.first > 0,
     );
     return connection;
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => String)
+  markPostAsSeen(
+    @Args('post', { description: 'The post id.' }) post: string,
+    @CurrentUser() user: TokenUser,
+  ): string {
+    const seenPostId = v4();
+    this.sessionsService
+      .findByUser(user._id, true)
+      .then(([session]) => {
+        if (!session)
+          throw new ForbiddenException('No open session found for this user.');
+        return this.seenPostService.create({
+          _id: seenPostId,
+          post,
+          session: session._id,
+        });
+      })
+      .then(() =>
+        this.logger.log(
+          `Post ${post} marked as seen for user ${user._id}. SeenPostId: ${seenPostId}`,
+        ),
+      )
+      .catch(error =>
+        this.logger.error({
+          message: `Failed to mark post ${post} as seen for user ${user._id}`,
+          error: error.toString(),
+        }),
+      );
+
+    return seenPostId;
   }
 }

@@ -18,9 +18,10 @@ import { FeedModule } from './feed/feed.module';
 import { LikesModule } from './likes/likes.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { OrdersModule } from './orders/orders.module';
-import { PostsModule } from './posts/posts.module';
-import { UsersModule } from './users/users.module';
 import { PaymentsModule } from './payments/payments.module';
+import { PostsModule } from './posts/posts.module';
+import { SessionsModule } from './sessions/sessions.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { PaymentsModule } from './payments/payments.module';
     LikesModule,
     DeliveryModule,
     PaymentsModule,
+    SessionsModule,
   ],
 })
 export class AppModule {

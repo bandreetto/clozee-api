@@ -18,29 +18,52 @@ export class FeedService {
     return feed.toObject();
   }
 
-  async findSortedByDate(
+  async findByPost(postId: string): Promise<Feed> {
+    return this.feedModel.findOne({ post: postId }).lean();
+  }
+
+  async findSortedByScore(
     first: number,
-    before: Date,
-    feedTags: FeedTags,
+    cursor?: { maxScore: number; before: Date },
+    feedTags?: FeedTags,
+    blacklistedPosts: string[] = [],
   ): Promise<Feed[]> {
     return this.feedModel
       .find({
-        ...(before ? { createdAt: { $lt: before } } : null),
+        ...(cursor
+          ? {
+              $or: [
+                { score: cursor.maxScore, createdAt: { $lt: cursor.before } },
+                { score: { $lt: cursor.maxScore } },
+              ],
+            }
+          : null),
         ...(feedTags.sizes.length
           ? { 'tags.size': { $in: feedTags.sizes } }
           : { 'tags.size': { $in: Object.values(SIZES) } }),
         ...(feedTags.genders.length
           ? { 'tags.gender': { $in: feedTags.genders } }
           : { 'tags.gender': { $in: Object.values(GENDER_TAGS) } }),
+        post: { $nin: blacklistedPosts },
       })
-      .sort({ createdAt: -1 })
+      .sort({ score: -1, createdAt: -1 })
       .limit(first)
       .lean();
   }
 
-  async countByDate(date: Date, tags: FeedTags): Promise<number> {
+  async countByScore(
+    tags: FeedTags,
+    cursor?: { maxScore: number; before: Date },
+  ): Promise<number> {
     return this.feedModel.countDocuments({
-      ...(date ? { createdAt: { $lt: date } } : null),
+      ...(cursor
+        ? {
+            $or: [
+              { score: cursor.maxScore, createdAt: { $lt: cursor.before } },
+              { score: { $lt: cursor.maxScore } },
+            ],
+          }
+        : null),
       ...(tags.sizes.length
         ? { 'tags.size': { $in: tags.sizes } }
         : { 'tags.size': { $in: Object.values(SIZES) } }),
@@ -69,7 +92,7 @@ export class FeedService {
       },
       {
         $addFields: {
-          score: { $meta: 'searchScore' },
+          searchScore: { $meta: 'searchScore' },
         },
       },
       {
@@ -83,12 +106,12 @@ export class FeedService {
               ? tags.genders
               : Object.values(GENDER_TAGS),
           },
-          score: { $lt: maxScore },
+          searchScore: { $lt: maxScore },
         },
       },
       {
         $sort: {
-          score: -1,
+          searchScore: -1,
           createdAt: -1,
         },
       },
@@ -138,6 +161,12 @@ export class FeedService {
       },
     ]);
     return result?.searchCount || 0;
+  }
+
+  async updateScore(feedId: string, newScore: number): Promise<Feed> {
+    return this.feedModel
+      .findByIdAndUpdate(feedId, { $set: { score: newScore } })
+      .lean();
   }
 
   async deleteByPost(post: string): Promise<Feed> {

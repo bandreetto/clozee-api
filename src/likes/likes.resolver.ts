@@ -7,12 +7,15 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { LikesService } from './likes.service';
 import { PostsService } from '../posts/posts.service';
 import { Like } from './contracts';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { LikePayload } from './contracts/payloads';
 
 @Resolver(() => Like)
 export class LikesResolver {
   constructor(
     private readonly likesService: LikesService,
     private readonly postsService: PostsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -28,6 +31,7 @@ export class LikesResolver {
       deleted: false,
     });
 
+    this.eventEmitter.emit('post.liked', { post: postId } as LikePayload);
     return this.postsService.findById(postId);
   }
 
@@ -44,6 +48,7 @@ export class LikesResolver {
       deleted: true,
     });
 
+    this.eventEmitter.emit('post.unliked', { post: postId } as LikePayload);
     return this.postsService.findById(postId);
   }
 }

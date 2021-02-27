@@ -21,7 +21,7 @@ export class Comment {
   })
   tags: string[] | User[];
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, index: true })
   @Field(() => Post, { description: 'The post that the comment belongs to' })
   post: string | Post;
 
