@@ -31,17 +31,6 @@ type Delivery {
   deliveryTime: Int!
 }
 
-type PageInfo {
-  """The first cursor of this page."""
-  startCursor: String
-
-  """The last cursor of this page."""
-  endCursor: String
-
-  """A boolean indicating if there are more edges after this page."""
-  hasNextPage: Boolean!
-}
-
 type Coordinates {
   latitude: Float!
   longitude: Float!
@@ -260,6 +249,30 @@ type User {
   createdAt: DateTime!
 }
 
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PageInfo {
+  """The first cursor of this page."""
+  startCursor: String
+
+  """The last cursor of this page."""
+  endCursor: String
+
+  """A boolean indicating if there are more edges after this page."""
+  hasNextPage: Boolean!
+}
+
 type DeliveryInfo {
   """The menv delivery orderId."""
   menvDeliveryOrderId: Int!
@@ -292,19 +305,6 @@ type Order {
   """The sum of the post's prices for this order."""
   itemsPrice: Float!
   createdAt: DateTime!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
 }
 
 type Session {

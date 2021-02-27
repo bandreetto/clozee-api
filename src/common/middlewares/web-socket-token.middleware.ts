@@ -1,5 +1,4 @@
 import { JwtService } from '@nestjs/jwt';
-import { isAccessToken } from 'src/auth/auth.logic';
 import { Token } from 'src/auth/contracts';
 
 export const WebSocketTokenMiddleware = (jwtService: JwtService) =>
@@ -13,12 +12,8 @@ export const WebSocketTokenMiddleware = (jwtService: JwtService) =>
         complete: true,
       })
       .then(decoded => {
-        if (!isAccessToken(decoded)) return {};
         return {
-          user: {
-            _id: decoded.payload.sub,
-            username: decoded.payload.username,
-          },
+          token: decoded,
         };
       })
       .catch(() => ({}));

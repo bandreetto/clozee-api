@@ -14,10 +14,11 @@ import { JwtService } from '@nestjs/jwt';
 import { isRefreshToken } from './auth.logic';
 import configuration from 'src/config/configuration';
 import { AuthResponse, Token } from './contracts';
+import { TOKEN_TYPES } from './contracts/enums';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
-const ACCESS_TOKEN_EXP = '10 min';
+const ACCESS_TOKEN_EXP = '1 year';
 
 @Resolver()
 export class AuthResolver {
@@ -32,7 +33,7 @@ export class AuthResolver {
       { username: user.username },
       {
         header: {
-          typ: 'access',
+          typ: TOKEN_TYPES.ACCESS,
         },
         expiresIn: ACCESS_TOKEN_EXP,
         subject: user._id,
@@ -43,7 +44,7 @@ export class AuthResolver {
     this.jwtService.sign(
       {},
       {
-        header: { typ: 'refresh' },
+        header: { typ: TOKEN_TYPES.REFRESH },
         subject: userId,
       },
     );
