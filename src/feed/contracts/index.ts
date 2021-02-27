@@ -29,9 +29,11 @@ FeedSchema.index({
   createdAt: -1,
   'tags.size': 1,
   'tags.gender': 1,
+  post: 1,
 });
 
 FeedSchema.index({
   'tags.size': 1,
   'tags.gender': 1,
+  post: 1,
 });

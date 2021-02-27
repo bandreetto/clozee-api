@@ -306,6 +306,10 @@ type AuthResponse {
   refreshToken: String!
 }
 
+type Session {
+  _id: String!
+}
+
 type FeedPostEdge {
   node: Post!
 
@@ -424,6 +428,11 @@ type Mutation {
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
+  startSession: Session!
+  markPostAsSeen(
+    """The post id."""
+    post: String!
+  ): String!
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!

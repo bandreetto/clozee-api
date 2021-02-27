@@ -26,6 +26,7 @@ export class FeedService {
     first: number,
     cursor?: { maxScore: number; before: Date },
     feedTags?: FeedTags,
+    blacklistedPosts: string[] = [],
   ): Promise<Feed[]> {
     return this.feedModel
       .find({
@@ -43,6 +44,7 @@ export class FeedService {
         ...(feedTags.genders.length
           ? { 'tags.gender': { $in: feedTags.genders } }
           : { 'tags.gender': { $in: Object.values(GENDER_TAGS) } }),
+        post: { $nin: blacklistedPosts },
       })
       .sort({ score: -1, createdAt: -1 })
       .limit(first)
