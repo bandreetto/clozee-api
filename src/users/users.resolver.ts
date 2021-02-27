@@ -128,40 +128,41 @@ export class UsersResolver {
     @Args('input') input: UpdateUserInfoInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    if (input.bankInfo) {
-      if (!isBankInputComplete(input.bankInfo)) {
-        throw new BadRequestException('Bank info is not complete');
-      }
-
-      const userData = await this.usersService.findById(user._id);
-      const userAlreadyHasBankInfo = !!userData.bankInfo;
-      const isChangingHolderDocument =
-        userAlreadyHasBankInfo &&
-        userData.bankInfo.holderDocument !== input.bankInfo.holderDocument;
-
-      if (isChangingHolderDocument) {
-        throw new BadRequestException(
-          'Cannot update the account holder document',
-        );
-      }
-
-      let userRecipientId = userData.pagarmeRecipientId;
-
-      if (!userRecipientId) {
-        const { recipientId } = await this.pagarmeService.createRecipient(
-          userData,
-        );
-        await this.usersService.updateUser(user._id, {
-          pagarmeRecipientId: recipientId,
-        });
-      } else {
-        await this.pagarmeService.updateRecipient(
-          input.bankInfo,
-          userRecipientId,
-        );
-      }
+    if (!input.bankInfo) {
+      return this.usersService.updateUser(user._id, input);
     }
-    return this.usersService.updateUser(user._id, input);
+
+    if (!isBankInputComplete(input.bankInfo)) {
+      throw new BadRequestException('Bank info is not complete');
+    }
+
+    const userData = await this.usersService.findById(user._id);
+    const userAlreadyHasBankInfo = !!userData.bankInfo;
+    const isChangingHolderDocument =
+      userAlreadyHasBankInfo &&
+      userData.bankInfo.holderDocument !== input.bankInfo.holderDocument;
+
+    if (isChangingHolderDocument) {
+      throw new BadRequestException(
+        'Cannot update the account holder document',
+      );
+    }
+
+    let userRecipientId = userData.pagarmeRecipientId;
+
+    if (!userRecipientId) {
+      const { recipientId } = await this.pagarmeService.createRecipient(
+        userData,
+      );
+      await this.usersService.updateUser(user._id, {
+        pagarmeRecipientId: recipientId,
+      });
+    } else {
+      await this.pagarmeService.updateRecipient(
+        input.bankInfo,
+        userRecipientId,
+      );
+    }
   }
 
   @UseGuards(AuthGuard)
