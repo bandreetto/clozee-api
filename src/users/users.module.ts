@@ -1,12 +1,18 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OrdersModule } from 'src/orders/orders.module';
+import { PaymentsModule } from 'src/payments/payments.module';
+import { PostsModule } from 'src/posts/posts.module';
+import { BankInfoResolver } from './bank-info.resolver';
+import { BanksResolver } from './banks.resolver';
+import { BanksService } from './banks.service';
 import {
   Address,
   AddressSchema,
   Bank,
-  BankSchema,
   BankInfo,
   BankInfoSchema,
+  BankSchema,
   Coordinates,
   CoordinatesSchema,
   PaymentMethod,
@@ -16,14 +22,9 @@ import {
   User,
   UserSchema,
 } from './contracts';
-import { UsersService } from './users.service';
-import { UsersResolver } from './users.resolver';
-import { PostsModule } from 'src/posts/posts.module';
-import { OrdersModule } from 'src/orders/orders.module';
 import { UsersLoader } from './users.dataloaders';
-import { BanksService } from './banks.service';
-import { BanksResolver } from './banks.resolver';
-import { BankInfoResolver } from './bank-info.resolver';
+import { UsersResolver } from './users.resolver';
+import { UsersService } from './users.service';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { BankInfoResolver } from './bank-info.resolver';
     ]),
     forwardRef(() => PostsModule),
     forwardRef(() => OrdersModule),
+    PaymentsModule,
   ],
   providers: [
     UsersService,

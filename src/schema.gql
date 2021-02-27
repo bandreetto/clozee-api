@@ -18,6 +18,30 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Delivery {
+  _id: String!
+  buyersZipCode: String!
+  sellersZipCode: String!
+
+  """The delivery fare in cents."""
+  price: Int!
+  menvServiceNumber: Float!
+
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
+}
+
+type PageInfo {
+  """The first cursor of this page."""
+  startCursor: String
+
+  """The last cursor of this page."""
+  endCursor: String
+
+  """A boolean indicating if there are more edges after this page."""
+  hasNextPage: Boolean!
+}
+
 type Coordinates {
   latitude: Float!
   longitude: Float!
@@ -32,19 +56,6 @@ type Address {
   city: String
   state: String
   coordinates: Coordinates
-}
-
-type PaymentMethod {
-  _id: String!
-
-  """Card id provided by the payment gateway."""
-  cardId: String!
-
-  """Last 4 digits of the credit card."""
-  lastDigits: String!
-
-  """The card's flag."""
-  flag: String!
 }
 
 type Bank {
@@ -138,6 +149,19 @@ enum GENDER_TAGS {
   NEUTRAL
 }
 
+type PaymentMethod {
+  _id: String!
+
+  """Card id provided by the payment gateway."""
+  cardId: String!
+
+  """Last 4 digits of the credit card."""
+  lastDigits: String!
+
+  """The card's flag."""
+  flag: String!
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -215,6 +239,7 @@ enum POST_CONDITIONS {
 
 type User {
   _id: String!
+  pagarmeRecipientId: String
   name: String
   email: String
   cpf: String
@@ -233,30 +258,6 @@ type User {
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
   createdAt: DateTime!
-}
-
-type PageInfo {
-  """The first cursor of this page."""
-  startCursor: String
-
-  """The last cursor of this page."""
-  endCursor: String
-
-  """A boolean indicating if there are more edges after this page."""
-  hasNextPage: Boolean!
-}
-
-type Delivery {
-  _id: String!
-  buyersZipCode: String!
-  sellersZipCode: String!
-
-  """The delivery fare in cents."""
-  price: Int!
-  menvServiceNumber: Float!
-
-  """The expected delivery time in business days."""
-  deliveryTime: Int!
 }
 
 type DeliveryInfo {
@@ -352,14 +353,13 @@ type SaleNotification implements Notification {
 }
 
 type Query {
-  me: User!
-  user(id: String!): User!
-
-  """A list of 60 users"""
-  users(searchTerm: String): [User!]!
-
   """Returns all categories"""
   categories(roots: Boolean): [Category!]!
+  post(postId: String!): Post!
+  posts(
+    """Filter posts by user id"""
+    user: String!
+  ): [Post!]!
   order(orderId: String!): Order!
 
   """The orders that the current user has bought."""
@@ -367,12 +367,12 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
-  post(postId: String!): Post!
-  posts(
-    """Filter posts by user id"""
-    user: String!
-  ): [Post!]!
   banks: [Bank!]!
+  me: User!
+  user(id: String!): User!
+
+  """A list of 60 users"""
+  users(searchTerm: String): [User!]!
   feed(
     searchTerm: String
     tags: FeedTagsInput
@@ -395,6 +395,20 @@ input FeedTagsInput {
 }
 
 type Mutation {
+  """
+  Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
+  """
+  updateDeliveryInfo(seller: String!): Delivery!
+  addComment(input: AddCommentInput!): Comment!
+  likePost(postId: String!): Post!
+  unlikePost(postId: String!): Post!
+
+  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  uploadPostImage: String!
+  addPost(addPostInput: AddPostInput!): Post!
+  editPost(updateFields: UpdatePostFields!, postId: String!): Post!
+  deletePost(postId: String!): Post!
+  checkout(input: CheckoutInput!): Order!
   updateUserFeedTags(tags: FeedTagsInput!): User!
   savePost(postId: String!): Post!
   unsavePost(postId: String!): Post!
@@ -410,21 +424,6 @@ type Mutation {
   deletePaymentMethod(paymentMethodId: String!): User!
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
-  addComment(input: AddCommentInput!): Comment!
-
-  """
-  Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
-  """
-  updateDeliveryInfo(seller: String!): Delivery!
-  checkout(input: CheckoutInput!): Order!
-  likePost(postId: String!): Post!
-  unlikePost(postId: String!): Post!
-
-  """Returns a pre-signed S3 URL that allows the avatar upload."""
-  uploadPostImage: String!
-  addPost(addPostInput: AddPostInput!): Post!
-  editPost(updateFields: UpdatePostFields!, postId: String!): Post!
-  deletePost(postId: String!): Post!
   signUp(input: SignUpInput!): AuthResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken(token: String!): String!
@@ -436,6 +435,59 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
+}
+
+input AddCommentInput {
+  """The id of the post the comment is being made."""
+  post: String!
+  body: String!
+}
+
+input AddPostInput {
+  title: String!
+  size: SIZES!
+  description: String!
+
+  """An array of urls for post images."""
+  images: [String!]!
+
+  """The id of the post category."""
+  category: String!
+
+  """The condition of this post's product."""
+  condition: POST_CONDITIONS!
+
+  """Price of the item being announced in cents."""
+  price: Int!
+}
+
+input UpdatePostFields {
+  title: String
+  description: String
+
+  """The new price of the item in cents."""
+  price: Int
+  size: String
+
+  """An array of urls for the new post images."""
+  images: [String!]
+
+  """The new category id of this post."""
+  category: String
+
+  """The new condition of the post's product"""
+  condition: POST_CONDITIONS
+}
+
+input CheckoutInput {
+  """The array of posts being bought."""
+  posts: [String!]!
+
+  """The id of the user's payment method to use on the checkout."""
+  paymentMethodId: String!
+
+  """The id of the delivery info for this checkout."""
+  deliveryInfoId: String!
 }
 
 input UpdateUserInfoInput {
@@ -491,67 +543,8 @@ input CoordinatesInput {
 }
 
 input AddCreditCardInput {
-  """Card id provided by the payment gateway."""
-  cardId: String!
-
-  """Last 4 digits of the credit card."""
-  lastDigits: String!
-
-  """The card's flag."""
-  flag: String!
-}
-
-input AddCommentInput {
-  """The id of the post the comment is being made."""
-  post: String!
-  body: String!
-}
-
-input CheckoutInput {
-  """The array of posts being bought."""
-  posts: [String!]!
-
-  """The id of the user's payment method to use on the checkout."""
-  paymentMethodId: String!
-
-  """The id of the delivery info for this checkout."""
-  deliveryInfoId: String!
-}
-
-input AddPostInput {
-  title: String!
-  size: SIZES!
-  description: String!
-
-  """An array of urls for post images."""
-  images: [String!]!
-
-  """The id of the post category."""
-  category: String!
-
-  """The condition of this post's product."""
-  condition: POST_CONDITIONS!
-
-  """Price of the item being announced in cents."""
-  price: Int!
-}
-
-input UpdatePostFields {
-  title: String
-  description: String
-
-  """The new price of the item in cents."""
-  price: Int
-  size: String
-
-  """An array of urls for the new post images."""
-  images: [String!]
-
-  """The new category id of this post."""
-  category: String
-
-  """The new condition of the post's product"""
-  condition: POST_CONDITIONS
+  """Card hash provided by the payment gateway."""
+  cardHash: String!
 }
 
 input SignUpInput {

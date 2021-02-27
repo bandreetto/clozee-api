@@ -39,14 +39,8 @@ export class AddressInput {
 
 @InputType()
 export class AddCreditCardInput {
-  @Field({ description: 'Card id provided by the payment gateway.' })
-  cardId: string;
-
-  @Field({ description: 'Last 4 digits of the credit card.' })
-  lastDigits: string;
-
-  @Field({ description: "The card's flag." })
-  flag: string;
+  @Field({ description: 'Card hash provided by the payment gateway.' })
+  cardHash: string;
 }
 
 @InputType()
