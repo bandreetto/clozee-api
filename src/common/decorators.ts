@@ -7,14 +7,14 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { Token } from 'src/auth/contracts';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { TokenUser } from './types';
-import { isAccessToken } from 'src/auth/auth.logic';
+import { isAccessToken, isPreSignToken } from 'src/auth/auth.logic';
 
 export const CurrentUser = createParamDecorator(
   (_data: unknown, context: ExecutionContext): TokenUser => {
     const ctx = GqlExecutionContext.create(context);
     const { req, connection } = ctx.getContext();
     const token: Token = req?.token || connection?.context?.token;
-    if (!isAccessToken(token)) return null;
+    if (!isAccessToken(token) && !isPreSignToken(token)) return null;
     return {
       _id: token.payload.sub,
       username: token.payload.username,

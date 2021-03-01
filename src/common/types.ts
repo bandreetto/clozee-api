@@ -38,7 +38,7 @@ export class PaginationArgs {
 
 export interface TokenUser {
   _id: string;
-  username: string;
+  username?: string;
 }
 
 export interface AuthorizedConnectionContext {
