@@ -13,7 +13,7 @@ import { SignUpInput } from './contracts/inputs';
 import { JwtService } from '@nestjs/jwt';
 import { isRefreshToken } from './auth.logic';
 import configuration from 'src/config/configuration';
-import { AuthResponse, Token } from './contracts';
+import { AuthResponse, PreSignResponse, Token } from './contracts';
 import { TOKEN_TYPES } from './contracts/enums';
 
 const SCRYPT_KEYLEN = 64;
@@ -49,20 +49,40 @@ export class AuthResolver {
       },
     );
 
+  createPreSignToken = (userId: string) =>
+    this.jwtService.sign(
+      {},
+      { header: { typ: TOKEN_TYPES.PRE_SIGN }, subject: userId },
+    );
+
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
     if (await this.usersService.existsWithUsername(input.username)) {
       throw new ConflictException('This username already exists.');
     }
-
-    const createdUser = await this.usersService.create({
-      _id: v4(),
-      username: input.username,
-      avatar:
-        input.avatarUrl ||
-        `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
-      feedTags: input.feedTags,
-    });
+    let user: User;
+    if (!input._id) {
+      user = await this.usersService.create({
+        _id: v4(),
+        username: input.username,
+        avatar:
+          input.avatarUrl ||
+          `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
+        ...(input.feedTags ? { feedTags: input.feedTags } : null),
+      });
+    } else {
+      user = await this.usersService.updateUser(input._id, {
+        username: input.username,
+        avatar:
+          input.avatarUrl ||
+          `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
+        ...(input.feedTags ? { feedTags: input.feedTags } : null),
+      });
+      if (!user)
+        throw new NotFoundException(
+          "Couldn't find a user with this id. Omit the id field or provide a valid id from a pre-signed user.",
+        );
+    }
     const salt = randomBytes(SALT_LEN);
     const passwordHash = scryptSync(
       input.password,
@@ -73,12 +93,23 @@ export class AuthResolver {
       _id: v4(),
       passwordHash,
       salt: salt.toString('base64'),
-      user: createdUser._id,
+      user: user._id,
     });
     return {
-      me: createdUser,
-      token: this.createAccessToken(createdUser),
-      refreshToken: this.createRefreshToken(createdUser._id),
+      me: user,
+      token: this.createAccessToken(user),
+      refreshToken: this.createRefreshToken(user._id),
+    };
+  }
+
+  @Mutation(() => PreSignResponse)
+  async preSign(): Promise<PreSignResponse> {
+    const user = await this.usersService.create({
+      _id: v4(),
+    });
+    return {
+      preSignToken: this.createPreSignToken(user._id),
+      userId: user._id,
     };
   }
 

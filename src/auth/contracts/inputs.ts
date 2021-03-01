@@ -3,6 +3,8 @@ import { FeedTagsInput } from 'src/users/contracts/inputs';
 
 @InputType()
 export class SignUpInput {
+  @Field({ nullable: true, description: 'The id of the pre-signed user.' })
+  _id?: string;
   @Field()
   username: string;
   @Field()
