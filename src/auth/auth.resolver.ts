@@ -1,7 +1,7 @@
 import {
-  BadRequestException,
   ConflictException,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { randomBytes, scryptSync } from 'crypto';
@@ -11,14 +11,16 @@ import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { SignUpInput } from './contracts/inputs';
 import { JwtService } from '@nestjs/jwt';
-import { isRefreshToken } from './auth.logic';
 import configuration from 'src/config/configuration';
-import { AuthResponse, PreSignResponse, Token } from './contracts';
+import { AuthResponse, PreSignResponse, RefreshToken } from './contracts';
 import { TOKEN_TYPES } from './contracts/enums';
+import { AuthGuard } from 'src/common/guards';
+import { CurrentToken, TokenTypes } from 'src/common/decorators';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
-const ACCESS_TOKEN_EXP = '1 year';
+const ACCESS_TOKEN_EXP = '10 min';
+const REFRESH_TOKEN_EXP = '180 days';
 
 @Resolver()
 export class AuthResolver {
@@ -45,6 +47,7 @@ export class AuthResolver {
       {},
       {
         header: { typ: TOKEN_TYPES.REFRESH },
+        expiresIn: REFRESH_TOKEN_EXP,
         subject: userId,
       },
     );
@@ -138,20 +141,20 @@ export class AuthResolver {
     };
   }
 
-  @Mutation(() => String)
-  async refreshToken(@Args('token') refreshToken: string): Promise<string> {
-    const decodedToken = this.jwtService.decode(refreshToken, {
-      complete: true,
-    }) as Token;
-    if (!isRefreshToken(decodedToken))
-      throw new BadRequestException(
-        'You can only refresh tokens with a refresh type token.',
-      );
-
-    const { sub } = this.jwtService.verify(refreshToken);
+  @UseGuards(AuthGuard)
+  @TokenTypes(TOKEN_TYPES.REFRESH)
+  @Mutation(() => AuthResponse)
+  async refreshToken(
+    @CurrentToken() token: RefreshToken,
+  ): Promise<AuthResponse> {
+    const { sub } = token.payload;
     const user = await this.usersService.findById(sub);
     if (!user) throw new NotFoundException('User not found.');
 
-    return this.createAccessToken(user);
+    return {
+      me: user,
+      token: this.createAccessToken(user),
+      refreshToken: this.createRefreshToken(user._id),
+    };
   }
 }

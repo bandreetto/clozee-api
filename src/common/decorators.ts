@@ -22,6 +22,14 @@ export const CurrentUser = createParamDecorator(
   },
 );
 
+export const CurrentToken = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): Token => {
+    const ctx = GqlExecutionContext.create(context);
+    const { req, connection } = ctx.getContext();
+    return req?.token || connection?.context?.token;
+  },
+);
+
 export const TOKEN_TYPES_KEY = 'TOKEN_TYPES_KEY';
 export const TokenTypes = (...types: TOKEN_TYPES[]) =>
   SetMetadata(TOKEN_TYPES_KEY, types);
