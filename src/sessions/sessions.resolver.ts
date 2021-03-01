@@ -3,10 +3,11 @@ import { AuthGuard } from 'src/common/guards';
 import { Session } from './contracts';
 import { SessionsService } from './sessions.service';
 import { UseGuards } from '@nestjs/common';
-import { CurrentUser } from 'src/common/decorators';
+import { CurrentUser, TokenTypes } from 'src/common/decorators';
 import { TokenUser } from '../common/types';
 import { v4 } from 'uuid';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 
 @Resolver()
 export class SessionsResolver {
@@ -16,6 +17,7 @@ export class SessionsResolver {
   ) {}
 
   @UseGuards(AuthGuard)
+  @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Mutation(() => Session)
   async startSession(@CurrentUser() user: TokenUser): Promise<Session> {
     const openSessions = await this.sessionsService.findByUser(user._id, true);

@@ -50,9 +50,9 @@ export class User {
   @Field(() => [Post])
   savedPosts?: Post[];
 
-  @Prop({ required: true, index: true, unique: true })
-  @Field()
-  username: string;
+  @Prop({ index: true, unique: true })
+  @Field({ nullable: true })
+  username?: string;
 
   @Prop()
   @Field({ nullable: true })

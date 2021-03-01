@@ -13,3 +13,13 @@ export class AuthResponse {
   @Field({ description: 'A long lived token, used to get a new access token.' })
   refreshToken: string;
 }
+
+@ObjectType()
+export class PreSignResponse {
+  @Field({ description: 'The pre-signed user token.' })
+  preSignToken: string;
+  @Field({
+    description: 'The pre-signed user id. Use it to create the user later.',
+  })
+  userId: string;
+}

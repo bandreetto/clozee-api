@@ -1,6 +1,6 @@
 import { ForbiddenException, Logger, UseGuards } from '@nestjs/common';
 import { Args, Resolver, Query, Mutation } from '@nestjs/graphql';
-import { CurrentUser } from 'src/common/decorators';
+import { CurrentUser, TokenTypes } from 'src/common/decorators';
 import { PaginationArgs, TokenUser } from 'src/common/types';
 import { SIZES } from 'src/posts/contracts/enums';
 import { PostsService } from 'src/posts/posts.service';
@@ -14,6 +14,7 @@ import { SeenPostService } from './seen-post.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { SessionsService } from '../sessions/sessions.service';
 import { v4 } from 'uuid';
+import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 
 @Resolver()
 export class FeedResolver {
@@ -100,6 +101,7 @@ export class FeedResolver {
   }
 
   @UseGuards(AuthGuard)
+  @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Mutation(() => String)
   markPostAsSeen(
     @Args('post', { description: 'The post id.' }) post: string,

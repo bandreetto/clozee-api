@@ -1,6 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { isAccessToken } from '../../auth/auth.logic';
 import { Token } from '../../auth/contracts';
 
 @Injectable()
@@ -17,11 +16,7 @@ export class TokenMiddleware implements NestMiddleware {
         complete: true,
       })
       .then(decoded => {
-        if (!isAccessToken(decoded)) return next();
-        req.user = {
-          _id: decoded.payload.sub,
-          username: decoded.payload.username,
-        };
+        req.token = decoded;
         return next();
       })
       .catch(() => next());
