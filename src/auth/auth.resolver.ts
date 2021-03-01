@@ -20,7 +20,7 @@ import { CurrentToken, TokenTypes } from 'src/common/decorators';
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
 const ACCESS_TOKEN_EXP = '10 min';
-const REFRESH_TOKEN_EXP = '6 months';
+const REFRESH_TOKEN_EXP = '180 days';
 
 @Resolver()
 export class AuthResolver {
