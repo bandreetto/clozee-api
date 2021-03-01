@@ -435,7 +435,7 @@ type Mutation {
   signUp(input: SignUpInput!): AuthResponse!
   preSign: PreSignResponse!
   logIn(password: String!, username: String!): AuthResponse!
-  refreshToken(token: String!): String!
+  refreshToken: AuthResponse!
   startSession: Session!
   markPostAsSeen(
     """The post id."""
