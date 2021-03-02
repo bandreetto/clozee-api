@@ -76,39 +76,81 @@ export class FeedConsumer {
     } catch (error) {
       this.logger.error({
         message:
-          'Error while tring to create a feedPost from the post.created event',
+          'Error while trying to create a feedPost from the post.created event',
         payload,
         error: error.toString(),
       });
     }
   }
 
-  @OnEvent('post.deleted')
-  handlePostDeleted(payload: Post) {
-    return this.feedService.deleteByPost(payload._id);
+  @OnEvent('post.deleted', { async: true })
+  async deleteFeedPost(payload: Post) {
+    try {
+      await this.feedService.deleteByPost(payload._id);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while trying to delete FeedPost from post.deleted event.',
+        payload,
+        error: error.toString(),
+      });
+    }
   }
 
-  @OnEvent('post.liked')
+  @OnEvent('post.liked', { async: true })
   async incrementLikeScore(payload: LikePayload) {
-    const feed = await this.feedService.findByPost(payload.post);
-    return this.feedService.updateScore(feed._id, feed.score + 1);
+    try {
+      const feed = await this.feedService.findByPost(payload.post);
+      await this.feedService.updateScore(feed._id, feed.score + 1);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while incrementing post score from post.liked event.',
+        payload,
+        error: error.toString(),
+      });
+    }
   }
 
-  @OnEvent('post.unliked')
+  @OnEvent('post.unliked', { async: true })
   async decrementeLikeScore(payload: LikePayload) {
-    const feed = await this.feedService.findByPost(payload.post);
-    return this.feedService.updateScore(feed._id, feed.score - 1);
+    try {
+      const feed = await this.feedService.findByPost(payload.post);
+      await this.feedService.updateScore(feed._id, feed.score - 1);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while decrementing post score from post.unliked event.',
+        payload,
+        error: error.toString(),
+      });
+    }
   }
 
-  @OnEvent('comment.created')
+  @OnEvent('comment.created', { async: true })
   async incrementCommentScore(payload: CommentCreatedPayload) {
-    const feed = await this.feedService.findByPost(payload.post._id);
-    return this.feedService.updateScore(feed._id, feed.score + 1);
+    try {
+      const feed = await this.feedService.findByPost(payload.post._id);
+      await this.feedService.updateScore(feed._id, feed.score + 1);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while incrementing post score from comment.created event.',
+        payload,
+        error: error.toString(),
+      });
+    }
   }
 
-  @OnEvent('order.created')
-  handlePostSold(payload: OrderCreatedPayload) {
-    return this.feedService.deleteManyByPosts(payload.posts.map(p => p._id));
+  @OnEvent('order.created', { async: true })
+  async deleteSoldPostFromFeed(payload: OrderCreatedPayload) {
+    try {
+      await this.feedService.deleteManyByPosts(payload.posts.map(p => p._id));
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while deleting FeedPost from order.created event.',
+        payload,
+        error: error.toString(),
+      });
+    }
   }
 
   @OnEvent('session.terminated', { async: true })
