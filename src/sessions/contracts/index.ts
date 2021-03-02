@@ -8,8 +8,8 @@ export class Session {
   @Field()
   _id: string;
 
-  @Prop({ index: true })
-  user?: string;
+  @Prop({ index: true, required: true })
+  user: string;
 
   @Prop()
   terminatedAt?: Date;
