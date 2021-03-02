@@ -1,4 +1,5 @@
 import { ArgsType, Field, ObjectType } from '@nestjs/graphql';
+import { AccessToken } from 'src/auth/contracts';
 
 @ObjectType()
 export class PageInfo {
@@ -44,7 +45,7 @@ export interface TokenUser {
 export interface AuthorizedConnectionContext {
   connection: {
     context: {
-      user: TokenUser;
+      token: AccessToken;
     };
   };
 }

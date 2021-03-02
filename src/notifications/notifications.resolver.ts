@@ -20,9 +20,12 @@ export class NotificationsResolver {
       payload: { notification: Notification },
       _variables,
       connectionContext: AuthorizedConnectionContext,
-    ) =>
-      payload.notification.user ===
-      connectionContext.connection.context.user._id,
+    ) => {
+      return (
+        payload?.notification?.user ===
+        connectionContext?.connection?.context?.token?.payload?.sub
+      );
+    },
   })
   notification() {
     return this.pubSub.asyncIterator('notification');

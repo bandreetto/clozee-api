@@ -30,7 +30,7 @@ export class NotificationsConsumer {
   ) {}
 
   @OnEvent('comment.created', { async: true })
-  async sendCommentNotifications(payload: CommentCreatedPayload) {
+  async createNotifications(payload: CommentCreatedPayload) {
     try {
       if (!payload.comment.tags.length) return;
       const commentTags = payload.comment.tags as string[];
@@ -46,28 +46,36 @@ export class NotificationsConsumer {
       const createdNotifications = await this.notificationsService.createMany(
         tagNotifications,
       );
-
-      /**
-       * Graphql Subscription
-       */
-      createdNotifications.forEach(notification => {
-        this.pubSub.publish('notification', {
-          notification,
-        });
+      await Promise.all(
+        createdNotifications.map(notification =>
+          this.pubSub.publish('notification', {
+            notification,
+          }),
+        ),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while sending comment.created notifications',
+        payload,
+        error: error.toString(),
       });
+    }
+  }
 
-      /**
-       * Push Notifications
-       */
+  @OnEvent('comment.created', { async: true })
+  async sendCommentPushNotification(payload: CommentCreatedPayload) {
+    try {
       const users = await this.usersService.findManyByIds([
         payload.comment.user as string,
-        ...createdNotifications.map(n => n.user),
+        ...(payload.comment.tags as string[]),
       ]);
       const taggingUser = users.find(user => user._id === payload.comment.user);
+      const taggedUsers = users.filter(
+        u => u.deviceToken && u._id !== taggingUser._id,
+      );
+      if (!taggedUsers.length) return;
       await admin.messaging().sendMulticast({
-        tokens: users
-          .filter(u => createdNotifications.map(n => n.user).includes(u._id))
-          .map(u => u.deviceToken),
+        tokens: taggedUsers.map(u => u.deviceToken),
         notification: {
           title: `@${taggingUser.username} marcou você em um comentário`,
           body: payload.comment.body,
@@ -76,7 +84,7 @@ export class NotificationsConsumer {
       });
     } catch (error) {
       this.logger.error({
-        message: 'Error while sending comment.created notifications',
+        message: 'Error while sending comment push notifications.',
         payload,
         error: error.toString(),
       });
