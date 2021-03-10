@@ -137,7 +137,7 @@ export class MenvService {
         number: adressee.address.number,
         district: adressee.address.district,
         city: adressee.address.city,
-        state_abbr: 'RS',
+        state_abbr: adressee.address.state,
         country_id: 'BR',
         postal_code: formatZipCode(adressee.address.zipCode),
         note: '',
