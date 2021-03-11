@@ -9,7 +9,6 @@ import { OrdersLoader } from './orders.dataloader';
 import { OrdersResolver } from './orders.resolver';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
-import { SalesService } from './sales.service';
 
 @Module({
   imports: [
@@ -28,13 +27,7 @@ import { SalesService } from './sales.service';
     forwardRef(() => UsersModule),
     forwardRef(() => PostsModule),
   ],
-  providers: [
-    SalesService,
-    SalesLoader,
-    OrdersResolver,
-    OrdersService,
-    OrdersLoader,
-  ],
-  exports: [SalesService, SalesLoader, OrdersService, OrdersLoader],
+  providers: [SalesLoader, OrdersResolver, OrdersService, OrdersLoader],
+  exports: [SalesLoader, OrdersService, OrdersLoader],
 })
 export class OrdersModule {}

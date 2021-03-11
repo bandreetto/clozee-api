@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Document, Model } from 'mongoose';
-import { Order } from './contracts';
+import { Order, Sale } from './contracts';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<Order & Document>,
+    @InjectModel(Sale.name) private readonly saleModel: Model<Sale & Document>,
   ) {}
 
   async findById(orderId: string): Promise<Order> {
@@ -40,5 +41,18 @@ export class OrdersService {
     return this.orderModel
       .findOneAndUpdate({ _id: orderId }, { $set: { ...fields } })
       .lean();
+  }
+
+  async createSales(sales: Sale[]): Promise<Sale[]> {
+    const newSales = await this.saleModel.insertMany(sales);
+    return newSales.map(s => s.toObject());
+  }
+
+  async findSalesByPosts(postIds: string[]): Promise<Sale[]> {
+    return this.saleModel.find({ post: { $in: postIds } }).lean();
+  }
+
+  async findSalesByOrders(orderIds: string[]): Promise<Sale[]> {
+    return this.saleModel.find({ order: { $in: orderIds } });
   }
 }

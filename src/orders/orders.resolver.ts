@@ -30,14 +30,12 @@ import { Order, Sale } from './contracts';
 import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
-import { SalesService } from './sales.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
   constructor(
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
-    private readonly salesService: SalesService,
     private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
@@ -68,7 +66,7 @@ export class OrdersResolver {
   })
   async mySales(@CurrentUser() user: TokenUser) {
     const userPosts = await this.postsService.findManyByUser(user._id);
-    const userSales = await this.salesService.findManyByPosts(
+    const userSales = await this.ordersService.findSalesByPosts(
       userPosts.map(post => post._id),
     );
     const orderIds = userSales.map(sale => sale.order) as string[];
@@ -138,7 +136,7 @@ export class OrdersResolver {
       post,
       order: orderId,
     }));
-    await this.salesService.createMany(newSales);
+    await this.ordersService.createSales(newSales);
     const order = await this.ordersService.create({
       _id: orderId,
       number: orderNumber,

@@ -28,9 +28,9 @@ import { CommentsLoader } from 'src/comments/comments.dataloader';
 import { UsersLoader } from 'src/users/users.dataloaders';
 import { CategoriesLoader } from 'src/categories/categories.dataloader';
 import { SalesLoader } from 'src/orders/sales.dataloader';
-import { SalesService } from 'src/orders/sales.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LikesLoader } from '../likes/likes.dataloader';
+import { OrdersService } from 'src/orders/orders.service';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -39,7 +39,7 @@ export class PostsResolver {
     private readonly usersLoader: UsersLoader,
     private readonly commentsLoader: CommentsLoader,
     private readonly categoriesLoader: CategoriesLoader,
-    private readonly salesService: SalesService,
+    private readonly ordersService: OrdersService,
     private readonly salesLoader: SalesLoader,
     private readonly likesLoader: LikesLoader,
     private readonly eventEmitter: EventEmitter2,
@@ -114,7 +114,7 @@ export class PostsResolver {
     if (!userPosts.some(userPost => userPost._id === postId))
       throw new ForbiddenException('You can only delete your own posts.');
 
-    const [postSale] = await this.salesService.findManyByPosts([postId]);
+    const [postSale] = await this.ordersService.findSalesByPosts([postId]);
     if (postSale) throw new ConflictException('You cannot delete a sold post.');
 
     const deletedPost = await this.postsService.updateOne(postId, {
