@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Logger,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -33,6 +34,8 @@ import { SalesLoader } from './sales.dataloader';
 
 @Resolver(() => Order)
 export class OrdersResolver {
+  logger = new Logger(OrdersResolver.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
@@ -136,20 +139,36 @@ export class OrdersResolver {
       post,
       order: orderId,
     }));
-    await this.ordersService.createSales(newSales);
-    const order = await this.ordersService.create({
-      _id: orderId,
-      number: orderNumber,
-      buyer: user._id,
-      paymentMethod: paymentMethod._id,
-      buyersAddress: user.address,
-      sellersAddress: seller.address,
-      deliveryInfo: {
-        price: delivery.price,
-        deliveryTime: delivery.deliveryTime,
-        menvDeliveryOrderId: menvOrderId,
-      },
-    });
+
+    let order: Order;
+    const session = await this.ordersService.startTransaction();
+    try {
+      await this.ordersService.createSales(newSales, session);
+      order = await this.ordersService.create(
+        {
+          _id: orderId,
+          number: orderNumber,
+          buyer: user._id,
+          paymentMethod: paymentMethod._id,
+          buyersAddress: user.address,
+          sellersAddress: seller.address,
+          deliveryInfo: {
+            price: delivery.price,
+            deliveryTime: delivery.deliveryTime,
+            menvDeliveryOrderId: menvOrderId,
+          },
+        },
+        session,
+      );
+      await this.ordersService.commitTransaction(session);
+    } catch (error) {
+      this.ordersService.abortTransaction(session);
+      this.logger.error({
+        message: 'An error occoured while trying to create order and sales.',
+        error: error.toString(),
+      });
+      throw error;
+    }
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
   }

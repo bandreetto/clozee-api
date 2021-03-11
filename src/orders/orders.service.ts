@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Document, Model } from 'mongoose';
+import { Document, Model, ClientSession } from 'mongoose';
 import { Order, Sale } from './contracts';
 
 @Injectable()
@@ -10,6 +10,22 @@ export class OrdersService {
     private readonly orderModel: Model<Order & Document>,
     @InjectModel(Sale.name) private readonly saleModel: Model<Sale & Document>,
   ) {}
+
+  async startTransaction(): Promise<ClientSession> {
+    const session = await this.orderModel.db.startSession();
+    session.startTransaction();
+    return session;
+  }
+
+  async commitTransaction(session: ClientSession): Promise<void> {
+    await session.commitTransaction();
+    return session.endSession();
+  }
+
+  async abortTransaction(session: ClientSession): Promise<void> {
+    await session.abortTransaction();
+    return session.endSession();
+  }
 
   async findById(orderId: string): Promise<Order> {
     return this.orderModel.findById(orderId).lean();
@@ -32,8 +48,8 @@ export class OrdersService {
       .lean();
   }
 
-  async create(order: Order): Promise<Order> {
-    const newOrder = await this.orderModel.create(order);
+  async create(order: Order, session?: ClientSession): Promise<Order> {
+    const newOrder = await this.orderModel.create(order, { session });
     return newOrder.toObject();
   }
 
@@ -43,8 +59,8 @@ export class OrdersService {
       .lean();
   }
 
-  async createSales(sales: Sale[]): Promise<Sale[]> {
-    const newSales = await this.saleModel.insertMany(sales);
+  async createSales(sales: Sale[], session?: ClientSession): Promise<Sale[]> {
+    const newSales = await this.saleModel.insertMany(sales, { session });
     return newSales.map(s => s.toObject());
   }
 
