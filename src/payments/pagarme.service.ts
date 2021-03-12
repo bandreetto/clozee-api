@@ -33,7 +33,7 @@ export class PagarmeService {
     const client = await pagarme.client.connect({
       api_key: configuration.pagarme.token(),
     });
-    const clozeeAmount = amount * TAX_PERCENTAGE + FIXED_TAX;
+    const clozeeAmount = amount * TAX_PERCENTAGE + FIXED_TAX * posts.length;
     const sellerAmount = amount - clozeeAmount;
 
     const response = await client.transactions.create({
