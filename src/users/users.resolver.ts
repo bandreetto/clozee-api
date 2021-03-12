@@ -22,10 +22,10 @@ import { FeedTags, PaymentMethod, User } from './contracts';
 import {
   AddCreditCardInput,
   AddressInput,
+  BankInfoInput,
   FeedTagsInput,
   UpdateUserInfoInput,
 } from './contracts/inputs';
-import { isBankInputComplete } from './logic/is-bank-input-complete';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
 
@@ -128,19 +128,20 @@ export class UsersResolver {
     @Args('input') input: UpdateUserInfoInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    if (!input.bankInfo) {
-      return this.usersService.updateUser(user._id, input);
-    }
+    return this.usersService.updateUser(user._id, input);
+  }
 
-    if (!isBankInputComplete(input.bankInfo)) {
-      throw new BadRequestException('Bank info is not complete');
-    }
-
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  async updateBankInfo(
+    @Args('bankInfo') input: BankInfoInput,
+    @CurrentUser() user: TokenUser,
+  ): Promise<User> {
     const userData = await this.usersService.findById(user._id);
     const userAlreadyHasBankInfo = !!userData.bankInfo;
     const isChangingHolderDocument =
       userAlreadyHasBankInfo &&
-      userData.bankInfo.holderDocument !== input.bankInfo.holderDocument;
+      userData.bankInfo.holderDocument !== input.holderDocument;
 
     if (isChangingHolderDocument) {
       throw new BadRequestException(
@@ -148,21 +149,19 @@ export class UsersResolver {
       );
     }
 
-    let userRecipientId = userData.pagarmeRecipientId;
+    const userRecipientId = userData.pagarmeRecipientId;
 
-    if (!userRecipientId) {
-      const { recipientId } = await this.pagarmeService.createRecipient(
-        userData,
-      );
-      await this.usersService.updateUser(user._id, {
-        pagarmeRecipientId: recipientId,
-      });
-    } else {
-      await this.pagarmeService.updateRecipient(
-        input.bankInfo,
-        userRecipientId,
-      );
-    }
+    const recipientId = userRecipientId
+      ? await this.pagarmeService.updateRecipient(input, userRecipientId)
+      : await this.pagarmeService.createRecipient({
+          ...userData,
+          bankInfo: input,
+        });
+
+    return this.usersService.updateUser(user._id, {
+      pagarmeRecipientId: recipientId,
+      bankInfo: input,
+    });
   }
 
   @UseGuards(AuthGuard)
@@ -203,13 +202,15 @@ export class UsersResolver {
   @UseGuards(AuthGuard)
   @Mutation(() => User)
   async addCreditCard(
-    @Args('input') input: AddCreditCardInput,
+    @Args() input: AddCreditCardInput,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    if (!input.cardHash)
-      throw new BadRequestException('cardHash is required to add credit card');
-
-    const card = await this.pagarmeService.createCard(input.cardHash);
+    const card = await this.pagarmeService.createCard(
+      input.number,
+      input.holderName,
+      input.expirationDate,
+      input.cvv,
+    );
     await this.usersService.addPaymentMethod(user._id, {
       flag: card.brand,
       cardId: card.id,

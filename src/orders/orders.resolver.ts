@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  InternalServerErrorException,
+  Logger,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -30,14 +32,15 @@ import { Order, Sale } from './contracts';
 import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
-import { SalesService } from './sales.service';
+import { PagarmeService } from 'src/payments/pagarme.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
+  logger = new Logger(OrdersResolver.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly usersLoader: UsersLoader,
-    private readonly salesService: SalesService,
     private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
@@ -45,6 +48,7 @@ export class OrdersResolver {
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly deliveryService: DeliveryService,
+    private readonly pagarmeService: PagarmeService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -68,7 +72,7 @@ export class OrdersResolver {
   })
   async mySales(@CurrentUser() user: TokenUser) {
     const userPosts = await this.postsService.findManyByUser(user._id);
-    const userSales = await this.salesService.findManyByPosts(
+    const userSales = await this.ordersService.findSalesByPosts(
       userPosts.map(post => post._id),
     );
     const orderIds = userSales.map(sale => sale.order) as string[];
@@ -120,38 +124,65 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
-    const orderNumber = await this.countersService.getCounterAndIncrement(
-      'orders',
-    );
+    let order: Order;
+    const session = await this.ordersService.startTransaction();
+    try {
+      const orderNumber = await this.countersService.getCounterAndIncrement(
+        'orders',
+      );
 
-    const { orderId: menvOrderId } = await this.menvService.addToCart(
-      delivery.menvServiceNumber,
-      seller,
-      user,
-      posts,
-      orderNumber,
-    );
+      const orderId = v4();
+      const newSales: Sale[] = input.posts.map(post => ({
+        _id: v4(),
+        post,
+        order: orderId,
+      }));
 
-    const orderId = v4();
-    const newSales: Sale[] = input.posts.map(post => ({
-      _id: v4(),
-      post,
-      order: orderId,
-    }));
-    await this.salesService.createMany(newSales);
-    const order = await this.ordersService.create({
-      _id: orderId,
-      number: orderNumber,
-      buyer: user._id,
-      paymentMethod: paymentMethod._id,
-      buyersAddress: user.address,
-      sellersAddress: seller.address,
-      deliveryInfo: {
-        price: delivery.price,
-        deliveryTime: delivery.deliveryTime,
-        menvDeliveryOrderId: menvOrderId,
-      },
-    });
+      const { orderId: menvOrderId } = await this.menvService.addToCart(
+        delivery.menvServiceNumber,
+        seller,
+        user,
+        posts,
+        orderNumber,
+      );
+
+      await this.ordersService.createSales(newSales, session);
+      order = await this.ordersService.create(
+        {
+          _id: orderId,
+          number: orderNumber,
+          buyer: user._id,
+          paymentMethod: paymentMethod._id,
+          buyersAddress: user.address,
+          sellersAddress: seller.address,
+          deliveryInfo: {
+            price: delivery.price,
+            deliveryTime: delivery.deliveryTime,
+            menvDeliveryOrderId: menvOrderId,
+          },
+        },
+        session,
+      );
+
+      await this.pagarmeService.transaction({
+        amount: posts.reduce((total, post) => post.price + total, 0),
+        buyer: user,
+        cardId: paymentMethod.cardId,
+        posts,
+        seller,
+      });
+
+      await this.ordersService.commitTransaction(session);
+    } catch (error) {
+      this.ordersService.abortTransaction(session);
+      this.logger.error({
+        message: 'An error occoured while trying to create order and sales.',
+        error,
+      });
+      throw new InternalServerErrorException(
+        'An error occoured while trying to create order and sales.',
+      );
+    }
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
   }

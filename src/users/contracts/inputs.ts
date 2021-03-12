@@ -1,4 +1,4 @@
-import { Field, Float, InputType } from '@nestjs/graphql';
+import { Field, Float, InputType, ArgsType } from '@nestjs/graphql';
 import { SIZES } from 'src/posts/contracts/enums';
 import { ACCOUNT_TYPES, GENDER_TAGS } from './enum';
 
@@ -37,10 +37,19 @@ export class AddressInput {
   coordinates: CoordinatesInput;
 }
 
-@InputType()
+@ArgsType()
 export class AddCreditCardInput {
-  @Field({ description: 'Card hash provided by the payment gateway.' })
-  cardHash: string;
+  @Field({ description: "The credit card's number" })
+  number: string;
+  @Field()
+  holderName: string;
+  @Field({
+    description:
+      "The month and year of the card's expiration date, following the fomat MMYY",
+  })
+  expirationDate: string;
+  @Field()
+  cvv: string;
 }
 
 @InputType()
@@ -58,7 +67,6 @@ export class BankInfoInput {
   account: string;
 
   @Field({
-    nullable: true,
     description: 'The bank account verifying digit.',
   })
   accountDv: string;
@@ -88,9 +96,6 @@ export class UpdateUserInfoInput {
 
   @Field({ nullable: true })
   phoneNumber?: string;
-
-  @Field({ nullable: true, description: "The user's banking info." })
-  bankInfo?: BankInfoInput;
 }
 
 @InputType()
