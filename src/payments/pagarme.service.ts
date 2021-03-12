@@ -1,15 +1,15 @@
-import { BadRequestException, HttpService, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import pagarme from 'pagarme';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
 import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
-import {
-  ICreateCardResponse,
-  IRecipientResponse,
-  ITransaction,
-  ITransactionResponse,
-} from './contracts';
+import { ICreateCardResponse, ITransaction } from './contracts';
 import {
   formatCPF,
   formatZipCode,
@@ -18,7 +18,7 @@ import {
 
 @Injectable()
 export class PagarmeService {
-  constructor(private readonly httpClient: HttpService) {}
+  logger = new Logger(PagarmeService.name);
 
   async transaction({
     amount,
@@ -26,16 +26,18 @@ export class PagarmeService {
     cardId,
     buyer,
     posts,
-  }: ITransaction): Promise<ITransactionResponse> {
+  }: ITransaction): Promise<string> {
     if (amount < MINIMUM_TRANSACTION_VALUE) {
       throw new BadRequestException('Invalid transaction');
     }
-
+    const client = await pagarme.client.connect({
+      api_key: configuration.pagarme.token(),
+    });
     const sellerAmount = amount * (1 - TAX_PERCENTAGE) - FIXED_TAX;
     const sellerPercentage = sellerAmount / amount;
     const clozeePercentage = 1 - sellerPercentage;
 
-    const response = await pagarme.client.transactions.create({
+    const response = await client.transactions.create({
       capture: true,
       async: false,
       installments: '1',
@@ -95,60 +97,108 @@ export class PagarmeService {
     });
 
     if (response.status !== 'paid') {
-      throw new Error('Paymen denied');
+      throw new InternalServerErrorException('Payment denied');
     }
 
-    return { trasactionId: response.tid };
+    return response.tid;
   }
 
-  async createRecipient(user: User): Promise<IRecipientResponse> {
-    const response = await pagarme.client.recipients.create({
-      transfer_enabled: true,
-      transfer_day: '0',
-      transfer_interval: 'daily',
-      metadata: {},
-      bank_account: {
-        agencia: user.bankInfo.agency,
-        agencia_dv: user.bankInfo.agencyDv,
-        bank_code: String(user.bankInfo.bank),
-        conta: user.bankInfo.account,
-        conta_dv: user.bankInfo.accountDv,
-        document_number: formatCPF(user.bankInfo.holderDocument),
-        legal_name: user.bankInfo.holderName,
-        type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
-      },
-    });
+  async createRecipient(user: User): Promise<string> {
+    try {
+      const client = await pagarme.client.connect({
+        api_key: configuration.pagarme.token(),
+      });
+      const response = await client.recipients.create({
+        transfer_enabled: true,
+        transfer_day: '0',
+        transfer_interval: 'daily',
+        metadata: {},
+        bank_account: {
+          agencia: user.bankInfo.agency,
+          agencia_dv: user.bankInfo.agencyDv,
+          bank_code: String(user.bankInfo.bank),
+          conta: user.bankInfo.account,
+          conta_dv: user.bankInfo.accountDv,
+          document_number: formatCPF(user.bankInfo.holderDocument),
+          legal_name: user.bankInfo.holderName,
+          type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
+        },
+      });
 
-    return { recipientId: response.id };
+      return response.id;
+    } catch (error) {
+      this.logger.error({
+        message: `An error occoured while trying to create recipient on pagarme for the user ${user._id}`,
+      });
+      throw new InternalServerErrorException();
+    }
   }
 
   async updateRecipient(
     bankInfo: User['bankInfo'],
     recipientId: string,
-  ): Promise<IRecipientResponse> {
-    const response = await pagarme.client.recipients.update({
-      recipient_id: recipientId,
-      bank_account: {
-        agencia: bankInfo.agency,
-        agencia_dv: bankInfo.agencyDv,
-        bank_code: String(bankInfo.bank),
-        conta: bankInfo.account,
-        conta_dv: bankInfo.accountDv,
-        document_number: formatCPF(bankInfo.holderDocument),
-        legal_name: bankInfo.holderName,
-        type: fromAccountTypeToPagarmeType(bankInfo.accountType),
-      },
-    });
+  ): Promise<string> {
+    try {
+      const client = await pagarme.client.connect({
+        api_key: configuration.pagarme.token(),
+      });
+      const response = await client.recipients.update({
+        recipient_id: recipientId,
+        bank_account: {
+          agencia: bankInfo.agency,
+          agencia_dv: bankInfo.agencyDv,
+          bank_code: String(bankInfo.bank),
+          conta: bankInfo.account,
+          conta_dv: bankInfo.accountDv,
+          document_number: formatCPF(bankInfo.holderDocument),
+          legal_name: bankInfo.holderName,
+          type: fromAccountTypeToPagarmeType(bankInfo.accountType),
+        },
+      });
 
-    return { recipientId: response.id };
+      return response.id;
+    } catch (error) {
+      this.logger.error({
+        message: `An error occoured while trying to update pagarme recipient for the user with recipiend id ${recipientId}`,
+        error,
+      });
+      throw new InternalServerErrorException();
+    }
   }
 
-  async createCard(cardHash: string): Promise<ICreateCardResponse> {
-    const response = await pagarme.client.cards.create(
-      {},
-      { card_hash: cardHash },
-    );
-
-    return response.data as ICreateCardResponse;
+  async createCard(
+    number: string,
+    holderName: string,
+    expirationDate: string,
+    cvv: string,
+  ): Promise<ICreateCardResponse> {
+    try {
+      const client = await pagarme.client.connect({
+        api_key: configuration.pagarme.token(),
+      });
+      console.log({
+        card_number: number,
+        card_holder_name: holderName,
+        card_expiration_date: expirationDate,
+        card_cvv: cvv,
+      });
+      const response = await client.cards.create(
+        {
+          card_number: number,
+          card_holder_name: holderName,
+          card_expiration_date: expirationDate,
+          card_cvv: cvv,
+        },
+        {},
+      );
+      return response as ICreateCardResponse;
+    } catch (error) {
+      this.logger.error({
+        message:
+          'An error occoured while trying to create pagarme credit card.',
+        error,
+      });
+      throw new InternalServerErrorException();
+    }
   }
 }

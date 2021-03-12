@@ -4,6 +4,7 @@ import { CountersModule } from 'src/counters/counters.module';
 import { DeliveryModule } from 'src/delivery/delivery.module';
 import { PostsModule } from 'src/posts/posts.module';
 import { UsersModule } from 'src/users/users.module';
+import { PaymentsModule } from 'src/payments/payments.module';
 import { Order, OrderSchema, Sale, SaleSchema } from './contracts';
 import { OrdersLoader } from './orders.dataloader';
 import { OrdersResolver } from './orders.resolver';
@@ -24,6 +25,7 @@ import { SalesLoader } from './sales.dataloader';
     ]),
     CountersModule,
     DeliveryModule,
+    PaymentsModule,
     forwardRef(() => UsersModule),
     forwardRef(() => PostsModule),
   ],

@@ -421,6 +421,7 @@ type Mutation {
   savePost(postId: String!): Post!
   unsavePost(postId: String!): Post!
   updateUserInfo(input: UpdateUserInfoInput!): User!
+  updateBankInfo(bankInfo: BankInfoInput!): User!
   updateAddress(address: AddressInput!): User!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
@@ -428,7 +429,17 @@ type Mutation {
 
   """Returns the user with the updated avatar url."""
   updateUserAvatar(newAvatarUrl: String!): User!
-  addCreditCard(input: AddCreditCardInput!): User!
+  addCreditCard(
+    """The credit card's number"""
+    number: String!
+    holderName: String!
+
+    """
+    The month and year of the card's expiration date, following the fomat MMYY
+    """
+    expirationDate: String!
+    cvv: String!
+  ): User!
   deletePaymentMethod(paymentMethodId: String!): User!
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
@@ -504,9 +515,6 @@ input UpdateUserInfoInput {
   email: String
   cpf: String
   phoneNumber: String
-
-  """The user's banking info."""
-  bankInfo: BankInfoInput
 }
 
 input BankInfoInput {
@@ -523,7 +531,7 @@ input BankInfoInput {
   account: String!
 
   """The bank account verifying digit."""
-  accountDv: String
+  accountDv: String!
 
   """The user's bank account type"""
   accountType: ACCOUNT_TYPES!
@@ -549,11 +557,6 @@ input AddressInput {
 input CoordinatesInput {
   latitude: Float!
   longitude: Float!
-}
-
-input AddCreditCardInput {
-  """Card hash provided by the payment gateway."""
-  cardHash: String!
 }
 
 input SignUpInput {

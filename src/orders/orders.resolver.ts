@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  InternalServerErrorException,
   Logger,
   UnauthorizedException,
   UseGuards,
@@ -31,6 +32,7 @@ import { Order, Sale } from './contracts';
 import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
+import { PagarmeService } from 'src/payments/pagarme.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -46,6 +48,7 @@ export class OrdersResolver {
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly deliveryService: DeliveryService,
+    private readonly pagarmeService: PagarmeService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -121,28 +124,37 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
-    const orderNumber = await this.countersService.getCounterAndIncrement(
-      'orders',
-    );
-
-    const { orderId: menvOrderId } = await this.menvService.addToCart(
-      delivery.menvServiceNumber,
-      seller,
-      user,
-      posts,
-      orderNumber,
-    );
-
-    const orderId = v4();
-    const newSales: Sale[] = input.posts.map(post => ({
-      _id: v4(),
-      post,
-      order: orderId,
-    }));
-
     let order: Order;
     const session = await this.ordersService.startTransaction();
     try {
+      const orderNumber = await this.countersService.getCounterAndIncrement(
+        'orders',
+        session,
+      );
+
+      const orderId = v4();
+      const newSales: Sale[] = input.posts.map(post => ({
+        _id: v4(),
+        post,
+        order: orderId,
+      }));
+
+      await this.pagarmeService.transaction({
+        amount: posts.reduce((total, post) => post.price + total, 0),
+        buyer: user,
+        cardId: paymentMethod.cardId,
+        posts,
+        seller,
+      });
+
+      const { orderId: menvOrderId } = await this.menvService.addToCart(
+        delivery.menvServiceNumber,
+        seller,
+        user,
+        posts,
+        orderNumber,
+      );
+
       await this.ordersService.createSales(newSales, session);
       order = await this.ordersService.create(
         {
@@ -165,9 +177,11 @@ export class OrdersResolver {
       this.ordersService.abortTransaction(session);
       this.logger.error({
         message: 'An error occoured while trying to create order and sales.',
-        error: error.toString(),
+        error,
       });
-      throw error;
+      throw new InternalServerErrorException(
+        'An error occoured while trying to create order and sales.',
+      );
     }
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
