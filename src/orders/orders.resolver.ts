@@ -129,7 +129,6 @@ export class OrdersResolver {
     try {
       const orderNumber = await this.countersService.getCounterAndIncrement(
         'orders',
-        session,
       );
 
       const orderId = v4();
@@ -138,14 +137,6 @@ export class OrdersResolver {
         post,
         order: orderId,
       }));
-
-      await this.pagarmeService.transaction({
-        amount: posts.reduce((total, post) => post.price + total, 0),
-        buyer: user,
-        cardId: paymentMethod.cardId,
-        posts,
-        seller,
-      });
 
       const { orderId: menvOrderId } = await this.menvService.addToCart(
         delivery.menvServiceNumber,
@@ -172,6 +163,15 @@ export class OrdersResolver {
         },
         session,
       );
+
+      await this.pagarmeService.transaction({
+        amount: posts.reduce((total, post) => post.price + total, 0),
+        buyer: user,
+        cardId: paymentMethod.cardId,
+        posts,
+        seller,
+      });
+
       await this.ordersService.commitTransaction(session);
     } catch (error) {
       this.ordersService.abortTransaction(session);

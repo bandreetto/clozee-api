@@ -33,9 +33,8 @@ export class PagarmeService {
     const client = await pagarme.client.connect({
       api_key: configuration.pagarme.token(),
     });
-    const sellerAmount = amount * (1 - TAX_PERCENTAGE) - FIXED_TAX;
-    const sellerPercentage = sellerAmount / amount;
-    const clozeePercentage = 1 - sellerPercentage;
+    const clozeeAmount = amount * TAX_PERCENTAGE + FIXED_TAX;
+    const sellerAmount = amount - clozeeAmount;
 
     const response = await client.transactions.create({
       capture: true,
@@ -82,13 +81,13 @@ export class PagarmeService {
       split_rules: [
         {
           recipient_id: seller.pagarmeRecipientId,
-          percentage: sellerPercentage,
+          amount: sellerAmount,
           liable: true,
           charge_processing_fee: true,
         },
         {
           recipient_id: configuration.pagarme.recipientId(),
-          percentage: clozeePercentage,
+          amount: clozeeAmount,
           liable: true,
           charge_processing_fee: false,
           charge_remainder: true,

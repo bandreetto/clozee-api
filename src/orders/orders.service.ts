@@ -49,7 +49,7 @@ export class OrdersService {
   }
 
   async create(order: Order, session?: ClientSession): Promise<Order> {
-    const newOrder = await this.orderModel.create(order, { session });
+    const [newOrder] = await this.orderModel.create([order], { session });
     return newOrder.toObject();
   }
 
