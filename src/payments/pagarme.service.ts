@@ -128,6 +128,8 @@ export class PagarmeService {
     } catch (error) {
       this.logger.error({
         message: `An error occoured while trying to create recipient on pagarme for the user ${user._id}`,
+        error: error.toString(),
+        metadata: error,
       });
       throw new InternalServerErrorException();
     }
@@ -159,7 +161,8 @@ export class PagarmeService {
     } catch (error) {
       this.logger.error({
         message: `An error occoured while trying to update pagarme recipient for the user with recipiend id ${recipientId}`,
-        error,
+        error: error.toString(),
+        metadata: error,
       });
       throw new InternalServerErrorException();
     }
@@ -189,7 +192,8 @@ export class PagarmeService {
       this.logger.error({
         message:
           'An error occoured while trying to create pagarme credit card.',
-        error,
+        error: error.toString(),
+        metadata: error,
       });
       throw new InternalServerErrorException();
     }
