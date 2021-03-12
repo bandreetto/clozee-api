@@ -175,12 +175,6 @@ export class PagarmeService {
       const client = await pagarme.client.connect({
         api_key: configuration.pagarme.token(),
       });
-      console.log({
-        card_number: number,
-        card_holder_name: holderName,
-        card_expiration_date: expirationDate,
-        card_cvv: cvv,
-      });
       const response = await client.cards.create(
         {
           card_number: number,
