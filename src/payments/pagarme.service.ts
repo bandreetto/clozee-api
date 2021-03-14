@@ -5,6 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import pagarme from 'pagarme';
+import { BankAccountCreateOptions } from 'pagarme-js-types/src/client/bankAccounts/options';
+import R from 'ramda';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
@@ -15,7 +17,6 @@ import {
   formatZipCode,
   fromAccountTypeToPagarmeType,
 } from './payments.logic';
-
 @Injectable()
 export class PagarmeService {
   logger = new Logger(PagarmeService.name);
@@ -107,21 +108,26 @@ export class PagarmeService {
       const client = await pagarme.client.connect({
         api_key: configuration.pagarme.token(),
       });
+
+      const bankAccount: BankAccountCreateOptions = {
+        agencia: user.bankInfo.agency,
+        agencia_dv: user.bankInfo.agencyDv,
+        bank_code: String(user.bankInfo.bank),
+        conta: user.bankInfo.account,
+        conta_dv: user.bankInfo.accountDv,
+        document_number: formatCPF(user.bankInfo.holderDocument),
+        legal_name: user.bankInfo.holderName,
+        type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
+      };
+
       const response = await client.recipients.create({
         transfer_enabled: true,
         transfer_day: '0',
         transfer_interval: 'daily',
         metadata: {},
-        bank_account: {
-          agencia: user.bankInfo.agency,
-          agencia_dv: user.bankInfo.agencyDv,
-          bank_code: String(user.bankInfo.bank),
-          conta: user.bankInfo.account,
-          conta_dv: user.bankInfo.accountDv,
-          document_number: formatCPF(user.bankInfo.holderDocument),
-          legal_name: user.bankInfo.holderName,
-          type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
-        },
+        bank_account: R.reject(R.anyPass([R.isEmpty, R.isNil, R.equals('')]))(
+          bankAccount,
+        ),
       });
 
       return response.id;
