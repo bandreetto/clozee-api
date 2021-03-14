@@ -59,18 +59,17 @@ export class PagarmeService {
         name: buyer.name,
       },
       customer: {
-        address: {
-          zipcode: buyer.address.zipCode,
-          neighborhood: buyer.address.district,
-          street: buyer.address.street,
-          street_number: buyer.address.number,
-        },
         external_id: buyer._id,
         name: buyer.name,
-        phone: formatPhoneNumber(buyer.phoneNumber),
+        phone_numbers: [formatPhoneNumber(buyer.phoneNumber)],
         type: 'individual',
         country: 'br',
-        document_number: formatCPF(buyer.cpf),
+        documents: [
+          {
+            type: 'cpf',
+            number: formatCPF(buyer.cpf),
+          },
+        ],
         email: buyer.email,
       },
       items: posts.map(p => ({
@@ -96,7 +95,7 @@ export class PagarmeService {
           charge_remainder: true,
         },
       ],
-    } as any);
+    });
 
     if (response.status !== 'paid') {
       throw new InternalServerErrorException('Payment denied');
