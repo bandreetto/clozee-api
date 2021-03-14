@@ -14,6 +14,7 @@ import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
 import { ICreateCardResponse, ITransaction } from './contracts';
 import {
   formatCPF,
+  formatPhoneNumber,
   formatZipCode,
   fromAccountTypeToPagarmeType,
 } from './payments.logic';
@@ -60,7 +61,7 @@ export class PagarmeService {
       customer: {
         external_id: buyer._id,
         name: buyer.name,
-        phone_numbers: [buyer.phoneNumber],
+        phone_numbers: [formatPhoneNumber(buyer.phoneNumber)],
         type: 'individual',
         country: 'br',
         documents: [

@@ -29,3 +29,7 @@ export const fromAccountTypeToPagarmeType = (
       return 'conta_corrente';
   }
 };
+
+export const formatPhoneNumber = (plainPhoneNumber: string) => {
+  return `+55${plainPhoneNumber}`;
+};
