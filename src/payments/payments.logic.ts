@@ -31,5 +31,11 @@ export const fromAccountTypeToPagarmeType = (
 };
 
 export const formatPhoneNumber = (plainPhoneNumber: string) => {
-  return `+55${plainPhoneNumber}`;
+  const ddd = plainPhoneNumber.substring(0, 2);
+  const number = plainPhoneNumber.substring(2, plainPhoneNumber.length);
+
+  return {
+    ddd,
+    number,
+  };
 };
