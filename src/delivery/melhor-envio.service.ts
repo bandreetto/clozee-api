@@ -145,7 +145,7 @@ export class MenvService {
       products: posts.map(post => ({
         name: post.title,
         quantity: 1,
-        unitary_value: post.price,
+        unitary_value: post.price / 100,
       })),
       volumes: [
         {
@@ -156,7 +156,7 @@ export class MenvService {
         },
       ],
       options: {
-        insurance_value: posts.reduce((acc, post) => acc + post.price, 0),
+        insurance_value: posts.reduce((acc, post) => acc + post.price, 0) / 100,
         receipt: false,
         own_hand: false,
         reverse: false,
