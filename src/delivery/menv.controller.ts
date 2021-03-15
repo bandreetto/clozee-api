@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MenvService } from 'src/delivery/melhor-envio.service';
+import { MenvService } from 'src/delivery/menv.service';
 
 @Injectable()
 export class MenvController {

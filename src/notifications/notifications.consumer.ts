@@ -4,7 +4,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import { admin } from 'src/common/firebase-admin';
-import { MenvController } from 'src/delivery/melhor-envio.controller';
+import { MenvController } from 'src/delivery/menv.controller';
 import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
 import { OrdersService } from 'src/orders/orders.service';
 import { Post } from 'src/posts/contracts';
