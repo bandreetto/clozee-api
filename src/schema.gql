@@ -571,5 +571,5 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification: Notification!
+  notification(userId: String!, token: String!): Notification!
 }

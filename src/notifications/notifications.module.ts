@@ -5,6 +5,7 @@ import { CommentsModule } from 'src/comments/comments.module';
 import { DeliveryModule } from 'src/delivery/delivery.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from 'src/auth/auth.module';
 import { CommentTagNotificationResolver } from './comment-tag-notification.resolver';
 import {
   CommentTagNotification,
@@ -42,6 +43,7 @@ import { SaleNotificationResolver } from './sale-notification.resolver';
     OrdersModule,
     UsersModule,
     DeliveryModule,
+    AuthModule,
   ],
   providers: [
     NotificationsResolver,
