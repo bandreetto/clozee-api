@@ -114,7 +114,7 @@ export class MenvService {
     const data = {
       service: serviceNumber,
       from: {
-        name: sender.username,
+        name: sender.name,
         phone: sender.phoneNumber,
         email: sender.email,
         document: sender.cpf,
@@ -128,7 +128,7 @@ export class MenvService {
         note: '',
       },
       to: {
-        name: adressee.username,
+        name: adressee.name,
         phone: adressee.phoneNumber,
         email: adressee.email,
         document: adressee.cpf,
