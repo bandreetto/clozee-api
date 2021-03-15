@@ -157,7 +157,7 @@ export class NotificationsConsumer {
           payload.posts,
           subTotal,
           sellerTaxes,
-          subTotal + payload.order.deliveryInfo.price + sellerTaxes,
+          subTotal + payload.order.deliveryInfo.price,
           labelUrl,
         );
       }
