@@ -66,7 +66,7 @@ export class DeliveryResolver {
       buyersZipCode: buyer.address.zipCode,
       sellersZipCode: seller.address.zipCode,
       price,
-      deliveryTime,
+      deliveryTime: deliveryTime + 2,
       menvServiceNumber: id,
     });
   }
