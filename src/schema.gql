@@ -283,7 +283,7 @@ type PageInfo {
 
 type DeliveryInfo {
   """The menv delivery orderId."""
-  menvDeliveryOrderId: Int!
+  menvDeliveryOrderId: Int
 
   """The delivery label URL."""
   deliveryLabelUrl: String!

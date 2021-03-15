@@ -138,14 +138,6 @@ export class OrdersResolver {
         order: orderId,
       }));
 
-      const { orderId: menvOrderId } = await this.menvService.addToCart(
-        delivery.menvServiceNumber,
-        seller,
-        user,
-        posts,
-        orderNumber,
-      );
-
       await this.ordersService.createSales(newSales, session);
       order = await this.ordersService.create(
         {
@@ -158,7 +150,7 @@ export class OrdersResolver {
           deliveryInfo: {
             price: delivery.price,
             deliveryTime: delivery.deliveryTime,
-            menvDeliveryOrderId: menvOrderId,
+            menvServiceNumber: delivery.menvServiceNumber,
           },
         },
         session,

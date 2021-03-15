@@ -1,12 +1,13 @@
 import { forwardRef, HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { OrdersModule } from 'src/orders/orders.module';
 import { UsersModule } from 'src/users/users.module';
 import { Delivery, DeliverySchema } from './contracts';
 import { CorreiosService } from './correios.service';
 import { DeliveryResolver } from './delivery.resolver';
 import { DeliveryService } from './delivery.service';
-import { MenvController } from './melhor-envio.controller';
-import { MenvService } from './melhor-envio.service';
+import { MenvController } from './menv.controller';
+import { MenvService } from './menv.service';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MenvService } from './melhor-envio.service';
     ]),
     HttpModule,
     forwardRef(() => UsersModule),
+    forwardRef(() => OrdersModule),
   ],
   providers: [
     DeliveryResolver,

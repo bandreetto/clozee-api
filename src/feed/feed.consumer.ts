@@ -76,7 +76,7 @@ export class FeedConsumer {
     } catch (error) {
       this.logger.error({
         message:
-          'Error while trying to create a feedPost from the post.created event',
+          'Error while trying to create a feedPost from the post.created event.',
         payload,
         error: error.toString(),
       });
