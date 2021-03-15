@@ -169,7 +169,12 @@ export class OrdersResolver {
       this.ordersService.abortTransaction(session);
       this.logger.error({
         message: 'An error occoured while trying to create order and sales.',
-        error,
+        error: error.toString(),
+        metadata: {
+          error,
+          input,
+          buyer: tokenUser,
+        },
       });
       throw new InternalServerErrorException(
         'An error occoured while trying to create order and sales.',
