@@ -158,6 +158,7 @@ export class NotificationsConsumer {
           subTotal,
           sellerTaxes,
           subTotal + payload.order.deliveryInfo.price,
+          subTotal - sellerTaxes,
           labelUrl,
         );
       }

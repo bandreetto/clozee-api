@@ -24,6 +24,7 @@ export class MailService {
     subTotal: number,
     taxes: number,
     total: number,
+    sellerTotal: number,
     labelUrl: string,
   ): Promise<void> {
     await this.sgClient
@@ -56,6 +57,7 @@ export class MailService {
                 delivery_fee: formatEmailCurrency(order.deliveryInfo.price),
                 taxes: formatEmailCurrency(taxes),
                 total: formatEmailCurrency(total),
+                sellerTotal: formatEmailCurrency(sellerTotal),
                 label_url: labelUrl,
               },
             },
