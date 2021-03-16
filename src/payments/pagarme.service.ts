@@ -24,6 +24,7 @@ export class PagarmeService {
 
   async transaction({
     amount,
+    deliveryFee,
     seller,
     cardId,
     buyer,
@@ -44,7 +45,7 @@ export class PagarmeService {
       capture: true,
       async: false,
       installments: '1',
-      amount,
+      amount: amount + deliveryFee,
       card_id: cardId,
       payment_method: 'credit_card',
       billing: {
@@ -91,7 +92,7 @@ export class PagarmeService {
         },
         {
           recipient_id: configuration.pagarme.recipientId(),
-          amount: clozeeAmount,
+          amount: clozeeAmount + deliveryFee,
           liable: true,
           charge_processing_fee: true,
           charge_remainder: true,
