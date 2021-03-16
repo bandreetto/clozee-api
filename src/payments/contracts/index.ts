@@ -6,6 +6,7 @@ export interface ITransaction {
   cardId: string;
   buyer: User;
   amount: number;
+  deliveryFee: number;
   posts: Post[];
 }
 

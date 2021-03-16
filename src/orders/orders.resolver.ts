@@ -158,6 +158,7 @@ export class OrdersResolver {
 
       await this.pagarmeService.transaction({
         amount: posts.reduce((total, post) => post.price + total, 0),
+        deliveryFee: order.deliveryInfo.price,
         buyer: user,
         cardId: paymentMethod.cardId,
         posts,
