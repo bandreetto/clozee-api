@@ -229,7 +229,7 @@ export class MenvService {
     }
 
     try {
-      const response = await this.httpClient
+      await this.httpClient
         .post(
           `${configuration.menv.apiUrl()}/me/shipment/generate`,
           {
