@@ -18,19 +18,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-type Delivery {
-  _id: String!
-  buyersZipCode: String!
-  sellersZipCode: String!
-
-  """The delivery fare in cents."""
-  price: Int!
-  menvServiceNumber: Float!
-
-  """The expected delivery time in business days."""
-  deliveryTime: Int!
-}
-
 type Coordinates {
   latitude: Float!
   longitude: Float!
@@ -151,6 +138,29 @@ type PaymentMethod {
   flag: String!
 }
 
+type User {
+  _id: String!
+  pagarmeRecipientId: String
+  name: String
+  email: String
+  cpf: String
+  phoneNumber: String
+  bankInfo: BankInfo
+  posts: [Post!]!
+  savedPosts: [Post!]!
+  username: String
+  avatar: String
+  address: Address
+
+  """Tags used to customize user's feed."""
+  feedTags: FeedTags!
+  deviceToken: String!
+
+  """The ids of users credit cards"""
+  paymentMethods: [PaymentMethod!]!
+  createdAt: DateTime!
+}
+
 type Comment {
   _id: String!
   body: String!
@@ -226,61 +236,6 @@ enum POST_CONDITIONS {
   USED_FAIR
 }
 
-type User {
-  _id: String!
-  pagarmeRecipientId: String
-  name: String
-  email: String
-  cpf: String
-  phoneNumber: String
-  bankInfo: BankInfo
-  posts: [Post!]!
-  savedPosts: [Post!]!
-  username: String
-  avatar: String
-  address: Address
-
-  """Tags used to customize user's feed."""
-  feedTags: FeedTags!
-  deviceToken: String!
-
-  """The ids of users credit cards"""
-  paymentMethods: [PaymentMethod!]!
-  createdAt: DateTime!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
-}
-
-type PageInfo {
-  """The first cursor of this page."""
-  startCursor: String
-
-  """The last cursor of this page."""
-  endCursor: String
-
-  """A boolean indicating if there are more edges after this page."""
-  hasNextPage: Boolean!
-}
-
 type DeliveryInfo {
   """The menv delivery orderId."""
   menvDeliveryOrderId: Int
@@ -313,6 +268,51 @@ type Order {
   """The sum of the post's prices for this order."""
   itemsPrice: Float!
   createdAt: DateTime!
+}
+
+type Delivery {
+  _id: String!
+  buyersZipCode: String!
+  sellersZipCode: String!
+
+  """The delivery fare in cents."""
+  price: Int!
+  menvServiceNumber: Float!
+
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
+}
+
+type PageInfo {
+  """The first cursor of this page."""
+  startCursor: String
+
+  """The last cursor of this page."""
+  endCursor: String
+
+  """A boolean indicating if there are more edges after this page."""
+  hasNextPage: Boolean!
 }
 
 type Session {

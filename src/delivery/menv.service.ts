@@ -1,4 +1,9 @@
-import { HttpService, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpService,
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ascend, assocPath } from 'ramda';
 import configuration from 'src/config/configuration';
 import { Post } from 'src/posts/contracts';
@@ -93,7 +98,7 @@ export class MenvService {
         originZipCode,
         destinationZipCode,
       });
-      throw new Error('Internal error');
+      throw new InternalServerErrorException();
     }
   }
 
@@ -196,7 +201,7 @@ export class MenvService {
           error,
         ),
       });
-      return { orderId: null };
+      throw new InternalServerErrorException();
     }
   }
 
@@ -234,7 +239,7 @@ export class MenvService {
         ),
         orders,
       });
-      return null;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -266,7 +271,7 @@ export class MenvService {
         ),
         orders,
       });
-      return null;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -299,7 +304,7 @@ export class MenvService {
         ),
         orders,
       });
-      return null;
+      throw new InternalServerErrorException();
     }
   }
 }

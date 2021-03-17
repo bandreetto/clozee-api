@@ -4,11 +4,11 @@ import configuration from 'src/config/configuration';
 import { Order } from 'src/orders/contracts';
 import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
-import { formatEmailCurrency } from './notifications.logic';
+import { formatEmailCurrency } from '../notifications/notifications.logic';
 
 @Injectable()
-export class MailService {
-  logger = new Logger(MailService.name);
+export class MailerService {
+  logger = new Logger(MailerService.name);
   sgClient: Client;
 
   constructor() {

@@ -2,17 +2,13 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PubSub } from 'graphql-subscriptions';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
-import { TAX_PERCENTAGE } from 'src/common/contants';
 import { admin } from 'src/common/firebase-admin';
-import { MenvController } from 'src/delivery/menv.controller';
 import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
-import { OrdersService } from 'src/orders/orders.service';
 import { Post } from 'src/posts/contracts';
 import { UsersService } from 'src/users/users.service';
 import { v4 } from 'uuid';
 import { CommentsService } from '../comments/comments.service';
 import { CommentTagNotification, SaleNotification } from './contracts';
-import { MailService } from './mail.service';
 import { NotificationsService } from './notifications.service';
 
 @Injectable()
@@ -23,9 +19,6 @@ export class NotificationsConsumer {
     private readonly notificationsService: NotificationsService,
     private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
-    private readonly mailService: MailService,
-    private readonly ordersService: OrdersService,
-    private readonly menvController: MenvController,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -87,12 +80,13 @@ export class NotificationsConsumer {
         message: 'Error while sending comment push notifications.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
 
   @OnEvent('order.created', { async: true })
-  async sendOrderNotifications(payload: OrderCreatedPayload) {
+  async createSaleNotifications(payload: OrderCreatedPayload) {
     try {
       const sellerId = payload.posts[0].user as string;
       const notification: SaleNotification = {
@@ -109,63 +103,26 @@ export class NotificationsConsumer {
       /**
        * Graphql Subscription
        */
-      this.pubSub.publish('notification', {
+      await this.pubSub.publish('notification', {
         notification: createdNotification,
       });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while creating sale notifications',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('order.created', { async: true })
+  async sendPushNotifications(payload: OrderCreatedPayload) {
+    try {
+      const sellerId = payload.posts[0].user as string;
 
       const seller = await this.usersService.findById(sellerId);
-      const buyer = await this.usersService.findById(
-        payload.order.buyer as string,
-      );
 
-      const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
-
-      /**
-       * Menv Delivery
-       */
-
-      const labelUrl = await this.menvController.getLabelURLForOrder(
-        payload.order.deliveryInfo.menvDeliveryOrderId,
-      );
-
-      await this.ordersService.update(payload.order._id, {
-        deliveryInfo: {
-          ...payload.order.deliveryInfo,
-          deliveryLabelUrl: labelUrl,
-        },
-      });
-
-      /**
-       * Emails
-       */
-
-      this.mailService.sendBuyerEmail(
-        buyer,
-        payload.order,
-        payload.posts,
-        subTotal,
-        0,
-        subTotal + payload.order.deliveryInfo.price,
-      );
-
-      const sellerTaxes = subTotal * TAX_PERCENTAGE;
-
-      if (labelUrl) {
-        this.mailService.sendSellerMail(
-          seller,
-          payload.order,
-          payload.posts,
-          subTotal,
-          sellerTaxes,
-          subTotal + payload.order.deliveryInfo.price,
-          subTotal - sellerTaxes,
-          labelUrl,
-        );
-      }
-
-      /**
-       * Push Notifications
-       */
       if (!seller.deviceToken)
         return this.logger.warn({
           message:
@@ -189,9 +146,10 @@ export class NotificationsConsumer {
       await admin.messaging().sendAll(fcmNotifications);
     } catch (error) {
       this.logger.error({
-        message: 'Error while sending order.created notifications',
+        message: 'Error while sending created order push notifications',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
