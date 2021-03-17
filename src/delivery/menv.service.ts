@@ -1,5 +1,5 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
-import { ascend } from 'ramda';
+import { ascend, assocPath } from 'ramda';
 import configuration from 'src/config/configuration';
 import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
@@ -84,7 +84,12 @@ export class MenvService {
     } catch (error) {
       this.logger.error({
         message: 'Error while calculating delivery fee',
-        error,
+        error: error.toString(),
+        metadata: assocPath(
+          ['config', 'headers', 'Authorization'],
+          'redacted',
+          error,
+        ),
         originZipCode,
         destinationZipCode,
       });
@@ -184,7 +189,12 @@ export class MenvService {
     } catch (error) {
       this.logger.error({
         message: 'Error while trying to add delivery to cart',
-        error,
+        error: error.toString(),
+        metadata: assocPath(
+          ['config', 'headers', 'Authorization'],
+          'redacted',
+          error,
+        ),
       });
       return { orderId: null };
     }
@@ -216,7 +226,12 @@ export class MenvService {
     } catch (error) {
       this.logger.error({
         message: 'Error while checking out delivery',
-        error,
+        error: error.toString(),
+        metadata: assocPath(
+          ['config', 'headers', 'Authorization'],
+          'redacted',
+          error,
+        ),
         orders,
       });
       return null;
@@ -229,7 +244,7 @@ export class MenvService {
     }
 
     try {
-      const response = await this.httpClient
+      await this.httpClient
         .post(
           `${configuration.menv.apiUrl()}/me/shipment/generate`,
           {
@@ -243,7 +258,12 @@ export class MenvService {
     } catch (error) {
       this.logger.error({
         message: 'Error while generating labels',
-        error,
+        error: error.toString(),
+        metadata: assocPath(
+          ['config', 'headers', 'Authorization'],
+          'redacted',
+          error,
+        ),
         orders,
       });
       return null;
@@ -271,7 +291,12 @@ export class MenvService {
     } catch (error) {
       this.logger.error({
         message: 'Error while printing labels',
-        error,
+        error: error.toString(),
+        metadata: assocPath(
+          ['config', 'headers', 'Authorization'],
+          'redacted',
+          error,
+        ),
         orders,
       });
       return null;

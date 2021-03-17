@@ -3,9 +3,9 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Order } from 'src/orders/contracts';
 import { Post } from 'src/posts/contracts';
 import { UsersService } from '../users/users.service';
-import { MenvService } from './melhor-envio.service';
 import { reconciliateByKey } from '../common/reconciliators';
 import { OrdersService } from '../orders/orders.service';
+import { MenvService } from './menv.service';
 
 @Injectable()
 export class MenvConsumer {

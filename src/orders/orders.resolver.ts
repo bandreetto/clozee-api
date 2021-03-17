@@ -20,7 +20,6 @@ import { AuthGuard } from 'src/common/guards';
 import { TokenUser } from 'src/common/types';
 import { CountersService } from 'src/counters/counters.service';
 import { DeliveryService } from 'src/delivery/delivery.service';
-import { MenvService } from 'src/delivery/melhor-envio.service';
 import { Post } from 'src/posts/contracts';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { PostsService } from 'src/posts/posts.service';
@@ -44,7 +43,6 @@ export class OrdersResolver {
     private readonly salesLoader: SalesLoader,
     private readonly ordersService: OrdersService,
     private readonly countersService: CountersService,
-    private readonly menvService: MenvService,
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly deliveryService: DeliveryService,
