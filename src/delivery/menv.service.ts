@@ -166,7 +166,6 @@ export class MenvService {
         },
       ],
       options: {
-        insurance_value: posts.reduce((acc, post) => acc + post.price, 0),
         receipt: false,
         own_hand: false,
         reverse: false,
