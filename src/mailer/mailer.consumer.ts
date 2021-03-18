@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { OrderCreatedPayload } from '../orders/contracts/payloads';
-import { MailerService } from './mailer.service';
-import { UsersService } from '../users/users.service';
-import { DeliveryMenvCheckoutPayload } from '../delivery/contracts/payloads';
 import { TAX_PERCENTAGE } from 'src/common/contants';
+import { DeliveryMenvCheckoutPayload } from '../delivery/contracts/payloads';
+import { OrderCreatedPayload } from '../orders/contracts/payloads';
+import { UsersService } from '../users/users.service';
+import { MailerService } from './mailer.service';
 
 @Injectable()
 export class MailerConsumer {
@@ -45,11 +45,16 @@ export class MailerConsumer {
   @OnEvent('delivery.menv.checkout', { async: true })
   async sendSellerEmail(payload: DeliveryMenvCheckoutPayload) {
     try {
-      const sellesId = payload.posts[0].user as string;
-      const seller = await this.usersService.findById(sellesId);
+      const sellerId = payload.posts[0].user as string;
+      const buyerId = payload.order.buyer as string;
+      const [seller, buyer] = await Promise.all([
+        this.usersService.findById(sellerId),
+        this.usersService.findById(buyerId),
+      ]);
       const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
       const sellerTaxes = subTotal * TAX_PERCENTAGE;
       await this.mailerService.sendSellerMail(
+        buyer,
         seller,
         payload.order,
         payload.posts,
