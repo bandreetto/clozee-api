@@ -33,7 +33,7 @@ export class MenvService {
       Authorization: `Bearer ${configuration.menv.token()}`,
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'User-Agent': `${configuration.menv.contactMail()}`,
+      'User-Agent': `${configuration.menv.appName()} ${configuration.menv.contactMail()}`,
     },
   };
 
@@ -155,7 +155,7 @@ export class MenvService {
       products: posts.map(post => ({
         name: post.title,
         quantity: 1,
-        unitary_value: post.price,
+        unitary_value: post.price / 100,
       })),
       volumes: [
         {
@@ -166,7 +166,6 @@ export class MenvService {
         },
       ],
       options: {
-        insurance_value: posts.reduce((acc, post) => acc + post.price, 0),
         receipt: false,
         own_hand: false,
         reverse: false,
