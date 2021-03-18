@@ -72,6 +72,11 @@ export class MailerService {
             name: 'Clozee',
           },
           template_id: 'd-64580261f5004915aef8a5d1d2271646',
+          mail_settings: {
+            sandbox_mode: {
+              enable: configuration.sendgrid.sandbox(),
+            },
+          },
         },
       })
       .catch(error =>
@@ -132,6 +137,11 @@ export class MailerService {
             name: 'Clozee',
           },
           template_id: 'd-70d95bd77ff5444f8d6bd3b7a70632eb',
+          mail_settings: {
+            sandbox_mode: {
+              enable: configuration.sendgrid.sandbox(),
+            },
+          },
         },
       })
       .catch(error =>

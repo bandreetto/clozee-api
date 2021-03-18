@@ -16,6 +16,7 @@ export default {
   },
   sendgrid: {
     key: () => process.env.SENDGRID_API_KEY,
+    sandbox: () => process.env.SANDBOX_MODE !== 'false',
   },
   menv: {
     apiUrl: () => process.env.MELHOR_ENVIO_API,
