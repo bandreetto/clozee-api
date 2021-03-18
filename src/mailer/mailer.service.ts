@@ -18,6 +18,7 @@ export class MailerService {
   }
 
   async sendSellerMail(
+    buyer: User,
     seller: User,
     order: Order,
     soldPosts: Post[],
@@ -42,11 +43,11 @@ export class MailerService {
               ],
               dynamic_template_data: {
                 order_number: order.number,
-                recipient_name: seller.username,
-                recipient_full_name: seller.name,
-                recipient_phone_number: seller.phoneNumber,
-                recipient_address_line_1: `${seller.address.street}, ${seller.address.number}`,
-                recipient_address_line_2: `${seller.address.city} - ${seller.address.state} | ${seller.address.zipCode}`,
+                recipient_name: buyer.username,
+                recipient_full_name: buyer.name,
+                recipient_phone_number: buyer.phoneNumber,
+                recipient_address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
+                recipient_address_line_2: `${buyer.address.city} - ${buyer.address.state} | ${buyer.address.zipCode}`,
                 orderItems: soldPosts.map(post => ({
                   name: post.title,
                   size: post.size,
