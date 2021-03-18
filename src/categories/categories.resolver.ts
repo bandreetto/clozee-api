@@ -25,7 +25,9 @@ export class CategoriesResolver {
   @ResolveField()
   async children(@Root() category: Category) {
     const categories = await this.categoriesLoader.byParent.load(category._id);
-    return categories.sort(ascend(cat => cat.name));
+    return categories
+      .sort(ascend(cat => cat.name))
+      .sort(cat => (cat.name === 'Outros' ? 1 : -1));
   }
 
   @ResolveField()
