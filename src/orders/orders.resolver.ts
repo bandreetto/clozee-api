@@ -106,6 +106,9 @@ export class OrdersResolver {
         'You can only buy posts from the same seller in a checkout.',
       );
 
+    if (user._id === posts[0].user)
+      throw new BadRequestException('You cannot buy your own posts.');
+
     const seller = await this.usersService.findById(posts[0].user as string);
     const delivery = await this.deliveryService.findById(input.deliveryInfoId);
     if (!delivery)
