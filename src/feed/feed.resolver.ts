@@ -15,6 +15,7 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { SessionsService } from '../sessions/sessions.service';
 import { v4 } from 'uuid';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
+import { EventEmitter2 } from 'eventemitter2';
 
 @Resolver()
 export class FeedResolver {
@@ -25,6 +26,7 @@ export class FeedResolver {
     private readonly feedService: FeedService,
     private readonly seenPostService: SeenPostService,
     private readonly sessionsService: SessionsService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @Query(() => FeedPostConnection)
@@ -93,10 +95,9 @@ export class FeedResolver {
       feedPost,
       post: posts.find(post => post._id === feedPost.post),
     }));
-    const connection = fromPostsToConnection(
-      orderedPosts,
-      postsCount - args.first > 0,
-    );
+    const hasNextPage = postsCount - args.first > 0;
+    const connection = fromPostsToConnection(orderedPosts, hasNextPage);
+    if (!hasNextPage) this.eventEmitter.emit('feed.endReached', user._id);
     return connection;
   }
 

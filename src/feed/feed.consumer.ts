@@ -79,6 +79,7 @@ export class FeedConsumer {
           'Error while trying to create a feedPost from the post.created event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -93,6 +94,7 @@ export class FeedConsumer {
           'Error while trying to delete FeedPost from post.deleted event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -107,6 +109,7 @@ export class FeedConsumer {
         message: 'Error while incrementing post score from post.liked event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -121,6 +124,7 @@ export class FeedConsumer {
         message: 'Error while decrementing post score from post.unliked event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -136,6 +140,7 @@ export class FeedConsumer {
           'Error while incrementing post score from comment.created event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -149,6 +154,7 @@ export class FeedConsumer {
         message: 'Error while deleting FeedPost from order.created event.',
         payload,
         error: error.toString(),
+        metadata: error,
       });
     }
   }
@@ -167,6 +173,21 @@ export class FeedConsumer {
       this.logger.error({
         message: 'Error while merging session seen posts to blacklist.',
         error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('feed.endReached', { async: true })
+  async clearBlacklist(payload: string) {
+    try {
+      this.logger.log(`Clearing user ${payload} blacklist.`);
+      await this.seenPostService.clearBlacklist(payload);
+    } catch (error) {
+      this.logger.error({
+        message: `Could not clear user ${payload} blacklist.`,
+        error: error.toString(),
+        metadata: error,
       });
     }
   }

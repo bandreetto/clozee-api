@@ -58,4 +58,12 @@ export class SeenPostService {
       },
     ]);
   }
+
+  async clearBlacklist(userId: string): Promise<void> {
+    return this.postBlacklistModel
+      .findByIdAndUpdate(userId, {
+        $set: { posts: [] },
+      })
+      .lean();
+  }
 }
