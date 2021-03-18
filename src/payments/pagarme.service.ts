@@ -5,13 +5,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import pagarme from 'pagarme';
-import { BankAccountCreateOptions } from 'pagarme-js-types/src/client/bankAccounts/options';
 import R from 'ramda';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
 import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
 import { ICreateCardResponse, ITransaction } from './contracts';
+import { BankAccountCreateOptions } from './contracts/dtos';
 import {
   formatCPF,
   formatPhoneNumber,
@@ -24,6 +24,7 @@ export class PagarmeService {
 
   async transaction({
     amount,
+    deliveryFee,
     seller,
     cardId,
     buyer,
@@ -44,7 +45,7 @@ export class PagarmeService {
       capture: true,
       async: false,
       installments: '1',
-      amount,
+      amount: amount + deliveryFee,
       card_id: cardId,
       payment_method: 'credit_card',
       billing: {
@@ -91,7 +92,7 @@ export class PagarmeService {
         },
         {
           recipient_id: configuration.pagarme.recipientId(),
-          amount: clozeeAmount,
+          amount: clozeeAmount + deliveryFee,
           liable: true,
           charge_processing_fee: true,
           charge_remainder: true,
@@ -100,7 +101,7 @@ export class PagarmeService {
     });
 
     if (response.status !== 'paid') {
-      throw new InternalServerErrorException('Payment denied');
+      throw new InternalServerErrorException('Payment Denied');
     }
 
     return response.tid;
@@ -153,7 +154,7 @@ export class PagarmeService {
         api_key: configuration.pagarme.token(),
       });
       const response = await client.recipients.update({
-        recipient_id: recipientId,
+        id: recipientId,
         bank_account: {
           agencia: bankInfo.agency,
           agencia_dv: bankInfo.agencyDv,

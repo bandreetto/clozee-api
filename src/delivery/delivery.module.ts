@@ -2,11 +2,11 @@ import { forwardRef, HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrdersModule } from 'src/orders/orders.module';
 import { UsersModule } from 'src/users/users.module';
+import { MailerModule } from '../mailer/mailer.module';
 import { Delivery, DeliverySchema } from './contracts';
-import { CorreiosService } from './correios.service';
+import { DeliveryConsumer } from './delivery.consumer';
 import { DeliveryResolver } from './delivery.resolver';
 import { DeliveryService } from './delivery.service';
-import { MenvController } from './menv.controller';
 import { MenvService } from './menv.service';
 
 @Module({
@@ -18,16 +18,11 @@ import { MenvService } from './menv.service';
       },
     ]),
     HttpModule,
+    MailerModule,
     forwardRef(() => UsersModule),
     forwardRef(() => OrdersModule),
   ],
-  providers: [
-    DeliveryResolver,
-    CorreiosService,
-    DeliveryService,
-    MenvService,
-    MenvController,
-  ],
-  exports: [DeliveryService, MenvController, MenvService],
+  providers: [DeliveryResolver, DeliveryService, MenvService, DeliveryConsumer],
+  exports: [DeliveryService, MenvService],
 })
 export class DeliveryModule {}

@@ -20,7 +20,8 @@ export default {
   menv: {
     apiUrl: () => process.env.MELHOR_ENVIO_API,
     token: () => process.env.MELHOR_ENVIO_TOKEN,
-    contactMail: () => 'bruno@clozee.com.br',
+    appName: () => process.env.MELHOR_ENVIO_APP_NAME,
+    contactMail: () => process.env.MELHOR_ENVIO_CONTACT_MAIL,
   },
   pagarme: {
     recipientId: () => process.env.CLOZEE_RECIPIENT_ID,

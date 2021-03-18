@@ -1,33 +1,45 @@
-import { Inject, UseGuards } from '@nestjs/common';
-import { Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
+import { Inject, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
-import { AuthorizedConnectionContext, TokenUser } from 'src/common/types';
+import { TokenUser } from 'src/common/types';
 import { Notification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PubSub } from 'graphql-subscriptions';
+import { JwtService } from '@nestjs/jwt';
+import { Token } from 'src/auth/contracts';
+import { isAccessToken } from 'src/auth/auth.logic';
 
+/**
+ * 5 hours in seconds => 5 hours * 60 minutes * 60 seconds
+ */
+const FIVE_HOURS = 5 * 60 * 60;
 @Resolver(() => Notification)
 export class NotificationsResolver {
   constructor(
     private readonly notificationsService: NotificationsService,
+    private readonly jwtService: JwtService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
-  @UseGuards(AuthGuard)
   @Subscription(() => Notification, {
     filter: (
       payload: { notification: Notification },
-      _variables,
-      connectionContext: AuthorizedConnectionContext,
+      variables: { token: string; userId: string },
     ) => {
-      return (
-        payload?.notification?.user ===
-        connectionContext?.connection?.context?.token?.payload?.sub
-      );
+      return payload?.notification?.user === variables.userId;
     },
   })
-  notification() {
+  async notification(
+    @Args('token') token: string,
+    @Args('userId') userId: string,
+  ) {
+    const decodedToken = await this.jwtService.verifyAsync<Token>(token, {
+      complete: true,
+      clockTolerance: FIVE_HOURS,
+    });
+    if (!isAccessToken(decodedToken)) throw new ForbiddenException();
+    if (decodedToken.payload.sub !== userId) throw new ForbiddenException();
     return this.pubSub.asyncIterator('notification');
   }
 
