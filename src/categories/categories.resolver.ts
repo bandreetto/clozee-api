@@ -3,6 +3,7 @@ import { Args, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { ascend } from 'ramda';
 import { AuthGuard } from 'src/common/guards';
 import { CategoriesLoader } from './categories.dataloader';
+import { isOthersCategory } from './categories.logic';
 import { CategoriesService } from './categories.service';
 import { Category } from './contracts';
 
@@ -25,7 +26,17 @@ export class CategoriesResolver {
   @ResolveField()
   async children(@Root() category: Category) {
     const categories = await this.categoriesLoader.byParent.load(category._id);
-    return categories.sort(ascend(cat => cat.name));
+    const othersCat = categories.find(isOthersCategory);
+    const sortedCategories = categories.sort(ascend(cat => cat.name));
+
+    if (!othersCat) {
+      return sortedCategories;
+    }
+
+    return [
+      ...sortedCategories.filter(cat => !isOthersCategory(cat)),
+      othersCat,
+    ];
   }
 
   @ResolveField()
