@@ -5,13 +5,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import pagarme from 'pagarme';
-import { BankAccountCreateOptions } from 'pagarme-js-types/src/client/bankAccounts/options';
 import R from 'ramda';
 import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
 import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
 import { ICreateCardResponse, ITransaction } from './contracts';
+import { BankAccountCreateOptions } from './contracts/dtos';
 import {
   formatCPF,
   formatPhoneNumber,
@@ -154,7 +154,7 @@ export class PagarmeService {
         api_key: configuration.pagarme.token(),
       });
       const response = await client.recipients.update({
-        recipient_id: recipientId,
+        id: recipientId,
         bank_account: {
           agencia: bankInfo.agency,
           agencia_dv: bankInfo.agencyDv,
