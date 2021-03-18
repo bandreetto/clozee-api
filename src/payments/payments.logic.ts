@@ -1,5 +1,5 @@
-import { BankAccountTypes } from 'pagarme-js-types/src/client/bankAccounts/options';
 import { ACCOUNT_TYPES } from 'src/users/contracts/enum';
+import { BankAccountTypes } from './contracts/dtos';
 
 export const formatZipCode = (zipCode: string) => {
   return zipCode.replace(/\s/g, '').replace('-', '');
