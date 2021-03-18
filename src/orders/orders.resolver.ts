@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   InternalServerErrorException,
   Logger,
   UnauthorizedException,
@@ -175,6 +176,16 @@ export class OrdersResolver {
           buyer: tokenUser,
         },
       });
+
+      /**
+       * Check for mongo duplicated error code
+       */
+      if (error.code === 11000)
+        throw new ConflictException(
+          'Duplicated Sale error. This post is already sold.',
+        );
+
+      if (error.message === 'Payment Denied') throw error;
       throw new InternalServerErrorException(
         'An error occoured while trying to create order and sales.',
       );

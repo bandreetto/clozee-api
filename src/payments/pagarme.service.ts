@@ -101,7 +101,7 @@ export class PagarmeService {
     });
 
     if (response.status !== 'paid') {
-      throw new InternalServerErrorException('Payment denied');
+      throw new InternalServerErrorException('Payment Denied');
     }
 
     return response.tid;
