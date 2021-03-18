@@ -43,7 +43,7 @@ export class MailerService {
               ],
               dynamic_template_data: {
                 order_number: order.number,
-                recipient_name: buyer.name || buyer.username,
+                recipient_username: buyer.username,
                 recipient_full_name: buyer.name,
                 recipient_phone_number: buyer.phoneNumber,
                 recipient_address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
@@ -110,7 +110,7 @@ export class MailerService {
               ],
               dynamic_template_data: {
                 order_number: order.number,
-                username: buyer.name || buyer.username,
+                username: buyer.username,
                 full_name: buyer.name,
                 phone_number: buyer.phoneNumber,
                 address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
