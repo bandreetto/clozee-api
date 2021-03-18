@@ -138,29 +138,6 @@ type PaymentMethod {
   flag: String!
 }
 
-type User {
-  _id: String!
-  pagarmeRecipientId: String
-  name: String
-  email: String
-  cpf: String
-  phoneNumber: String
-  bankInfo: BankInfo
-  posts: [Post!]!
-  savedPosts: [Post!]!
-  username: String
-  avatar: String
-  address: Address
-
-  """Tags used to customize user's feed."""
-  feedTags: FeedTags!
-  deviceToken: String!
-
-  """The ids of users credit cards"""
-  paymentMethods: [PaymentMethod!]!
-  createdAt: DateTime!
-}
-
 type Comment {
   _id: String!
   body: String!
@@ -234,6 +211,29 @@ enum POST_CONDITIONS {
   USED_NEW
   USED_GOOD
   USED_FAIR
+}
+
+type User {
+  _id: String!
+  pagarmeRecipientId: String
+  name: String
+  email: String
+  cpf: String
+  phoneNumber: String
+  bankInfo: BankInfo
+  posts: [Post!]!
+  savedPosts: [Post!]!
+  username: String
+  avatar: String
+  address: Address
+
+  """Tags used to customize user's feed."""
+  feedTags: FeedTags!
+  deviceToken: String!
+
+  """The ids of users credit cards"""
+  paymentMethods: [PaymentMethod!]!
+  createdAt: DateTime!
 }
 
 type DeliveryInfo {
