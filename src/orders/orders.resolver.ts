@@ -162,6 +162,7 @@ export class OrdersResolver {
           paymentMethod: paymentMethod._id,
           buyersAddress: user.address,
           sellersAddress: seller.address,
+          clozeeTax: clozeeAmount,
           deliveryInfo: {
             price: delivery.price,
             deliveryTime: delivery.deliveryTime,
@@ -215,6 +216,16 @@ export class OrdersResolver {
   async buyer(@Root() order: Order): Promise<User> {
     if (typeof order.buyer !== 'string') return order.buyer;
     return this.usersLoader.load(order.buyer);
+  }
+
+  @ResolveField()
+  async sellerAmount(@Root() order: Order) {
+    const sales = await this.salesLoader.byOrder.load(order._id);
+    const posts = (await this.postsLoader.loadMany(
+      sales.map(s => s.post as string),
+    )) as Post[];
+
+    return getSubTotal(posts) - order.clozeeTax;
   }
 
   @ResolveField()

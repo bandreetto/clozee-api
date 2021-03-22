@@ -38,6 +38,13 @@ export class Order {
   @Field(() => DeliveryInfo)
   deliveryInfo: DeliveryInfo;
 
+  @Prop({ required: true })
+  @Field({ description: 'The amount charged from the seller.' })
+  clozeeTax: number;
+
+  @Field({ description: 'The final amount that the seller will receive.' })
+  sellerAmount?: number;
+
   @Field(() => [Post], { description: 'The posts of this order.' })
   posts?: Post[];
 

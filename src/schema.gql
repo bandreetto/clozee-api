@@ -259,6 +259,12 @@ type Order {
   sellersAddress: Address!
   deliveryInfo: DeliveryInfo!
 
+  """The amount charged from the seller."""
+  clozeeTax: Float!
+
+  """The final amount that the seller will receive."""
+  sellerAmount: Float!
+
   """The posts of this order."""
   posts: [Post!]!
 
