@@ -44,9 +44,15 @@ export class FeedResolver {
     }
     let tags: FeedTags;
     if (feedTags) {
+      const sizes = feedTags.sizes.length
+        ? feedTags.sizes
+        : Object.values(SIZES);
+      const genders = feedTags.genders.length
+        ? feedTags.genders
+        : Object.values(GENDER_TAGS);
       tags = {
-        sizes: uniq([...feedTags.sizes, SIZES.OTHER, SIZES.UNIQUE]),
-        genders: uniq([...feedTags.genders, GENDER_TAGS.NEUTRAL]),
+        sizes: uniq([...sizes, SIZES.OTHER, SIZES.UNIQUE]),
+        genders: uniq([...genders, GENDER_TAGS.NEUTRAL]),
       };
     } else {
       tags = {
@@ -54,7 +60,7 @@ export class FeedResolver {
         genders: Object.values(GENDER_TAGS),
       };
     }
-    console.log({ tags, feedTags });
+
     let feedPosts: Feed[], postsCount: number;
     if (searchTerm) {
       let searchResult: Feed[];
