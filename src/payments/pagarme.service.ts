@@ -1,15 +1,12 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import pagarme from 'pagarme';
 import R from 'ramda';
-import { TAX_PERCENTAGE } from 'src/common/contants';
 import configuration from 'src/config/configuration';
 import { User } from 'src/users/contracts';
-import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE } from './../common/contants';
 import { ICreateCardResponse, ITransaction } from './contracts';
 import { BankAccountCreateOptions } from './contracts/dtos';
 import {
@@ -23,29 +20,25 @@ export class PagarmeService {
   logger = new Logger(PagarmeService.name);
 
   async transaction({
-    amount,
+    clozeeAmount,
+    sellerAmount,
     deliveryFee,
     seller,
     cardId,
     buyer,
     posts,
   }: ITransaction): Promise<string> {
-    if (amount < MINIMUM_TRANSACTION_VALUE) {
-      throw new BadRequestException('Invalid transaction');
-    }
+    const totalAmount = clozeeAmount + sellerAmount;
+
     const client = await pagarme.client.connect({
       api_key: configuration.pagarme.token(),
     });
-    const clozeeAmount = Math.floor(
-      amount * TAX_PERCENTAGE + FIXED_TAX * posts.length,
-    );
-    const sellerAmount = amount - clozeeAmount;
 
     const response = await client.transactions.create({
       capture: true,
       async: false,
       installments: '1',
-      amount: amount + deliveryFee,
+      amount: totalAmount + deliveryFee,
       card_id: cardId,
       payment_method: 'credit_card',
       billing: {

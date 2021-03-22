@@ -2,10 +2,11 @@ import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
 
 export interface ITransaction {
+  clozeeAmount: number;
+  sellerAmount: number;
   seller: User;
   cardId: string;
   buyer: User;
-  amount: number;
   deliveryFee: number;
   posts: Post[];
 }

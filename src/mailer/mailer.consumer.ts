@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { TAX_PERCENTAGE } from 'src/common/contants';
 import { DeliveryMenvCheckoutPayload } from '../delivery/contracts/payloads';
 import { OrderCreatedPayload } from '../orders/contracts/payloads';
 import { UsersService } from '../users/users.service';
 import { MailerService } from './mailer.service';
+import { getSplitValues, getSubTotal } from '../orders/orders.logic';
 
 @Injectable()
 export class MailerConsumer {
@@ -22,14 +22,13 @@ export class MailerConsumer {
         payload.order.buyer as string,
       );
 
-      const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
+      const subTotal = getSubTotal(payload.posts);
 
       await this.mailerService.sendBuyerEmail(
         buyer,
         payload.order,
         payload.posts,
         subTotal,
-        0,
         subTotal + payload.order.deliveryInfo.price,
       );
     } catch (error) {
@@ -51,8 +50,8 @@ export class MailerConsumer {
         this.usersService.findById(sellerId),
         this.usersService.findById(buyerId),
       ]);
-      const subTotal = payload.posts.reduce((acc, post) => acc + post.price, 0);
-      const sellerTaxes = subTotal * TAX_PERCENTAGE;
+      const subTotal = getSubTotal(payload.posts);
+      const [sellerTaxes] = getSplitValues(payload.posts);
       await this.mailerService.sendSellerMail(
         buyer,
         seller,
@@ -60,7 +59,6 @@ export class MailerConsumer {
         payload.posts,
         subTotal,
         sellerTaxes,
-        subTotal + payload.order.deliveryInfo.price,
         subTotal - sellerTaxes,
         payload.labelUrl,
       );

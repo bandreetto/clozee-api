@@ -33,6 +33,8 @@ import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { PagarmeService } from 'src/payments/pagarme.service';
+import { getSubTotal, getSplitValues } from './orders.logic';
+import { MINIMUM_TRANSACTION_VALUE } from 'src/common/contants';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -126,6 +128,17 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
+    const [clozeeAmount, sellerAmount] = getSplitValues(posts);
+    if (clozeeAmount + sellerAmount < MINIMUM_TRANSACTION_VALUE) {
+      this.logger.error({
+        message: `The sub-total of the order cannot be less than the minimum transaction value (${MINIMUM_TRANSACTION_VALUE.toLocaleString(
+          'pt-BR',
+          { style: 'currency', currency: 'BRL' },
+        )}`,
+      });
+      throw new BadRequestException('');
+    }
+
     let order: Order;
     const session = await this.ordersService.startTransaction();
     try {
@@ -159,7 +172,8 @@ export class OrdersResolver {
       );
 
       await this.pagarmeService.transaction({
-        amount: posts.reduce((total, post) => post.price + total, 0),
+        clozeeAmount,
+        sellerAmount,
         deliveryFee: order.deliveryInfo.price,
         buyer: user,
         cardId: paymentMethod.cardId,
@@ -217,8 +231,8 @@ export class OrdersResolver {
     const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),
     )) as Post[];
-    const postsTotal = posts.reduce((total, post) => total + post.price, 0);
-    return postsTotal + order.deliveryInfo.price;
+    const subTotal = getSubTotal(posts);
+    return subTotal + order.deliveryInfo.price;
   }
 
   @ResolveField()
@@ -227,6 +241,6 @@ export class OrdersResolver {
     const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),
     )) as Post[];
-    return posts.reduce((total, post) => total + post.price, 0);
+    return getSubTotal(posts);
   }
 }

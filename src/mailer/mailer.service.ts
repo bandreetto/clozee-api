@@ -24,7 +24,6 @@ export class MailerService {
     soldPosts: Post[],
     subTotal: number,
     taxes: number,
-    total: number,
     sellerTotal: number,
     labelUrl: string,
   ): Promise<void> {
@@ -55,10 +54,8 @@ export class MailerService {
                   image: post.images[0],
                 })),
                 subtotal: formatEmailCurrency(subTotal),
-                delivery_fee: formatEmailCurrency(order.deliveryInfo.price),
                 taxes: formatEmailCurrency(taxes),
-                total: formatEmailCurrency(total),
-                sellerTotal: formatEmailCurrency(sellerTotal),
+                seller_total: formatEmailCurrency(sellerTotal),
                 label_url: labelUrl,
               },
             },
@@ -92,7 +89,6 @@ export class MailerService {
     order: Order,
     boughtPosts: Post[],
     subTotal: number,
-    taxes: number,
     total: number,
   ) {
     await this.sgClient
@@ -123,7 +119,6 @@ export class MailerService {
                 })),
                 subtotal: formatEmailCurrency(subTotal),
                 delivery_fee: formatEmailCurrency(order.deliveryInfo.price),
-                taxes: formatEmailCurrency(taxes),
                 total: formatEmailCurrency(total),
               },
             },
