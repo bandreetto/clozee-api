@@ -27,6 +27,8 @@ export class MailerService {
     sellerTotal: number,
     labelUrl: string,
   ): Promise<void> {
+    const buyersAddressWithoutComplement = `${buyer.address.street}, ${buyer.address.number}`;
+    const buyersAddressWithComplement = `${buyersAddressWithoutComplement}, ${buyer.address.complement}`;
     await this.sgClient
       .request({
         method: 'POST',
@@ -45,7 +47,9 @@ export class MailerService {
                 recipient_username: buyer.username,
                 recipient_full_name: buyer.name,
                 recipient_phone_number: buyer.phoneNumber,
-                recipient_address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
+                recipient_address_line_1: buyer.address.complement
+                  ? buyersAddressWithComplement
+                  : buyersAddressWithoutComplement,
                 recipient_address_line_2: `${buyer.address.city} - ${buyer.address.state} | ${buyer.address.zipCode}`,
                 orderItems: soldPosts.map(post => ({
                   name: post.title,
@@ -91,6 +95,8 @@ export class MailerService {
     subTotal: number,
     total: number,
   ) {
+    const buyersAddressWithoutComplement = `${buyer.address.street}, ${buyer.address.number}`;
+    const buyersAddressWithComplement = `${buyersAddressWithoutComplement}, ${buyer.address.complement}`;
     await this.sgClient
       .request({
         method: 'POST',
@@ -109,7 +115,9 @@ export class MailerService {
                 username: buyer.username,
                 full_name: buyer.name,
                 phone_number: buyer.phoneNumber,
-                address_line_1: `${buyer.address.street}, ${buyer.address.number}`,
+                address_line_1: buyer.address.complement
+                  ? buyersAddressWithComplement
+                  : buyersAddressWithoutComplement,
                 address_line_2: `${buyer.address.city} - ${buyer.address.state} | ${buyer.address.zipCode}`,
                 orderItems: boughtPosts.map(post => ({
                   name: post.title,
