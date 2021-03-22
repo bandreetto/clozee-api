@@ -16,6 +16,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { v4 } from 'uuid';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { EventEmitter2 } from 'eventemitter2';
+import { uniq } from 'ramda';
 
 @Resolver()
 export class FeedResolver {
@@ -43,14 +44,17 @@ export class FeedResolver {
     }
     let tags: FeedTags;
     if (feedTags) {
-      tags = feedTags;
+      tags = {
+        sizes: uniq([...feedTags.sizes, SIZES.OTHER, SIZES.UNIQUE]),
+        genders: uniq([...feedTags.genders, GENDER_TAGS.NEUTRAL]),
+      };
     } else {
       tags = {
         sizes: Object.values(SIZES),
         genders: Object.values(GENDER_TAGS),
       };
     }
-
+    console.log({ tags, feedTags });
     let feedPosts: Feed[], postsCount: number;
     if (searchTerm) {
       let searchResult: Feed[];
