@@ -97,7 +97,8 @@ export class FeedResolver {
     }));
     const hasNextPage = postsCount - args.first > 0;
     const connection = fromPostsToConnection(orderedPosts, hasNextPage);
-    if (!hasNextPage) this.eventEmitter.emit('feed.endReached', user._id);
+    if (!hasNextPage && user?._id)
+      await this.eventEmitter.emitAsync('feed.endReached', user._id);
     return connection;
   }
 
