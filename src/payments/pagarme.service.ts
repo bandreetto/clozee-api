@@ -108,10 +108,14 @@ export class PagarmeService {
 
       const bankAccount: BankAccountCreateOptions = {
         agencia: user.bankInfo.agency,
-        agencia_dv: user.bankInfo.agencyDv,
+        ...(user.bankInfo.agencyDv
+          ? { agencia_dv: user.bankInfo.agencyDv }
+          : null),
         bank_code: String(user.bankInfo.bank),
         conta: user.bankInfo.account,
-        conta_dv: user.bankInfo.accountDv,
+        ...(user.bankInfo.accountDv
+          ? { conta_dv: user.bankInfo.accountDv }
+          : null),
         document_number: formatCPF(user.bankInfo.holderDocument),
         legal_name: user.bankInfo.holderName,
         type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
