@@ -7,8 +7,8 @@ export const errorLoggerPlugin = {
     return {
       didEncounterErrors(context) {
         if (
-          context.error[0].message === 'Unauthorized' ||
-          context.error[0].message === 'Forbidden resource'
+          context.errors[0].message === 'Unauthorized' ||
+          context.errors[0].message === 'Forbidden resource'
         )
           return;
         logger.error({
