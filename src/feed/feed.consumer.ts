@@ -13,8 +13,8 @@ import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
 import { SeenPostService } from './seen-post.service';
 import { Session } from 'src/sessions/contracts';
 
-const FEMALE_CATEGORY_ID = '9f09504e-9caa-43b5-b0fd-1c1da5d1606b';
-const MALE_CATEGORY_ID = '572edcbc-189e-40a2-94a6-e17167c8bc8e';
+const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
+const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
 @Injectable()
 export class FeedConsumer {
   logger = new Logger(FeedConsumer.name);
@@ -182,7 +182,7 @@ export class FeedConsumer {
   async clearBlacklist(payload: string) {
     try {
       this.logger.log(`Clearing user ${payload} blacklist.`);
-      await this.seenPostService.clearBlacklist(payload);
+      return this.seenPostService.clearBlacklist(payload);
     } catch (error) {
       this.logger.error({
         message: `Could not clear user ${payload} blacklist.`,
