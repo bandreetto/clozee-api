@@ -23,6 +23,7 @@ import { PostsModule } from './posts/posts.module';
 import { SessionsModule } from './sessions/sessions.module';
 import { UsersModule } from './users/users.module';
 import { MailerModule } from './mailer/mailer.module';
+import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { MailerModule } from './mailer/mailer.module';
         subscriptions: {
           onConnect: WebSocketTokenMiddleware(jwtService),
         },
+        plugins: [errorLoggerPlugin],
       }),
       inject: [JwtService],
     }),
