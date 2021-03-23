@@ -154,10 +154,10 @@ export class PagarmeService {
         id: recipientId,
         bank_account: {
           agencia: bankInfo.agency,
-          agencia_dv: bankInfo.agencyDv,
+          ...(bankInfo.agencyDv ? { agencia_dv: bankInfo.agencyDv } : null),
           bank_code: String(bankInfo.bank),
           conta: bankInfo.account,
-          conta_dv: bankInfo.accountDv,
+          ...(bankInfo.accountDv ? { conta_dv: bankInfo.accountDv } : null),
           document_number: formatCPF(bankInfo.holderDocument),
           legal_name: bankInfo.holderName,
           type: fromAccountTypeToPagarmeType(bankInfo.accountType),
