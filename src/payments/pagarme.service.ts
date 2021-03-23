@@ -11,7 +11,6 @@ import { ICreateCardResponse, ITransaction } from './contracts';
 import { BankAccountCreateOptions } from './contracts/dtos';
 import {
   formatCPF,
-  formatDigit,
   formatPhoneNumber,
   formatZipCode,
   fromAccountTypeToPagarmeType,
@@ -110,12 +109,12 @@ export class PagarmeService {
       const bankAccount: BankAccountCreateOptions = {
         agencia: user.bankInfo.agency,
         ...(user.bankInfo.agencyDv
-          ? { agencia_dv: formatDigit(user.bankInfo.agencyDv) }
+          ? { agencia_dv: user.bankInfo.agencyDv }
           : null),
         bank_code: String(user.bankInfo.bank),
         conta: user.bankInfo.account,
         ...(user.bankInfo.accountDv
-          ? { conta_dv: formatDigit(user.bankInfo.accountDv) }
+          ? { conta_dv: user.bankInfo.accountDv }
           : null),
         document_number: formatCPF(user.bankInfo.holderDocument),
         legal_name: user.bankInfo.holderName,
@@ -155,14 +154,10 @@ export class PagarmeService {
         id: recipientId,
         bank_account: {
           agencia: bankInfo.agency,
-          ...(bankInfo.agencyDv
-            ? { agencia_dv: formatDigit(bankInfo.agencyDv) }
-            : null),
+          ...(bankInfo.agencyDv ? { agencia_dv: bankInfo.agencyDv } : null),
           bank_code: String(bankInfo.bank),
           conta: bankInfo.account,
-          ...(bankInfo.accountDv
-            ? { conta_dv: formatDigit(bankInfo.accountDv) }
-            : null),
+          ...(bankInfo.accountDv ? { conta_dv: bankInfo.accountDv } : null),
           document_number: formatCPF(bankInfo.holderDocument),
           legal_name: bankInfo.holderName,
           type: fromAccountTypeToPagarmeType(bankInfo.accountType),
