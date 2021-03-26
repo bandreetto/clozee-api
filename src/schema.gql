@@ -422,6 +422,7 @@ type Mutation {
   addPost(addPostInput: AddPostInput!): Post!
   editPost(updateFields: UpdatePostFields!, postId: String!): Post!
   deletePost(postId: String!): Post!
+  reportPost(postId: String!): Post!
   checkout(input: CheckoutInput!): Order!
   updateUserFeedTags(tags: FeedTagsInput!): User!
   savePost(postId: String!): Post!
