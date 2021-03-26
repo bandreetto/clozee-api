@@ -50,6 +50,9 @@ export class Post {
   })
   condition: POST_CONDITIONS;
 
+  @Prop({ default: [] })
+  reportedBy?: string[];
+
   @Field(() => [Comment])
   comments: Comment[];
 

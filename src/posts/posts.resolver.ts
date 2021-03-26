@@ -124,6 +124,18 @@ export class PostsResolver {
     return deletedPost;
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => Post)
+  async reportPost(
+    @Args('postId') postId: string,
+    @CurrentUser() user: TokenUser,
+  ) {
+    const post = await this.postsService.findById(postId);
+    return this.postsService.updateOne(postId, {
+      reportedBy: [...post.reportedBy, user._id],
+    });
+  }
+
   @ResolveField()
   async user(@Root() post: Post): Promise<User> {
     if (typeof post.user !== 'string') return post.user;
