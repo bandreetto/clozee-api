@@ -35,6 +35,7 @@ export class FeedService {
               $or: [
                 { score: cursor.maxScore, createdAt: { $lt: cursor.before } },
                 { score: { $lt: cursor.maxScore } },
+                { score: 0, createdAt: { $lt: cursor.before } },
               ],
             }
           : null),
@@ -54,6 +55,7 @@ export class FeedService {
   async countByScore(
     tags: FeedTags,
     cursor?: { maxScore: number; before: Date },
+    blacklistedPosts: string[] = [],
   ): Promise<number> {
     return this.feedModel.countDocuments({
       ...(cursor
@@ -61,6 +63,7 @@ export class FeedService {
             $or: [
               { score: cursor.maxScore, createdAt: { $lt: cursor.before } },
               { score: { $lt: cursor.maxScore } },
+              { score: 0, createdAt: { $lt: cursor.before } },
             ],
           }
         : null),
@@ -70,6 +73,7 @@ export class FeedService {
       ...(tags.genders.length
         ? { 'tags.gender': { $in: tags.genders } }
         : { 'tags.gender': { $in: Object.values(GENDER_TAGS) } }),
+      post: { $nin: blacklistedPosts },
     });
   }
 
@@ -79,6 +83,7 @@ export class FeedService {
     limit: number,
     maxScore = Infinity,
     createdBefore?: Date,
+    blacklistedPosts: string[] = [],
   ): Promise<Feed[]> {
     return this.feedModel.aggregate([
       {
@@ -106,6 +111,7 @@ export class FeedService {
               ? tags.genders
               : Object.values(GENDER_TAGS),
           },
+          post: { $nin: blacklistedPosts },
           searchScore: { $lt: maxScore },
         },
       },
@@ -126,6 +132,7 @@ export class FeedService {
     tags: FeedTags,
     maxScore = Infinity,
     createdBefore?: Date,
+    blacklistedPosts: string[] = [],
   ): Promise<number> {
     const [result] = await this.feedModel.aggregate([
       {
@@ -153,6 +160,7 @@ export class FeedService {
               ? tags.genders
               : Object.values(GENDER_TAGS),
           },
+          post: { $nin: blacklistedPosts },
           score: { $lt: maxScore },
         },
       },
