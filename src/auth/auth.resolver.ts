@@ -19,7 +19,7 @@ import { CurrentToken, TokenTypes } from 'src/common/decorators';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
-const ACCESS_TOKEN_EXP = '10 min';
+const ACCESS_TOKEN_EXP = '1 year';
 const REFRESH_TOKEN_EXP = '180 days';
 
 @Resolver()

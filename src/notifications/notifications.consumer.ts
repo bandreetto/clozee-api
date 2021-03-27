@@ -10,6 +10,7 @@ import { v4 } from 'uuid';
 import { CommentsService } from '../comments/comments.service';
 import { CommentTagNotification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
+import { PostCommentNotification } from './contracts/post-comment-notification';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -23,7 +24,7 @@ export class NotificationsConsumer {
   ) {}
 
   @OnEvent('comment.created', { async: true })
-  async createNotifications(payload: CommentCreatedPayload) {
+  async createTagNotifications(payload: CommentCreatedPayload) {
     try {
       if (!payload.comment.tags.length) return;
       const commentTags = payload.comment.tags as string[];
@@ -48,7 +49,7 @@ export class NotificationsConsumer {
       );
     } catch (error) {
       this.logger.error({
-        message: 'Error while sending comment.created notifications',
+        message: 'Error while creating comment tag notifications',
         payload,
         error: error.toString(),
       });
@@ -56,7 +57,7 @@ export class NotificationsConsumer {
   }
 
   @OnEvent('comment.created', { async: true })
-  async sendCommentPushNotification(payload: CommentCreatedPayload) {
+  async sendCommentTagPushNotification(payload: CommentCreatedPayload) {
     try {
       const users = await this.usersService.findManyByIds([
         payload.comment.user as string,
@@ -77,7 +78,34 @@ export class NotificationsConsumer {
       });
     } catch (error) {
       this.logger.error({
-        message: 'Error while sending comment push notifications.',
+        message: 'Error while sending comment tag push notifications.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('comment.created', { async: true })
+  async createPostComentNotification(payload: CommentCreatedPayload) {
+    try {
+      const postCommentNotification: PostCommentNotification = {
+        _id: v4(),
+        comment: payload.comment._id,
+        kind: PostCommentNotification.name,
+        post: payload.post._id,
+        unseen: true,
+        user: payload.post.user as string,
+      };
+      const notification = await this.notificationsService.create(
+        postCommentNotification,
+      );
+      this.pubSub.publish('notification', {
+        notification,
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while creating post commented notification.',
         payload,
         error: error.toString(),
         metadata: error,

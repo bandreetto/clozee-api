@@ -1,9 +1,11 @@
 export * from './comment-tag-notification';
 export * from './sale-notification';
+export * from './post-comment-notification';
 
 import { Field, InterfaceType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { CommentTagNotification } from './comment-tag-notification';
+import { PostCommentNotification } from './post-comment-notification';
 import { SaleNotification } from './sale-notification';
 
 @Schema({ discriminatorKey: 'kind', timestamps: true })
@@ -14,6 +16,8 @@ import { SaleNotification } from './sale-notification';
         return CommentTagNotification;
       case SaleNotification.name:
         return SaleNotification;
+      case PostCommentNotification.name:
+        return PostCommentNotification;
       default:
         throw new Error('Unidentified Notification kind.');
     }
@@ -27,7 +31,11 @@ export class Notification {
   @Prop({
     type: String,
     required: true,
-    enum: [CommentTagNotification.name],
+    enum: [
+      CommentTagNotification.name,
+      SaleNotification.name,
+      PostCommentNotification.name,
+    ],
   })
   @Field()
   kind: string;
