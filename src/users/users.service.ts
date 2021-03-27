@@ -14,6 +14,8 @@ export class UsersService {
     private readonly paymentMethodModel: Model<PaymentMethod & Document>,
   ) {}
 
+  // User
+
   async findById(id: string): Promise<User> {
     return this.userModel.findById(id).lean();
   }
@@ -72,6 +74,18 @@ export class UsersService {
     return updatedUser;
   }
 
+  async addToBlockedUsers(userId, blockedUserId): Promise<User> {
+    return this.userModel.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { blockedUsers: blockedUserId },
+      },
+      {
+        new: true,
+      },
+    );
+  }
+
   async filter(
     filters: {
       username?: string;
@@ -119,6 +133,8 @@ export class UsersService {
     return user.toObject();
   }
 
+  // Saved Posts
+
   async findManySavedPosts(userIds: string[]): Promise<SavedPost[]> {
     return this.savedPostModel
       .find({
@@ -143,6 +159,8 @@ export class UsersService {
       .lean();
     return savedPost as SavedPost;
   }
+
+  // Payment Methods
 
   async addPaymentMethod(
     userId: string,

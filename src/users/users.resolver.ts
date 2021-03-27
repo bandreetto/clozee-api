@@ -1,4 +1,8 @@
-import { BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -7,6 +11,7 @@ import {
   Resolver,
   Root,
 } from '@nestjs/graphql';
+import { EventEmitter2 } from 'eventemitter2';
 import { descend, sort, uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
@@ -26,6 +31,7 @@ import {
   FeedTagsInput,
   UpdateUserInfoInput,
 } from './contracts/inputs';
+import { BlockUserPayload } from './contracts/payloads';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
 
@@ -37,7 +43,10 @@ export class UsersResolver {
     private readonly postsLoader: PostsLoader,
     private readonly postsService: PostsService,
     private readonly pagarmeService: PagarmeService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  // Queries
 
   @UseGuards(AuthGuard)
   @Query(() => User)
@@ -77,6 +86,8 @@ export class UsersResolver {
     }
     return usersResult;
   }
+
+  // Mutations
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
@@ -245,6 +256,28 @@ export class UsersResolver {
     return this.usersService.updateUser(user._id, { deviceToken: null });
   }
 
+  @UseGuards(AuthGuard)
+  @Mutation(() => User)
+  async blockUser(
+    @Args('userId') blockedUserId: string,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    const userBlocked = await this.usersService.findById(blockedUserId);
+    if (!userBlocked)
+      throw new NotFoundException('Could not find the user to block.');
+    const updatedUser = await this.usersService.addToBlockedUsers(
+      user._id,
+      blockedUserId,
+    );
+    this.eventEmitter.emit('user.blocked', {
+      blockingUser: updatedUser,
+      blockedUserId: blockedUserId,
+    } as BlockUserPayload);
+    return updatedUser;
+  }
+
+  // Field Resolvers
+
   @ResolveField()
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsLoader.byUser.load(user._id);
@@ -270,5 +303,13 @@ export class UsersResolver {
   @ResolveField()
   async paymentMethods(@Root() user: User): Promise<PaymentMethod[]> {
     return this.usersLoader.paymentMethods.load(user._id);
+  }
+
+  @ResolveField()
+  async blockedUsers(@Root() user: User): Promise<User[]> {
+    return user.blockedUsers.map(blockedUser => {
+      if (typeof blockedUser !== 'string') return blockedUser;
+      return this.usersLoader.load(blockedUser);
+    });
   }
 }

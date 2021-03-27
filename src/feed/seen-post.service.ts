@@ -59,11 +59,24 @@ export class SeenPostService {
     ]);
   }
 
-  async clearBlacklist(userId: string): Promise<void> {
+  async clearBlacklist(userId: string): Promise<PostBlacklist> {
     return this.postBlacklistModel
       .findByIdAndUpdate(userId, {
         $set: { posts: [] },
       })
       .lean();
+  }
+
+  async addToBlockedUserPosts(
+    userId: string,
+    posts: string[],
+  ): Promise<PostBlacklist> {
+    return this.postBlacklistModel.findByIdAndUpdate(
+      userId,
+      {
+        $addToSet: { blockedUsersPosts: { $each: posts } },
+      },
+      { new: true },
+    );
   }
 }

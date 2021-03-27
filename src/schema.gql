@@ -18,6 +18,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Category {
+  _id: String!
+  name: String!
+  parent: Category
+
+  """
+  Every parent of this category, from its direct parent to the category root.
+  """
+  ancestrals: [Category!]!
+  children: [Category!]!
+}
+
 type Coordinates {
   latitude: Float!
   longitude: Float!
@@ -153,18 +165,6 @@ type Comment {
   createdAt: DateTime!
 }
 
-type Category {
-  _id: String!
-  name: String!
-  parent: Category
-
-  """
-  Every parent of this category, from its direct parent to the category root.
-  """
-  ancestrals: [Category!]!
-  children: [Category!]!
-}
-
 type Post {
   _id: String!
   user: User!
@@ -229,11 +229,37 @@ type User {
 
   """Tags used to customize user's feed."""
   feedTags: FeedTags!
+
+  """The device token used for push notifications."""
   deviceToken: String!
+
+  """The list of users blocked by this user."""
+  blockedUsers: [User!]!
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
   createdAt: DateTime!
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
 }
 
 type DeliveryInfo {
@@ -287,27 +313,6 @@ type Delivery {
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
 }
 
 type PageInfo {
@@ -386,11 +391,6 @@ type PostCommentNotification implements Notification {
 type Query {
   """Returns all categories"""
   categories(roots: Boolean): [Category!]!
-  post(postId: String!): Post!
-  posts(
-    """Filter posts by user id"""
-    user: String!
-  ): [Post!]!
   order(orderId: String!): Order!
 
   """The orders that the current user has bought."""
@@ -398,12 +398,11 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
-  banks: [Bank!]!
-  me: User!
-  user(id: String!): User!
-
-  """A list of 60 users"""
-  users(searchTerm: String): [User!]!
+  post(postId: String!): Post!
+  posts(
+    """Filter posts by user id"""
+    user: String!
+  ): [Post!]!
   feed(
     searchTerm: String
     tags: FeedTagsInput
@@ -414,6 +413,12 @@ type Query {
     """Only return edges after this cursor."""
     after: String
   ): FeedPostConnection!
+  banks: [Bank!]!
+  me: User!
+  user(id: String!): User!
+
+  """A list of 60 users"""
+  users(searchTerm: String): [User!]!
   notifications: [Notification!]!
 }
 
@@ -430,7 +435,7 @@ type Mutation {
   Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
   """
   updateDeliveryInfo(seller: String!): Delivery!
-  addComment(input: AddCommentInput!): Comment!
+  checkout(input: CheckoutInput!): Order!
   likePost(postId: String!): Post!
   unlikePost(postId: String!): Post!
 
@@ -440,7 +445,12 @@ type Mutation {
   editPost(updateFields: UpdatePostFields!, postId: String!): Post!
   deletePost(postId: String!): Post!
   reportPost(postId: String!): Post!
-  checkout(input: CheckoutInput!): Order!
+  addComment(input: AddCommentInput!): Comment!
+  startSession: Session!
+  markPostAsSeen(
+    """The post id."""
+    post: String!
+  ): String!
   updateUserFeedTags(tags: FeedTagsInput!): User!
   savePost(postId: String!): Post!
   unsavePost(postId: String!): Post!
@@ -467,24 +477,25 @@ type Mutation {
   deletePaymentMethod(paymentMethodId: String!): User!
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
+  blockUser(userId: String!): User!
   signUp(input: SignUpInput!): AuthResponse!
   preSign: PreSignResponse!
   logIn(password: String!, username: String!): AuthResponse!
   refreshToken: AuthResponse!
-  startSession: Session!
-  markPostAsSeen(
-    """The post id."""
-    post: String!
-  ): String!
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
 }
 
-input AddCommentInput {
-  """The id of the post the comment is being made."""
-  post: String!
-  body: String!
+input CheckoutInput {
+  """The array of posts being bought."""
+  posts: [String!]!
+
+  """The id of the user's payment method to use on the checkout."""
+  paymentMethodId: String!
+
+  """The id of the delivery info for this checkout."""
+  deliveryInfoId: String!
 }
 
 input AddPostInput {
@@ -523,15 +534,10 @@ input UpdatePostFields {
   condition: POST_CONDITIONS
 }
 
-input CheckoutInput {
-  """The array of posts being bought."""
-  posts: [String!]!
-
-  """The id of the user's payment method to use on the checkout."""
-  paymentMethodId: String!
-
-  """The id of the delivery info for this checkout."""
-  deliveryInfoId: String!
+input AddCommentInput {
+  """The id of the post the comment is being made."""
+  post: String!
+  body: String!
 }
 
 input UpdateUserInfoInput {
