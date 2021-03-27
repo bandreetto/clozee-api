@@ -5,5 +5,5 @@ import { Comment } from '.';
 export class CommentCreatedPayload {
   comment: Comment;
   post: Post;
-  user: TokenUser;
+  commentOwner: TokenUser;
 }

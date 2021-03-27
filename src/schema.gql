@@ -366,6 +366,23 @@ type SaleNotification implements Notification {
   order: Order!
 }
 
+type PostCommentNotification implements Notification {
+  _id: String!
+  kind: String!
+
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
+
+  """The moment this notification was sent."""
+  createdAt: DateTime!
+
+  """The comment created on the post"""
+  comment: Comment!
+
+  """The post that the comment was commented on."""
+  post: Post!
+}
+
 type Query {
   """Returns all categories"""
   categories(roots: Boolean): [Category!]!

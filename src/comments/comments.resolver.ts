@@ -55,7 +55,7 @@ export class CommentsResolver {
     this.eventEmitter.emit('comment.created', {
       comment: createdComment,
       post,
-      user,
+      commentOwner: user,
     });
     return createdComment;
   }
