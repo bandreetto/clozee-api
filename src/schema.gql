@@ -246,7 +246,7 @@ type DeliveryInfo {
   menvDeliveryOrderId: Int
 
   """The delivery label URL."""
-  deliveryLabelUrl: String!
+  deliveryLabelUrl: String
 
   """The delivery fare in cents."""
   price: Int!
