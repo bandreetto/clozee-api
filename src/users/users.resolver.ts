@@ -63,7 +63,14 @@ export class UsersResolver {
   async users(
     @Args('searchTerm', { nullable: true })
     searchTerm: string,
+    @CurrentUser() tokenUser: TokenUser,
   ): Promise<User[]> {
+    let blacklistedUsers: string[];
+    if (tokenUser) {
+      const user = await this.usersService.findById(tokenUser._id);
+      blacklistedUsers = user.blockedUsers as string[];
+    }
+
     const usersResult = await this.usersService.filter(
       {
         startsWith: true,
@@ -71,6 +78,7 @@ export class UsersResolver {
         username: searchTerm,
       },
       60,
+      blacklistedUsers,
     );
     if (usersResult.length < 60) {
       const expandedSearch = await this.usersService.filter(
@@ -79,7 +87,7 @@ export class UsersResolver {
           username: searchTerm,
         },
         60 - usersResult.length,
-        usersResult.map(user => user._id),
+        [...usersResult.map(user => user._id), ...blacklistedUsers],
       );
 
       return [...usersResult, ...expandedSearch];
