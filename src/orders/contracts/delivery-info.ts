@@ -15,7 +15,10 @@ export class DeliveryInfo {
   menvServiceNumber?: number;
 
   @Prop({ required: false, default: null })
-  @Field(() => String, { description: 'The delivery label URL.' })
+  @Field(() => String, {
+    description: 'The delivery label URL.',
+    nullable: true,
+  })
   deliveryLabelUrl?: string;
 
   @Prop({ required: true })
