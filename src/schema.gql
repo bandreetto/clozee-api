@@ -229,7 +229,12 @@ type User {
 
   """Tags used to customize user's feed."""
   feedTags: FeedTags!
+
+  """The device token used for push notifications."""
   deviceToken: String!
+
+  """The list of users blocked by this user."""
+  blockedUsers: [User!]!
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
@@ -241,7 +246,7 @@ type DeliveryInfo {
   menvDeliveryOrderId: Int
 
   """The delivery label URL."""
-  deliveryLabelUrl: String!
+  deliveryLabelUrl: String
 
   """The delivery fare in cents."""
   price: Int!
@@ -467,6 +472,7 @@ type Mutation {
   deletePaymentMethod(paymentMethodId: String!): User!
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
+  blockUser(userId: String!): User!
   signUp(input: SignUpInput!): AuthResponse!
   preSign: PreSignResponse!
   logIn(password: String!, username: String!): AuthResponse!

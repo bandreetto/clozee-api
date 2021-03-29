@@ -10,6 +10,9 @@ export class PostBlacklist {
 
   @Prop({ type: [String], default: [] })
   posts: string[];
+
+  @Prop({ type: [String], default: [] })
+  blockedUsersPosts: string[];
 }
 
 export const PostBlacklistSchema = SchemaFactory.createForClass(PostBlacklist);

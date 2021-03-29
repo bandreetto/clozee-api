@@ -66,9 +66,15 @@ export class User {
   @Field(() => FeedTags, { description: "Tags used to customize user's feed." })
   feedTags?: FeedTags;
 
-  @Field()
+  @Field({ description: 'The device token used for push notifications.' })
   @Prop()
   deviceToken?: string;
+
+  @Field(() => [User], {
+    description: 'The list of users blocked by this user.',
+  })
+  @Prop({ default: [] })
+  blockedUsers?: string[] | User[];
 
   @Field(() => [PaymentMethod], {
     description: 'The ids of users credit cards',

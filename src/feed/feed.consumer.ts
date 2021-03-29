@@ -12,6 +12,8 @@ import { LikePayload } from '../likes/contracts/payloads';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
 import { SeenPostService } from './seen-post.service';
 import { Session } from 'src/sessions/contracts';
+import { BlockUserPayload } from '../users/contracts/payloads';
+import { PostsService } from 'src/posts/posts.service';
 
 const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
 const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
@@ -25,6 +27,7 @@ export class FeedConsumer {
     private readonly likesService: LikesService,
     private readonly commentsService: CommentsService,
     private readonly seenPostService: SeenPostService,
+    private readonly postsService: PostsService,
   ) {}
 
   @OnEvent('post.created', { async: true })
@@ -187,6 +190,27 @@ export class FeedConsumer {
     } catch (error) {
       this.logger.error({
         message: `Could not clear user ${payload} blacklist.`,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('user.blocked', { async: true })
+  async addBlockedUsersToBlacklist(payload: BlockUserPayload) {
+    try {
+      const blockedUserPosts = await this.postsService.findManyByUser(
+        payload.blockedUserId,
+      );
+      const blockedUserPostsIds = blockedUserPosts.map(p => p._id);
+      return this.seenPostService.addToBlockedUserPosts(
+        payload.blockingUser._id,
+        blockedUserPostsIds,
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Could not blacklist blocked user posts.',
+        payload,
         error: error.toString(),
         metadata: error,
       });

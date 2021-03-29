@@ -17,6 +17,7 @@ import { v4 } from 'uuid';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { EventEmitter2 } from 'eventemitter2';
 import { uniq } from 'ramda';
+import { PostBlacklist } from './contracts/post-blacklist';
 
 @Resolver()
 export class FeedResolver {
@@ -61,6 +62,9 @@ export class FeedResolver {
       };
     }
 
+    let postBlacklist: PostBlacklist;
+    if (user)
+      postBlacklist = await this.seenPostService.findBlacklistedPosts(user._id);
     let feedPosts: Feed[], postsCount: number;
     if (searchTerm) {
       let searchResult: Feed[];
@@ -71,22 +75,33 @@ export class FeedResolver {
           args.first,
           score,
           date,
+          postBlacklist && [
+            ...postBlacklist.posts,
+            ...postBlacklist.blockedUsersPosts,
+          ],
         ),
-        this.feedService.countBySearchTerm(searchTerm, tags, score, date),
+        this.feedService.countBySearchTerm(
+          searchTerm,
+          tags,
+          score,
+          date,
+          postBlacklist && [
+            ...postBlacklist.posts,
+            ...postBlacklist.blockedUsersPosts,
+          ],
+        ),
       ]);
       feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
     } else {
-      let postBlacklist;
-      if (user)
-        postBlacklist = await this.seenPostService.findBlacklistedPosts(
-          user._id,
-        );
       [feedPosts, postsCount] = await Promise.all([
         this.feedService.findSortedByScore(
           args.first,
           args.after && { maxScore: score, before: date },
           tags,
-          postBlacklist && postBlacklist.posts,
+          postBlacklist && [
+            ...postBlacklist.posts,
+            ...postBlacklist.blockedUsersPosts,
+          ],
         ),
         this.feedService.countByScore(
           tags,
@@ -94,6 +109,10 @@ export class FeedResolver {
             maxScore: score,
             before: date,
           },
+          postBlacklist && [
+            ...postBlacklist.posts,
+            ...postBlacklist.blockedUsersPosts,
+          ],
         ),
       ]);
     }
