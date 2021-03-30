@@ -485,6 +485,8 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
+  follow(userId: String!): User!
+  unfollow(userId: String!): User!
 }
 
 input AddCommentInput {
