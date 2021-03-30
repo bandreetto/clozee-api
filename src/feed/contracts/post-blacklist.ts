@@ -12,7 +12,7 @@ export class PostBlacklist {
   posts: string[];
 
   @Prop({ type: [String], default: [] })
-  blockedUsersPosts: string[];
+  blockedUsersPosts?: string[];
 }
 
 export const PostBlacklistSchema = SchemaFactory.createForClass(PostBlacklist);
