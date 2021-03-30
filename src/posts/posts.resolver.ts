@@ -13,6 +13,7 @@ import {
   ConflictException,
   ForbiddenException,
   GoneException,
+  Logger,
   UseGuards,
 } from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';
@@ -35,6 +36,8 @@ import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 
 @Resolver(() => Post)
 export class PostsResolver {
+  logger = new Logger(PostsResolver.name);
+
   constructor(
     private readonly postsService: PostsService,
     private readonly usersLoader: UsersLoader,
@@ -137,6 +140,7 @@ export class PostsResolver {
     @CurrentUser() user: TokenUser,
   ) {
     const post = await this.postsService.findById(postId);
+    this.logger.warn(`Post ${postId} reported by user ${user._id}!`);
     return this.postsService.updateOne(postId, {
       reportedBy: [...post.reportedBy, user._id],
     });
