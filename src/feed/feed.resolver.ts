@@ -77,7 +77,7 @@ export class FeedResolver {
           date,
           postBlacklist && [
             ...postBlacklist.posts,
-            ...postBlacklist.blockedUsersPosts,
+            ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
         this.feedService.countBySearchTerm(
@@ -87,7 +87,7 @@ export class FeedResolver {
           date,
           postBlacklist && [
             ...postBlacklist.posts,
-            ...postBlacklist.blockedUsersPosts,
+            ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
       ]);
@@ -100,7 +100,7 @@ export class FeedResolver {
           tags,
           postBlacklist && [
             ...postBlacklist.posts,
-            ...postBlacklist.blockedUsersPosts,
+            ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
         this.feedService.countByScore(
@@ -111,7 +111,7 @@ export class FeedResolver {
           },
           postBlacklist && [
             ...postBlacklist.posts,
-            ...postBlacklist.blockedUsersPosts,
+            ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
       ]);
