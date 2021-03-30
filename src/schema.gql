@@ -238,7 +238,41 @@ type User {
 
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
+  followers: [User!]!
+  following: [User!]!
   createdAt: DateTime!
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
+}
+
+type PageInfo {
+  """The first cursor of this page."""
+  startCursor: String
+
+  """The last cursor of this page."""
+  endCursor: String
+
+  """A boolean indicating if there are more edges after this page."""
+  hasNextPage: Boolean!
 }
 
 type DeliveryInfo {
@@ -292,38 +326,6 @@ type Delivery {
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
-}
-
-type PageInfo {
-  """The first cursor of this page."""
-  startCursor: String
-
-  """The last cursor of this page."""
-  endCursor: String
-
-  """A boolean indicating if there are more edges after this page."""
-  hasNextPage: Boolean!
 }
 
 type Session {
@@ -431,6 +433,9 @@ input FeedTagsInput {
 }
 
 type Mutation {
+  follow(userId: String!): User!
+  unfollow(userId: String!): User!
+
   """
   Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
   """
@@ -485,8 +490,6 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
-  follow(userId: String!): User!
-  unfollow(userId: String!): User!
 }
 
 input AddCommentInput {

@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from 'src/users/users.module';
 import { Follow, FollowSchema } from './contracts';
+import { FollowsLoader } from './follows.dataloader';
 import { FollowsResolver } from './follows.resolver';
 import { FollowsService } from './follows.service';
 
@@ -13,9 +14,9 @@ import { FollowsService } from './follows.service';
         schema: FollowSchema,
       },
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
-  providers: [FollowsResolver, FollowsService],
-  exports: [FollowsService],
+  providers: [FollowsResolver, FollowsService, FollowsLoader],
+  exports: [FollowsService, FollowsLoader],
 })
 export class FollowsModule {}

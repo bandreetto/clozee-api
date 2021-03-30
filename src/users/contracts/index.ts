@@ -81,6 +81,12 @@ export class User {
   })
   paymentMethods?: PaymentMethod[];
 
+  @Field(() => [User])
+  followers?: User[];
+
+  @Field(() => [User])
+  following?: User[];
+
   @Field()
   createdAt?: Date;
 }

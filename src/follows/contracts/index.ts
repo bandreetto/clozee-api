@@ -5,10 +5,10 @@ export class Follow {
   @Prop()
   _id: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   follower: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, index: true })
   followee: string;
 
   @Prop()

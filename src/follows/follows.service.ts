@@ -18,4 +18,16 @@ export class FollowsService {
       })
       .lean();
   }
+
+  async findManyByFollowees(followeesIds: string[]): Promise<Follow[]> {
+    return this.followModel
+      .find({ followee: { $in: followeesIds }, deleted: false })
+      .lean();
+  }
+
+  async findManyByFollowers(followersIds: string[]): Promise<Follow[]> {
+    return this.followModel
+      .find({ follower: { $in: followersIds }, deleted: false })
+      .lean();
+  }
 }
