@@ -239,7 +239,12 @@ type User {
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
   followers: [User!]!
+
+  """The list of users following this user."""
   following: [User!]!
+
+  """A boolean indicating weather the current user is following this user."""
+  isFollowing: Boolean!
   createdAt: DateTime!
 }
 

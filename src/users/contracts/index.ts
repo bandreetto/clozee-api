@@ -84,8 +84,16 @@ export class User {
   @Field(() => [User])
   followers?: User[];
 
-  @Field(() => [User])
+  @Field(() => [User], {
+    description: 'The list of users following this user.',
+  })
   following?: User[];
+
+  @Field({
+    description:
+      'A boolean indicating weather the current user is following this user.',
+  })
+  isFollowing?: boolean;
 
   @Field()
   createdAt?: Date;

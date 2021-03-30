@@ -338,4 +338,13 @@ export class UsersResolver {
       follows.map(follow => this.usersLoader.load(follow.followee)),
     );
   }
+
+  @ResolveField()
+  async isFollowing(
+    @Root() user: User,
+    @CurrentUser() currentUser: TokenUser,
+  ): Promise<boolean> {
+    const follows = await this.followsLoader.byFollowee.load(user._id);
+    return !!follows.find(follow => follow.follower === currentUser?._id);
+  }
 }
