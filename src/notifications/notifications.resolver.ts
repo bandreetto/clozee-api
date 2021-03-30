@@ -9,6 +9,10 @@ import { PubSub } from 'graphql-subscriptions';
 import { JwtService } from '@nestjs/jwt';
 import { Token } from 'src/auth/contracts';
 import { isAccessToken } from 'src/auth/auth.logic';
+import {
+  NOTIFICAION_KINDS,
+  NOTIFICATION_ENUM_TO_KIND_MAPPER,
+} from './contracts/enums';
 
 /**
  * 5 hours in seconds => 5 hours * 60 minutes * 60 seconds
@@ -45,8 +49,29 @@ export class NotificationsResolver {
 
   @UseGuards(AuthGuard)
   @Query(() => [Notification])
-  notifications(@CurrentUser() tokenUser: TokenUser): Promise<Notification[]> {
-    return this.notificationsService.findByUser(tokenUser._id);
+  async notifications(
+    @Args('notificationKinds', {
+      description:
+        'The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.',
+      type: () => [NOTIFICAION_KINDS],
+      /**
+       * Use these as default to support old versions of the app.
+       */
+      defaultValue: [NOTIFICAION_KINDS.COMMENT_TAG, NOTIFICAION_KINDS.SALE],
+    })
+    notificationKindsEnum: NOTIFICAION_KINDS[],
+    @CurrentUser()
+    tokenUser: TokenUser,
+  ): Promise<Notification[]> {
+    const notifications = await this.notificationsService.findByUser(
+      tokenUser._id,
+    );
+    const notificationKinds = notificationKindsEnum.map(
+      enumValue => NOTIFICATION_ENUM_TO_KIND_MAPPER[enumValue],
+    );
+    return notifications.filter(notification =>
+      notificationKinds.includes(notification.kind),
+    );
   }
 
   @UseGuards(AuthGuard)
