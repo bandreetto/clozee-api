@@ -14,7 +14,9 @@ export class LikesService {
   }
 
   async upsertLike({ _id, ...like }: Like): Promise<Like> {
-    return this.likeModel.findByIdAndUpdate(_id, like, { upsert: true }).lean();
+    return this.likeModel
+      .findByIdAndUpdate(_id, like, { upsert: true, new: true })
+      .lean();
   }
 
   async countByPosts(
