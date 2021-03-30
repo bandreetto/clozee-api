@@ -419,7 +419,12 @@ type Query {
     """Only return edges after this cursor."""
     after: String
   ): FeedPostConnection!
-  notifications: [Notification!]!
+  notifications(
+    """
+    The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.
+    """
+    notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
+  ): [Notification!]!
 }
 
 input FeedTagsInput {
@@ -428,6 +433,13 @@ input FeedTagsInput {
 
   """Users prefered clothing models."""
   genders: [GENDER_TAGS!]!
+}
+
+"""The kinds of notification existing in the app."""
+enum NOTIFICAION_KINDS {
+  COMMENT_TAG
+  SALE
+  POST_COMMENT
 }
 
 type Mutation {
@@ -601,5 +613,12 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification(userId: String!, token: String!): Notification!
+  notification(
+    """
+    The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.
+    """
+    notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
+    userId: String!
+    token: String!
+  ): Notification!
 }
