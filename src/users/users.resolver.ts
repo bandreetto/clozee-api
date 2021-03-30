@@ -34,6 +34,7 @@ import {
 import { BlockUserPayload } from './contracts/payloads';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
+import { FollowsLoader } from '../follows/follows.dataloader';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -43,6 +44,7 @@ export class UsersResolver {
     private readonly postsLoader: PostsLoader,
     private readonly postsService: PostsService,
     private readonly pagarmeService: PagarmeService,
+    private readonly followsLoader: FollowsLoader,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -319,5 +321,30 @@ export class UsersResolver {
       if (typeof blockedUser !== 'string') return blockedUser;
       return this.usersLoader.load(blockedUser);
     });
+  }
+
+  @ResolveField()
+  async followers(@Root() user: User): Promise<User[]> {
+    const follows = await this.followsLoader.byFollowee.load(user._id);
+    return Promise.all(
+      follows.map(follow => this.usersLoader.load(follow.follower)),
+    );
+  }
+
+  @ResolveField()
+  async following(@Root() user: User): Promise<User[]> {
+    const follows = await this.followsLoader.byFollower.load(user._id);
+    return Promise.all(
+      follows.map(follow => this.usersLoader.load(follow.followee)),
+    );
+  }
+
+  @ResolveField()
+  async isFollowing(
+    @Root() user: User,
+    @CurrentUser() currentUser: TokenUser,
+  ): Promise<boolean> {
+    const follows = await this.followsLoader.byFollowee.load(user._id);
+    return !!follows.find(follow => follow.follower === currentUser?._id);
   }
 }

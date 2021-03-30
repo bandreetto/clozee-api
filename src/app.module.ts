@@ -24,6 +24,7 @@ import { SessionsModule } from './sessions/sessions.module';
 import { UsersModule } from './users/users.module';
 import { MailerModule } from './mailer/mailer.module';
 import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
+import { FollowsModule } from './follows/follows.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
     PaymentsModule,
     SessionsModule,
     MailerModule,
+    FollowsModule,
   ],
 })
 export class AppModule {
