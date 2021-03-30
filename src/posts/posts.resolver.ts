@@ -13,11 +13,12 @@ import {
   ConflictException,
   ForbiddenException,
   GoneException,
+  Logger,
   UseGuards,
 } from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
-import { CurrentUser } from 'src/common/decorators';
+import { CurrentUser, TokenTypes } from 'src/common/decorators';
 import { TokenUser } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
@@ -31,9 +32,12 @@ import { SalesLoader } from 'src/orders/sales.dataloader';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LikesLoader } from '../likes/likes.dataloader';
 import { OrdersService } from 'src/orders/orders.service';
+import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 
 @Resolver(() => Post)
 export class PostsResolver {
+  logger = new Logger(PostsResolver.name);
+
   constructor(
     private readonly postsService: PostsService,
     private readonly usersLoader: UsersLoader,
@@ -44,6 +48,8 @@ export class PostsResolver {
     private readonly likesLoader: LikesLoader,
     private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  // Queries
 
   @Query(() => Post)
   async post(@Args('postId') postId: string): Promise<Post> {
@@ -60,6 +66,8 @@ export class PostsResolver {
       .findManyByUser(userId)
       .then(posts => posts.filter(post => !post.deleted));
   }
+
+  // Mutations
 
   @UseGuards(AuthGuard)
   @Mutation(() => String, {
@@ -125,16 +133,20 @@ export class PostsResolver {
   }
 
   @UseGuards(AuthGuard)
+  @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Mutation(() => Post)
   async reportPost(
     @Args('postId') postId: string,
     @CurrentUser() user: TokenUser,
   ) {
     const post = await this.postsService.findById(postId);
+    this.logger.warn(`Post ${postId} reported by user ${user._id}!`);
     return this.postsService.updateOne(postId, {
       reportedBy: [...post.reportedBy, user._id],
     });
   }
+
+  // Field Resolvers
 
   @ResolveField()
   async user(@Root() post: Post): Promise<User> {
