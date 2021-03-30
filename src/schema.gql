@@ -613,5 +613,12 @@ input SignUpInput {
 }
 
 type Subscription {
-  notification(userId: String!, token: String!): Notification!
+  notification(
+    """
+    The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.
+    """
+    notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
+    userId: String!
+    token: String!
+  ): Notification!
 }
