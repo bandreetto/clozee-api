@@ -67,7 +67,7 @@ export class UsersResolver {
     searchTerm: string,
     @CurrentUser() tokenUser: TokenUser,
   ): Promise<User[]> {
-    let blacklistedUsers: string[];
+    let blacklistedUsers: string[] = [];
     if (tokenUser) {
       const user = await this.usersService.findById(tokenUser._id);
       blacklistedUsers = user.blockedUsers as string[];
