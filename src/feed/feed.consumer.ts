@@ -106,6 +106,7 @@ export class FeedConsumer {
   async incrementLikeScore(payload: LikePayload) {
     try {
       const feed = await this.feedService.findByPost(payload.post);
+      if (!feed) return;
       await this.feedService.updateScore(feed._id, feed.score + 1);
     } catch (error) {
       this.logger.error({
@@ -118,9 +119,10 @@ export class FeedConsumer {
   }
 
   @OnEvent('post.unliked', { async: true })
-  async decrementeLikeScore(payload: LikePayload) {
+  async decrementLikeScore(payload: LikePayload) {
     try {
       const feed = await this.feedService.findByPost(payload.post);
+      if (!feed) return;
       await this.feedService.updateScore(feed._id, feed.score - 1);
     } catch (error) {
       this.logger.error({
