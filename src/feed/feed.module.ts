@@ -35,7 +35,7 @@ import { User, UserSchema } from 'src/users/contracts';
        * this should be only a reference to a mirroed users table on feed service's database (following SAGAS pattern), but as of today feed and users share
        * the same DB so no need to mirror the users DB.
        *
-       * This modulo SHOULD NOT write on users database.
+       * This module SHOULD NOT write on users database.
        */
       {
         name: User.name,
