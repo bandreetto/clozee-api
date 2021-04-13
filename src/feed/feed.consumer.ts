@@ -15,6 +15,7 @@ import { Session } from 'src/sessions/contracts';
 import { BlockUserPayload } from '../users/contracts/payloads';
 import { PostsService } from 'src/posts/posts.service';
 import { FollowsService } from '../follows/follows.service';
+import { Follow } from 'src/follows/contracts';
 
 const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
 const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
@@ -225,6 +226,56 @@ export class FeedConsumer {
     } catch (error) {
       this.logger.error({
         message: 'Could not blacklist blocked user posts.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('follow.created', { async: true })
+  async increaseFollowedUserPostsScore(payload: Follow) {
+    console.log('follow');
+    try {
+      const followeePosts = await this.postsService.findManyByUser(
+        payload.followee,
+      );
+      const feeds = await this.feedService.findByPosts(
+        followeePosts.map(p => p._id),
+        payload.follower,
+      );
+      await this.feedService.increaseManyScoresBy(
+        FOLLOWING_POINTS,
+        feeds.map(f => f._id),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Could not increase post score after following',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('follow.deleted', { async: true })
+  async decreaseUnfollowedUserPostsScore(payload: Follow) {
+    console.log('unfollow');
+    try {
+      const followeePosts = await this.postsService.findManyByUser(
+        payload.followee,
+      );
+      const feeds = await this.feedService.findByPosts(
+        followeePosts.map(p => p._id),
+        payload.follower,
+      );
+      await this.feedService.increaseManyScoresBy(
+        -FOLLOWING_POINTS,
+        feeds.map(f => f._id),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Could not decrease post score after unfollowing',
         payload,
         error: error.toString(),
         metadata: error,

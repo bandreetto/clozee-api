@@ -53,6 +53,10 @@ export class FeedService {
     return this.feedModel.findOne({ post: postId }).lean();
   }
 
+  async findByPosts(postsIds: string[], user: string): Promise<Feed[]> {
+    return this.feedModel.find({ post: { $in: postsIds }, user }).lean();
+  }
+
   async findSortedByScore(
     user: string,
     first: number,
@@ -123,17 +127,17 @@ export class FeedService {
   ): Promise<Feed[]> {
     return this.feedModel.aggregate([
       {
-        $match: {
-          user,
-        },
-      },
-      {
         $search: {
           index: 'feedsSearch',
           text: {
             path: 'tags.searchTerms',
             query: searchTerm,
           },
+        },
+      },
+      {
+        $match: {
+          user,
         },
       },
       {
@@ -178,17 +182,17 @@ export class FeedService {
   ): Promise<number> {
     const [result] = await this.feedModel.aggregate([
       {
-        $match: {
-          user,
-        },
-      },
-      {
         $search: {
           index: 'feedsSearch',
           text: {
             path: 'tags.searchTerms',
             query: searchTerm,
           },
+        },
+      },
+      {
+        $match: {
+          user,
         },
       },
       {
@@ -222,6 +226,19 @@ export class FeedService {
     return this.feedModel
       .findByIdAndUpdate(feedId, { $set: { score: newScore } })
       .lean();
+  }
+
+  async increaseManyScoresBy(amount: number, feedIds: string[]) {
+    return this.feedModel.updateMany(
+      {
+        _id: { $in: feedIds },
+      },
+      {
+        $inc: {
+          score: amount,
+        },
+      },
+    );
   }
 
   async deleteByPost(post: string): Promise<Feed> {
