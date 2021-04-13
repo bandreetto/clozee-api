@@ -35,7 +35,7 @@ import { User, UserSchema } from 'src/users/contracts';
        * this could only be a reference to a mirrored users table on feeds service's database (by following the Saga pattern: https://microservices.io/patterns/data/saga.html),
        * but as of today feed and users share the same DB so no need to mirror the users collection.
        *
-       * This module SHOULD NOT write on users database.
+       * This module SHOULD NOT write on users collection.
        */
       {
         name: User.name,
