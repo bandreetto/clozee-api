@@ -17,7 +17,6 @@ import { v4 } from 'uuid';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { EventEmitter2 } from 'eventemitter2';
 import { uniq } from 'ramda';
-import { PostBlacklist } from './contracts/post-blacklist';
 
 @Resolver()
 export class FeedResolver {
@@ -31,6 +30,8 @@ export class FeedResolver {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
+  @UseGuards(AuthGuard)
+  @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Query(() => FeedPostConnection)
   async feed(
     @Args() args: PaginationArgs,
@@ -62,14 +63,15 @@ export class FeedResolver {
       };
     }
 
-    let postBlacklist: PostBlacklist;
-    if (user)
-      postBlacklist = await this.seenPostService.findBlacklistedPosts(user._id);
+    const postBlacklist = await this.seenPostService.findBlacklistedPosts(
+      user._id,
+    );
     let feedPosts: Feed[], postsCount: number;
     if (searchTerm) {
       let searchResult: Feed[];
       [searchResult, postsCount] = await Promise.all([
         this.feedService.searchByTerm(
+          user._id,
           searchTerm,
           tags,
           args.first,
@@ -81,6 +83,7 @@ export class FeedResolver {
           ],
         ),
         this.feedService.countBySearchTerm(
+          user._id,
           searchTerm,
           tags,
           score,
@@ -95,6 +98,7 @@ export class FeedResolver {
     } else {
       [feedPosts, postsCount] = await Promise.all([
         this.feedService.findSortedByScore(
+          user._id,
           args.first,
           args.after && { maxScore: score, before: date },
           tags,
@@ -104,6 +108,7 @@ export class FeedResolver {
           ],
         ),
         this.feedService.countByScore(
+          user._id,
           tags,
           args.after && {
             maxScore: score,
