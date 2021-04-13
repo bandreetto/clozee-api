@@ -19,8 +19,6 @@ import { CurrentToken, TokenTypes } from 'src/common/decorators';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
-const ACCESS_TOKEN_EXP = '1 year';
-const REFRESH_TOKEN_EXP = '180 days';
 
 @Resolver()
 export class AuthResolver {
@@ -37,7 +35,7 @@ export class AuthResolver {
         header: {
           typ: TOKEN_TYPES.ACCESS,
         },
-        expiresIn: ACCESS_TOKEN_EXP,
+        expiresIn: configuration.auth.accessTokenExp(),
         subject: user._id,
       },
     );
@@ -47,7 +45,7 @@ export class AuthResolver {
       {},
       {
         header: { typ: TOKEN_TYPES.REFRESH },
-        expiresIn: REFRESH_TOKEN_EXP,
+        expiresIn: configuration.auth.refreshTokenExp(),
         subject: userId,
       },
     );
