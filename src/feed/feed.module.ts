@@ -32,8 +32,8 @@ import { User, UserSchema } from 'src/users/contracts';
       },
       /**
        * User model is injected here to allow the creation of a feed post for every user. In the future, when feed is its own service with its own database,
-       * this should be only a reference to a mirroed users table on feed service's database (following SAGAS pattern), but as of today feed and users share
-       * the same DB so no need to mirror the users DB.
+       * this should be only a reference to a mirrored users table on feed service's database (following Saga pattern: https://microservices.io/patterns/data/saga.html),
+       * but as of today feed and users share the same DB so no need to mirror the users collection.
        *
        * This module SHOULD NOT write on users database.
        */
