@@ -49,8 +49,8 @@ export class FeedService {
     ]);
   }
 
-  async findByPost(postId: string): Promise<Feed> {
-    return this.feedModel.findOne({ post: postId }).lean();
+  async findByPost(postId: string): Promise<Feed[]> {
+    return this.feedModel.find({ post: postId }).lean();
   }
 
   async findByPosts(postsIds: string[], user: string): Promise<Feed[]> {
@@ -222,13 +222,7 @@ export class FeedService {
     return result?.searchCount || 0;
   }
 
-  async updateScore(feedId: string, newScore: number): Promise<Feed> {
-    return this.feedModel
-      .findByIdAndUpdate(feedId, { $set: { score: newScore } })
-      .lean();
-  }
-
-  async increaseManyScoresBy(amount: number, feedIds: string[]) {
+  async addToScores(amount: number, feedIds: string[]): Promise<void> {
     return this.feedModel.updateMany(
       {
         _id: { $in: feedIds },
@@ -241,8 +235,21 @@ export class FeedService {
     );
   }
 
-  async deleteByPost(post: string): Promise<Feed> {
-    return this.feedModel.findOneAndDelete({ post }).lean();
+  async addToScoreByPost(amount: number, postId: string): Promise<void> {
+    return this.feedModel.updateMany(
+      {
+        post: postId,
+      },
+      {
+        $inc: {
+          score: amount,
+        },
+      },
+    );
+  }
+
+  async deleteByPost(post: string): Promise<void> {
+    await this.feedModel.deleteMany({ post }).lean();
   }
 
   async deleteManyByPosts(posts: string[]): Promise<void> {

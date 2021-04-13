@@ -119,9 +119,7 @@ export class FeedConsumer {
   @OnEvent('post.liked', { async: true })
   async incrementLikeScore(payload: LikePayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score + 1);
+      await this.feedService.addToScoreByPost(1, payload.post);
     } catch (error) {
       this.logger.error({
         message: 'Error while incrementing post score from post.liked event.',
@@ -135,9 +133,7 @@ export class FeedConsumer {
   @OnEvent('post.unliked', { async: true })
   async decrementLikeScore(payload: LikePayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score - 1);
+      await this.feedService.addToScoreByPost(-1, payload.post);
     } catch (error) {
       this.logger.error({
         message: 'Error while decrementing post score from post.unliked event.',
@@ -151,9 +147,7 @@ export class FeedConsumer {
   @OnEvent('comment.created', { async: true })
   async incrementCommentScore(payload: CommentCreatedPayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post._id);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score + 1);
+      await this.feedService.addToScoreByPost(1, payload.post._id);
     } catch (error) {
       this.logger.error({
         message:
@@ -244,7 +238,7 @@ export class FeedConsumer {
         followeePosts.map(p => p._id),
         payload.follower,
       );
-      await this.feedService.increaseManyScoresBy(
+      await this.feedService.addToScores(
         FOLLOWING_POINTS,
         feeds.map(f => f._id),
       );
@@ -269,7 +263,7 @@ export class FeedConsumer {
         followeePosts.map(p => p._id),
         payload.follower,
       );
-      await this.feedService.increaseManyScoresBy(
+      await this.feedService.addToScores(
         -FOLLOWING_POINTS,
         feeds.map(f => f._id),
       );
