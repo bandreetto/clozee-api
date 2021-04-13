@@ -31,8 +31,8 @@ import { User, UserSchema } from 'src/users/contracts';
         schema: PostBlacklistSchema,
       },
       /**
-       * User model is injected here to allow the creation of a feed post for every user. In the future, when feed is its own service with its own database,
-       * this should be only a reference to a mirrored users table on feed service's database (following Saga pattern: https://microservices.io/patterns/data/saga.html),
+       * User model is injected here to efficiently create a feed post for every user. In the future, when feeds have its own service with its own database,
+       * this could only be a reference to a mirrored users table on feeds service's database (by following the Saga pattern: https://microservices.io/patterns/data/saga.html),
        * but as of today feed and users share the same DB so no need to mirror the users collection.
        *
        * This module SHOULD NOT write on users database.
