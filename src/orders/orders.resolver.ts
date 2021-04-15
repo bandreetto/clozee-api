@@ -33,7 +33,7 @@ import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { PagarmeService } from 'src/payments/pagarme.service';
-import { getSubTotal, getSplitValues } from './orders.logic';
+import { getSubTotal, getSplitValues, getDonationAmount } from './orders.logic';
 import { MINIMUM_TRANSACTION_VALUE } from 'src/common/contants';
 
 @Resolver(() => Order)
@@ -253,5 +253,14 @@ export class OrdersResolver {
       sales.map(s => s.post as string),
     )) as Post[];
     return getSubTotal(posts);
+  }
+
+  @ResolveField()
+  async donationAmount(@Root() order: Order): Promise<number> {
+    const sales = await this.salesLoader.byOrder.load(order._id);
+    const posts = (await this.postsLoader.loadMany(
+      sales.map(s => s.post as string),
+    )) as Post[];
+    return getDonationAmount(posts);
   }
 }

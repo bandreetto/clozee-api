@@ -54,6 +54,9 @@ export class Order {
   @Field({ description: "The sum of the post's prices for this order." })
   itemsPrice?: number;
 
+  @Field({ description: 'The amount of this order that was donated.' })
+  donationAmount?: number;
+
   @Field()
   createdAt?: Date;
 }

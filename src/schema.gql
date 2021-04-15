@@ -320,6 +320,9 @@ type Order {
 
   """The sum of the post's prices for this order."""
   itemsPrice: Float!
+
+  """The amount of this order that was donated."""
+  donationAmount: Float!
   createdAt: DateTime!
 }
 
