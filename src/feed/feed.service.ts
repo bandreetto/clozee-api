@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feed } from './contracts';
 import { Model, Document } from 'mongoose';
-import { FeedTags } from 'src/users/contracts';
+import { FeedTags, User } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
 import { SIZES } from 'src/posts/contracts/enums';
 
@@ -11,18 +11,54 @@ export class FeedService {
   constructor(
     @InjectModel(Feed.name)
     private readonly feedModel: Model<Feed & Document>,
+    @InjectModel(User.name) private readonly usersModel: Model<User & Document>,
   ) {}
 
-  async create(newFeed: Feed): Promise<Feed> {
-    const feed = await this.feedModel.create(newFeed);
-    return feed.toObject();
+  async create(
+    { _id, ...newFeed }: Omit<Feed, 'user'>,
+    followingUsers: string[],
+    followingPoints: number,
+  ): Promise<void> {
+    await this.usersModel.aggregate([
+      {
+        $replaceWith: {
+          _id: {
+            $concat: [_id, ':', '$_id'],
+          },
+          user: '$_id',
+          ...newFeed,
+        },
+      },
+      {
+        $addFields: {
+          score: {
+            $cond: {
+              if: { $in: ['$user', followingUsers] },
+              then: { $add: ['$score', followingPoints] },
+              else: '$score',
+            },
+          },
+        },
+      },
+      {
+        $merge: {
+          into: 'feeds',
+          on: '_id',
+        },
+      },
+    ]);
   }
 
-  async findByPost(postId: string): Promise<Feed> {
-    return this.feedModel.findOne({ post: postId }).lean();
+  async findByPost(postId: string): Promise<Feed[]> {
+    return this.feedModel.find({ post: postId }).lean();
+  }
+
+  async findByPosts(postsIds: string[], user: string): Promise<Feed[]> {
+    return this.feedModel.find({ post: { $in: postsIds }, user }).lean();
   }
 
   async findSortedByScore(
+    user: string,
     first: number,
     cursor?: { maxScore: number; before: Date },
     feedTags?: FeedTags,
@@ -30,6 +66,7 @@ export class FeedService {
   ): Promise<Feed[]> {
     return this.feedModel
       .find({
+        user,
         ...(cursor
           ? {
               $or: [
@@ -53,11 +90,13 @@ export class FeedService {
   }
 
   async countByScore(
+    user: string,
     tags: FeedTags,
     cursor?: { maxScore: number; before: Date },
     blacklistedPosts: string[] = [],
   ): Promise<number> {
     return this.feedModel.countDocuments({
+      user,
       ...(cursor
         ? {
             $or: [
@@ -78,6 +117,7 @@ export class FeedService {
   }
 
   async searchByTerm(
+    user: string,
     searchTerm: string,
     tags: FeedTags,
     limit: number,
@@ -93,6 +133,11 @@ export class FeedService {
             path: 'tags.searchTerms',
             query: searchTerm,
           },
+        },
+      },
+      {
+        $match: {
+          user,
         },
       },
       {
@@ -128,6 +173,7 @@ export class FeedService {
   }
 
   async countBySearchTerm(
+    user: string,
     searchTerm: string,
     tags: FeedTags,
     maxScore = Infinity,
@@ -142,6 +188,11 @@ export class FeedService {
             path: 'tags.searchTerms',
             query: searchTerm,
           },
+        },
+      },
+      {
+        $match: {
+          user,
         },
       },
       {
@@ -171,14 +222,34 @@ export class FeedService {
     return result?.searchCount || 0;
   }
 
-  async updateScore(feedId: string, newScore: number): Promise<Feed> {
-    return this.feedModel
-      .findByIdAndUpdate(feedId, { $set: { score: newScore } })
-      .lean();
+  async addToScores(amount: number, feedIds: string[]): Promise<void> {
+    return this.feedModel.updateMany(
+      {
+        _id: { $in: feedIds },
+      },
+      {
+        $inc: {
+          score: amount,
+        },
+      },
+    );
   }
 
-  async deleteByPost(post: string): Promise<Feed> {
-    return this.feedModel.findOneAndDelete({ post }).lean();
+  async addToScoreByPost(amount: number, postId: string): Promise<void> {
+    return this.feedModel.updateMany(
+      {
+        post: postId,
+      },
+      {
+        $inc: {
+          score: amount,
+        },
+      },
+    );
+  }
+
+  async deleteByPost(post: string): Promise<void> {
+    await this.feedModel.deleteMany({ post }).lean();
   }
 
   async deleteManyByPosts(posts: string[]): Promise<void> {

@@ -14,9 +14,12 @@ import { SeenPostService } from './seen-post.service';
 import { Session } from 'src/sessions/contracts';
 import { BlockUserPayload } from '../users/contracts/payloads';
 import { PostsService } from 'src/posts/posts.service';
+import { FollowsService } from '../follows/follows.service';
+import { Follow } from 'src/follows/contracts';
 
 const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
 const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
+const FOLLOWING_POINTS = 20;
 @Injectable()
 export class FeedConsumer {
   logger = new Logger(FeedConsumer.name);
@@ -28,6 +31,7 @@ export class FeedConsumer {
     private readonly commentsService: CommentsService,
     private readonly seenPostService: SeenPostService,
     private readonly postsService: PostsService,
+    private readonly followsService: FollowsService,
   ) {}
 
   @OnEvent('post.created', { async: true })
@@ -37,16 +41,20 @@ export class FeedConsumer {
         typeof payload.category === 'string'
           ? payload.category
           : payload.category._id;
+      const postOwnerId =
+        typeof payload.user === 'string' ? payload.user : payload.user._id;
       const [
         category,
         categoryAncestrals,
         [{ count: likesCount } = { count: 0 }],
         comments,
+        follows,
       ] = await Promise.all([
         this.categoriesService.findById(categoryId),
         this.categoriesService.findCategoryParents(categoryId),
         this.likesService.countByPosts([payload._id]),
         this.commentsService.countByPost(payload._id),
+        this.followsService.findManyByFollowees([postOwnerId]),
       ]);
       const categoryAncestralsIds = categoryAncestrals.map(c => c._id);
 
@@ -59,23 +67,29 @@ export class FeedConsumer {
 
       const score = likesCount + comments;
 
+      const followingUsers = follows.map(f => f.follower);
       this.logger.debug(`Trying to create FeedPost for Post ${payload._id}`);
-      await this.feedService.create({
-        _id: v4(),
-        post: payload._id,
-        score,
-        tags: {
-          size: payload.size,
-          gender,
-          searchTerms: [
-            payload.title,
-            payload.description,
-            category.name,
-            ...categoryAncestrals.map(c => c.name),
-          ],
+      await this.feedService.create(
+        {
+          _id: v4(),
+          post: payload._id,
+          score,
+          tags: {
+            size: payload.size,
+            gender,
+            searchTerms: [
+              payload.title,
+              payload.description,
+              category.name,
+              ...categoryAncestrals.map(c => c.name),
+            ],
+          },
+          createdAt: payload.createdAt,
         },
-      });
-      this.logger.log(`FeedPost created for Post ${payload._id}`);
+        followingUsers,
+        FOLLOWING_POINTS,
+      );
+      this.logger.log(`FeedPosts created for Post ${payload._id}`);
     } catch (error) {
       this.logger.error({
         message:
@@ -105,9 +119,7 @@ export class FeedConsumer {
   @OnEvent('post.liked', { async: true })
   async incrementLikeScore(payload: LikePayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score + 1);
+      await this.feedService.addToScoreByPost(1, payload.post);
     } catch (error) {
       this.logger.error({
         message: 'Error while incrementing post score from post.liked event.',
@@ -121,9 +133,7 @@ export class FeedConsumer {
   @OnEvent('post.unliked', { async: true })
   async decrementLikeScore(payload: LikePayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score - 1);
+      await this.feedService.addToScoreByPost(-1, payload.post);
     } catch (error) {
       this.logger.error({
         message: 'Error while decrementing post score from post.unliked event.',
@@ -137,9 +147,7 @@ export class FeedConsumer {
   @OnEvent('comment.created', { async: true })
   async incrementCommentScore(payload: CommentCreatedPayload) {
     try {
-      const feed = await this.feedService.findByPost(payload.post._id);
-      if (!feed) return;
-      await this.feedService.updateScore(feed._id, feed.score + 1);
+      await this.feedService.addToScoreByPost(1, payload.post._id);
     } catch (error) {
       this.logger.error({
         message:
@@ -212,6 +220,56 @@ export class FeedConsumer {
     } catch (error) {
       this.logger.error({
         message: 'Could not blacklist blocked user posts.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('follow.created', { async: true })
+  async increaseFollowedUserPostsScore(payload: Follow) {
+    console.log('follow');
+    try {
+      const followeePosts = await this.postsService.findManyByUser(
+        payload.followee,
+      );
+      const feeds = await this.feedService.findByPosts(
+        followeePosts.map(p => p._id),
+        payload.follower,
+      );
+      await this.feedService.addToScores(
+        FOLLOWING_POINTS,
+        feeds.map(f => f._id),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Could not increase post score after following',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('follow.deleted', { async: true })
+  async decreaseUnfollowedUserPostsScore(payload: Follow) {
+    console.log('unfollow');
+    try {
+      const followeePosts = await this.postsService.findManyByUser(
+        payload.followee,
+      );
+      const feeds = await this.feedService.findByPosts(
+        followeePosts.map(p => p._id),
+        payload.follower,
+      );
+      await this.feedService.addToScores(
+        -FOLLOWING_POINTS,
+        feeds.map(f => f._id),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Could not decrease post score after unfollowing',
         payload,
         error: error.toString(),
         metadata: error,

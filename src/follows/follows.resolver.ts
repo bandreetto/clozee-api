@@ -6,12 +6,14 @@ import { User } from 'src/users/contracts';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { FollowsService } from './follows.service';
 import { UsersService } from 'src/users/users.service';
+import { EventEmitter2 } from 'eventemitter2';
 
 @Resolver()
 export class FollowsResolver {
   constructor(
     private readonly followsService: FollowsService,
     private readonly usersService: UsersService,
+    private readonly eventEmmiter: EventEmitter2,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -20,13 +22,14 @@ export class FollowsResolver {
     @Args('userId') followee: string,
     @CurrentUser() follower: TokenUser,
   ): Promise<User> {
-    await this.followsService.upsertFollow({
+    const follow = await this.followsService.upsertFollow({
       _id: `${follower._id}:${followee}`,
       follower: follower._id,
       followee,
       deleted: false,
     });
 
+    this.eventEmmiter.emit('follow.created', follow);
     return this.usersService.findById(followee);
   }
 
@@ -36,13 +39,14 @@ export class FollowsResolver {
     @Args('userId') followee: string,
     @CurrentUser() follower: TokenUser,
   ) {
-    await this.followsService.upsertFollow({
+    const follow = await this.followsService.upsertFollow({
       _id: `${follower._id}:${followee}`,
       follower: follower._id,
       followee,
       deleted: true,
     });
 
+    this.eventEmmiter.emit('follow.deleted', follow);
     return this.usersService.findById(followee);
   }
 }

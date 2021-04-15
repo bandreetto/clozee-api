@@ -5,6 +5,8 @@ export default {
   },
   auth: {
     secret: () => process.env.SECRET,
+    accessTokenExp: () => process.env.ACCESS_TOKEN_EXP,
+    refreshTokenExp: () => process.env.REFRESH_TOKEN_EXP,
   },
   images: {
     bucket: () => process.env.IMAGES_BUCKET,
