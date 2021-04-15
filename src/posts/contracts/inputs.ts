@@ -29,6 +29,13 @@ export class AddPostInput {
     description: 'Price of the item being announced in cents.',
   })
   price: number;
+
+  @Field({
+    defaultValue: 0,
+    description:
+      "The percentage of the seller's profit being destined to donation.",
+  })
+  donationPercentage: number;
 }
 
 @InputType()
