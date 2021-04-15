@@ -44,6 +44,14 @@ export class Post {
   @Field({ description: 'Price of the item being announced in cents.' })
   price: number;
 
+  @Prop({ required: true, min: 0, max: 100 })
+  @Field({
+    defaultValue: 0,
+    description:
+      "The percentage of the seller's profit being destined to donation.",
+  })
+  donationPercentage: number;
+
   @Prop({ required: true })
   @Field(() => POST_CONDITIONS, {
     description: "The condition of the post's product",

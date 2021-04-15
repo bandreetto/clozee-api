@@ -183,6 +183,9 @@ type Post {
   """Price of the item being announced in cents."""
   price: Float!
 
+  """The percentage of the seller's profit being destined to donation."""
+  donationPercentage: Float!
+
   """The condition of the post's product"""
   condition: POST_CONDITIONS!
   comments: [Comment!]!
@@ -531,6 +534,9 @@ input AddPostInput {
 
   """Price of the item being announced in cents."""
   price: Int!
+
+  """The percentage of the seller's profit being destined to donation."""
+  donationPercentage: Float = 0
 }
 
 input UpdatePostFields {
