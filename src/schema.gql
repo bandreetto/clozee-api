@@ -186,6 +186,9 @@ type Post {
   """The percentage of the seller's profit being destined to donation."""
   donationPercentage: Float!
 
+  """The calculated amount of the post's price going to donation in cents."""
+  donationAmount: Int!
+
   """The condition of the post's product"""
   condition: POST_CONDITIONS!
   comments: [Comment!]!

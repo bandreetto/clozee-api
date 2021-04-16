@@ -21,15 +21,17 @@ export class PagarmeService {
   logger = new Logger(PagarmeService.name);
 
   async transaction({
-    clozeeAmount,
-    sellerAmount,
+    clozeeSplit,
+    sellerSplit,
     deliveryFee,
     seller,
     cardId,
     buyer,
     posts,
+    orderId,
+    orderNumber,
   }: ITransaction): Promise<string> {
-    const totalAmount = clozeeAmount + sellerAmount;
+    const totalAmount = clozeeSplit + sellerSplit;
 
     const client = await pagarme.client.connect({
       api_key: configuration.pagarme.token(),
@@ -80,18 +82,22 @@ export class PagarmeService {
       split_rules: [
         {
           recipient_id: seller.pagarmeRecipientId,
-          amount: sellerAmount,
+          amount: sellerSplit,
           liable: true,
           charge_processing_fee: false,
         },
         {
           recipient_id: configuration.pagarme.recipientId(),
-          amount: clozeeAmount + deliveryFee,
+          amount: clozeeSplit + deliveryFee,
           liable: true,
           charge_processing_fee: true,
           charge_remainder: true,
         },
       ],
+      metadata: {
+        orderId,
+        orderNumber,
+      },
     });
 
     if (response.status !== 'paid') {
@@ -126,7 +132,9 @@ export class PagarmeService {
         transfer_enabled: true,
         transfer_day: '0',
         transfer_interval: 'daily',
-        metadata: {},
+        metadata: {
+          userId: user._id,
+        },
         bank_account: R.reject(R.anyPass([R.isEmpty, R.isNil, R.equals('')]))(
           bankAccount,
         ),

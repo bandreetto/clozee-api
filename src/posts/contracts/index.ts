@@ -1,5 +1,5 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectType, Field } from '@nestjs/graphql';
+import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { User } from 'src/users/contracts';
 import { Comment } from 'src/comments/contracts';
 import { Category } from 'src/categories/contracts';
@@ -51,6 +51,12 @@ export class Post {
       "The percentage of the seller's profit being destined to donation.",
   })
   donationPercentage: number;
+
+  @Field(() => Int, {
+    description:
+      "The calculated amount of the post's price going to donation in cents.",
+  })
+  donationAmount?: number;
 
   @Prop({ required: true })
   @Field(() => POST_CONDITIONS, {
