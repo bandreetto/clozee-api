@@ -177,7 +177,7 @@ export class OrdersResolver {
         },
         session,
       );
-      console.log({ clozeeSplit, sellerSplit });
+
       await this.pagarmeService.transaction({
         clozeeSplit,
         sellerSplit,
