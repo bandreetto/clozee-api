@@ -8,7 +8,7 @@ export function getSubTotal(posts: Post[]): number {
 const _getDonationPercentage = (clozeePercentage: number, fixedTax: number) => (posts: Post[]): number => {
   const pricesAfterClozeeTax = posts.map(p => [p.price * (1 - clozeePercentage) - fixedTax, p.donationPercentage])
   const weightedArithmeticMean = pricesAfterClozeeTax.reduce(
-    (acc, [price, donationPercentage]) => acc + price * (donationPercentage || 0),
+    (acc, [sellerAmount, donationPercentage]) => acc + sellerAmount * (donationPercentage || 0),
     0,
   )/pricesAfterClozeeTax.reduce((acc, [price]) => acc + price, 0);
 
@@ -43,4 +43,3 @@ export function getSplitValues(posts: Post[]): [clozeeSplit: number, sellerSplit
   const donationAmount = getDonationAmount(posts);
   return [clozeeAmount + donationAmount, sellerAmount - donationAmount];
 };
-
