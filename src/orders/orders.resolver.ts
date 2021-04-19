@@ -232,8 +232,8 @@ export class OrdersResolver {
     const posts = (await this.postsLoader.loadMany(
       sales.map(s => s.post as string),
     )) as Post[];
-
-    return getSubTotal(posts) - order.clozeeTax;
+    const donationAmount = getDonationAmount(posts);
+    return getSubTotal(posts) - order.clozeeTax - donationAmount;
   }
 
   @ResolveField()
