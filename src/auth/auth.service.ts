@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Document } from 'mongoose';
+import { Model, Document, ClientSession } from 'mongoose';
 import { AuthUser } from './contracts';
 
 @Injectable()
@@ -10,8 +10,8 @@ export class AuthService {
     private readonly authUserModel: Model<AuthUser & Document>,
   ) {}
 
-  create(authUser: AuthUser): Promise<AuthUser> {
-    return this.authUserModel.create(authUser);
+  create(authUser: AuthUser, session: ClientSession): Promise<AuthUser> {
+    return this.authUserModel.create(authUser, { session });
   }
 
   async findByUser(user: string): Promise<AuthUser> {
