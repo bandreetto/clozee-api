@@ -2,13 +2,15 @@ import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
 
 export interface ITransaction {
-  clozeeAmount: number;
-  sellerAmount: number;
+  clozeeSplit: number;
+  sellerSplit: number;
   seller: User;
   cardId: string;
   buyer: User;
   deliveryFee: number;
   posts: Post[];
+  orderId: string;
+  orderNumber: number;
 }
 
 export interface ITransactionResponse {

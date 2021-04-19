@@ -33,6 +33,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LikesLoader } from '../likes/likes.dataloader';
 import { OrdersService } from 'src/orders/orders.service';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
+import { getDonationAmount } from 'src/orders/orders.logic';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -195,5 +196,10 @@ export class PostsResolver {
   ): Promise<boolean> {
     if (!user) return false;
     return this.likesLoader.load(`${post._id}:${user._id}`).then(Boolean);
+  }
+
+  @ResolveField()
+  async donationAmount(@Root() post: Post): Promise<number> {
+    return getDonationAmount([post]);
   }
 }

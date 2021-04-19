@@ -33,7 +33,12 @@ import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { PagarmeService } from 'src/payments/pagarme.service';
-import { getSubTotal, getSplitValues } from './orders.logic';
+import {
+  getSubTotal,
+  getSplitValues,
+  getDonationAmount,
+  getClozeeAmount,
+} from './orders.logic';
 import { MINIMUM_TRANSACTION_VALUE } from 'src/common/contants';
 
 @Resolver(() => Order)
@@ -128,8 +133,8 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
-    const [clozeeAmount, sellerAmount] = getSplitValues(posts);
-    if (clozeeAmount + sellerAmount < MINIMUM_TRANSACTION_VALUE) {
+    const [clozeeSplit, sellerSplit] = getSplitValues(posts);
+    if (clozeeSplit + sellerSplit < MINIMUM_TRANSACTION_VALUE) {
       this.logger.error({
         message: `The sub-total of the order cannot be less than the minimum transaction value (${MINIMUM_TRANSACTION_VALUE.toLocaleString(
           'pt-BR',
@@ -138,6 +143,7 @@ export class OrdersResolver {
       });
       throw new BadRequestException('');
     }
+    const clozeeAmount = getClozeeAmount(posts);
 
     let order: Order;
     const session = await this.ordersService.startTransaction();
@@ -173,13 +179,15 @@ export class OrdersResolver {
       );
 
       await this.pagarmeService.transaction({
-        clozeeAmount,
-        sellerAmount,
+        clozeeSplit,
+        sellerSplit,
         deliveryFee: order.deliveryInfo.price,
         buyer: user,
         cardId: paymentMethod.cardId,
         posts,
         seller,
+        orderId: order._id,
+        orderNumber: order.number,
       });
 
       await this.ordersService.commitTransaction(session);
@@ -253,5 +261,14 @@ export class OrdersResolver {
       sales.map(s => s.post as string),
     )) as Post[];
     return getSubTotal(posts);
+  }
+
+  @ResolveField()
+  async donationAmount(@Root() order: Order): Promise<number> {
+    const sales = await this.salesLoader.byOrder.load(order._id);
+    const posts = (await this.postsLoader.loadMany(
+      sales.map(s => s.post as string),
+    )) as Post[];
+    return getDonationAmount(posts);
   }
 }
