@@ -10,8 +10,11 @@ export class AuthService {
     private readonly authUserModel: Model<AuthUser & Document>,
   ) {}
 
-  create(authUser: AuthUser, session: ClientSession): Promise<AuthUser> {
-    return this.authUserModel.create(authUser, { session });
+  async create(authUser: AuthUser, session: ClientSession): Promise<AuthUser> {
+    const [createdUser] = await this.authUserModel.create([authUser], {
+      session,
+    });
+    return createdUser.toObject();
   }
 
   async findByUser(user: string): Promise<AuthUser> {

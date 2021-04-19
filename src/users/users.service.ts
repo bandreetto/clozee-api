@@ -149,7 +149,7 @@ export class UsersService implements TransactionableService<ClientSession> {
   }
 
   async create(newUser: User, session?: ClientSession): Promise<User> {
-    const user = await this.userModel.create(newUser, { session });
+    const [user] = await this.userModel.create([newUser], { session });
     return user.toObject();
   }
 
