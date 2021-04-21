@@ -49,3 +49,11 @@ export interface AuthorizedConnectionContext {
     };
   };
 }
+
+export interface TransactionableService<SessionType> {
+  startTransaction(): Promise<SessionType>;
+
+  commitTransaction(session: SessionType): Promise<void>;
+
+  abortTransaction(session: SessionType): Promise<void>;
+}

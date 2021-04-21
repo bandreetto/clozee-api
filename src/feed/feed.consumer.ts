@@ -4,7 +4,6 @@ import { CategoriesService } from 'src/categories/categories.service';
 import { LikesService } from 'src/likes/likes.service';
 import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
 import { Post } from 'src/posts/contracts';
-import { GENDER_TAGS } from 'src/users/contracts/enum';
 import { v4 } from 'uuid';
 import { FeedService } from './feed.service';
 import { CommentsService } from '../comments/comments.service';
@@ -16,9 +15,11 @@ import { BlockUserPayload } from '../users/contracts/payloads';
 import { PostsService } from 'src/posts/posts.service';
 import { FollowsService } from '../follows/follows.service';
 import { Follow } from 'src/follows/contracts';
+import { OrdersService } from 'src/orders/orders.service';
+import { Feed } from './contracts';
+import { getPostScore, getFeedTags } from './feed.logic';
+import { Category } from 'src/categories/contracts';
 
-const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
-const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
 const FOLLOWING_POINTS = 20;
 @Injectable()
 export class FeedConsumer {
@@ -32,6 +33,7 @@ export class FeedConsumer {
     private readonly seenPostService: SeenPostService,
     private readonly postsService: PostsService,
     private readonly followsService: FollowsService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @OnEvent('post.created', { async: true })
@@ -45,9 +47,9 @@ export class FeedConsumer {
         typeof payload.user === 'string' ? payload.user : payload.user._id;
       const [
         category,
-        categoryAncestrals,
+        categoryParents,
         [{ count: likesCount } = { count: 0 }],
-        comments,
+        commentsCount,
         follows,
       ] = await Promise.all([
         this.categoriesService.findById(categoryId),
@@ -56,34 +58,18 @@ export class FeedConsumer {
         this.commentsService.countByPost(payload._id),
         this.followsService.findManyByFollowees([postOwnerId]),
       ]);
-      const categoryAncestralsIds = categoryAncestrals.map(c => c._id);
+      const tags = getFeedTags(payload, category, categoryParents);
 
-      let gender: GENDER_TAGS;
-      if (categoryAncestralsIds.includes(MALE_CATEGORY_ID))
-        gender = GENDER_TAGS.MALE;
-      else if (categoryAncestralsIds.includes(FEMALE_CATEGORY_ID))
-        gender = GENDER_TAGS.FEMALE;
-      else gender = GENDER_TAGS.NEUTRAL;
-
-      const score = likesCount + comments;
+      const score = getPostScore(payload, likesCount, commentsCount);
 
       const followingUsers = follows.map(f => f.follower);
       this.logger.debug(`Trying to create FeedPost for Post ${payload._id}`);
-      await this.feedService.create(
+      await this.feedService.createManyPerUser(
         {
           _id: v4(),
           post: payload._id,
           score,
-          tags: {
-            size: payload.size,
-            gender,
-            searchTerms: [
-              payload.title,
-              payload.description,
-              category.name,
-              ...categoryAncestrals.map(c => c.name),
-            ],
-          },
+          tags,
           createdAt: payload.createdAt,
         },
         followingUsers,
@@ -94,6 +80,81 @@ export class FeedConsumer {
       this.logger.error({
         message:
           'Error while trying to create a feedPost from the post.created event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('user.preSigned')
+  async createFeedForUser(payload: string) {
+    try {
+      this.logger.debug(`Trying to create Feed for user ${payload}`);
+
+      const [posts, follows] = await Promise.all([
+        this.postsService.findAllNotDeleted(),
+        this.followsService.findManyByFollowers([payload]),
+      ]);
+      const postsIds = posts.map(p => p._id);
+      const categoriesIds = posts.map(p =>
+        typeof p.category === 'string' ? p.category : p.category._id,
+      );
+      const [
+        sales,
+        postsLikes,
+        postsComments,
+        categories,
+        categoriesParents,
+      ] = await Promise.all([
+        this.ordersService.findSalesByPosts(postsIds),
+        this.likesService.countByPosts(postsIds),
+        this.commentsService.countByPosts(postsIds),
+        this.categoriesService.findManyByIds(categoriesIds),
+        Promise.all<[string, Category[]]>(
+          categoriesIds.map(async c => [
+            c,
+            await this.categoriesService.findCategoryParents(c),
+          ]),
+        ),
+      ]);
+      const notSoldPosts = posts.filter(
+        p => !sales.map(s => s?.post).includes(p._id),
+      );
+
+      const feeds: Feed[] = notSoldPosts.map(post => {
+        const category = categories.find(c => c._id === post.category);
+        const [_categoryId, parentCategories] = categoriesParents.find(
+          ([categoryId, _parents]) => categoryId === category._id,
+        );
+        const { count: likes } = postsLikes.find(
+          postLikes => postLikes._id === post._id,
+        ) || { count: 0 };
+        const { count: comments = 0 } = postsComments.find(
+          postComments => postComments._id === post._id,
+        ) || { count: 0 };
+
+        return {
+          _id: `${v4()}:${payload}`,
+          post: post._id,
+          score: getPostScore(
+            post,
+            likes,
+            comments,
+            follows.map(f => f.followee),
+          ),
+          tags: getFeedTags(post, category, parentCategories),
+          user: payload,
+          createdAt: post.createdAt,
+        };
+      });
+
+      await this.feedService.createMany(feeds);
+      this.logger.log(`New feed generated for user ${payload}`);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while trying to generate new feed for user after pre-sign.',
         payload,
         error: error.toString(),
         metadata: error,

@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Document } from 'mongoose';
+import { Model, Document, ClientSession } from 'mongoose';
 import { escapeRegex } from 'src/common/regex';
+import { TransactionableService } from 'src/common/types';
 import { Address, PaymentMethod, SavedPost, User } from './contracts';
 
 @Injectable()
-export class UsersService {
+export class UsersService implements TransactionableService<ClientSession> {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User & Document>,
     @InjectModel(SavedPost.name)
@@ -13,6 +14,24 @@ export class UsersService {
     @InjectModel(PaymentMethod.name)
     private readonly paymentMethodModel: Model<PaymentMethod & Document>,
   ) {}
+
+  // Transactions
+
+  async startTransaction(): Promise<ClientSession> {
+    const session = await this.userModel.db.startSession();
+    session.startTransaction();
+    return session;
+  }
+
+  async commitTransaction(session: ClientSession): Promise<void> {
+    await session.commitTransaction();
+    return session.endSession();
+  }
+
+  async abortTransaction(session: ClientSession): Promise<void> {
+    await session.abortTransaction();
+    return session.endSession();
+  }
 
   // User
 
@@ -60,6 +79,7 @@ export class UsersService {
   async updateUser(
     userId: string,
     fieldsToUpdate: Partial<User>,
+    session?: ClientSession,
   ): Promise<User> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(
@@ -67,7 +87,7 @@ export class UsersService {
         {
           $set: fieldsToUpdate,
         },
-        { new: true, runValidators: true },
+        { new: true, runValidators: true, session },
       )
       .lean();
 
@@ -128,8 +148,8 @@ export class UsersService {
     return this.userModel.exists({ username });
   }
 
-  async create(newUser: User): Promise<User> {
-    const user = await this.userModel.create(newUser);
+  async create(newUser: User, session?: ClientSession): Promise<User> {
+    const [user] = await this.userModel.create([newUser], { session });
     return user.toObject();
   }
 

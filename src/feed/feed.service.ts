@@ -14,7 +14,11 @@ export class FeedService {
     @InjectModel(User.name) private readonly usersModel: Model<User & Document>,
   ) {}
 
-  async create(
+  async createMany(newFeeds: Feed[]): Promise<void> {
+    await this.feedModel.create(newFeeds);
+  }
+
+  async createManyPerUser(
     { _id, ...newFeed }: Omit<Feed, 'user'>,
     followingUsers: string[],
     followingPoints: number,

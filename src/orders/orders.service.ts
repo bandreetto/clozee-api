@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Document, Model, ClientSession } from 'mongoose';
+import { TransactionableService } from 'src/common/types';
 import { Order, Sale } from './contracts';
 
 @Injectable()
-export class OrdersService {
+export class OrdersService implements TransactionableService<ClientSession> {
   constructor(
     @InjectModel(Order.name)
     private readonly orderModel: Model<Order & Document>,
