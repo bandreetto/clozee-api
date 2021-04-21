@@ -39,7 +39,7 @@ export function getPostScore(post: Post, numberOfLikes: number, numberOfComments
   score += numberOfLikes;
   score += numberOfComments;
   const postOwner = typeof post.user === 'string' ? post.user : post.user._id
-  if (followingIds.includes(postOwner)) score += 20;
+  if (followingIds?.includes(postOwner)) score += 20;
   return score;
 }
 
