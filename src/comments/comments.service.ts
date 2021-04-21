@@ -30,4 +30,15 @@ export class CommentsService {
   async countByPost(postId: string): Promise<number> {
     return this.commentModel.find({ post: postId }).countDocuments();
   }
+
+  async countByPosts(
+    postIds: string[],
+  ): Promise<{ _id: string; count: number }[]> {
+    return this.commentModel.aggregate([
+      {
+        $match: { post: { $in: postIds } },
+      },
+      { $group: { _id: '$post', count: { $sum: 1 } } },
+    ]);
+  }
 }

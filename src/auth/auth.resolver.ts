@@ -120,7 +120,6 @@ export class AuthResolver {
         refreshToken: this.createRefreshToken(user._id),
       };
       await this.usersService.commitTransaction(session);
-      this.eventEmitter.emit('user.signUp');
       return response;
     } catch (error) {
       this.usersService.abortTransaction(session);
@@ -146,7 +145,7 @@ export class AuthResolver {
     const user = await this.usersService.create({
       _id: v4(),
     });
-    this.eventEmitter.emit('user.preSign');
+    this.eventEmitter.emit('user.preSigned', user._id);
     return {
       preSignToken: this.createPreSignToken(user._id),
       userId: user._id,

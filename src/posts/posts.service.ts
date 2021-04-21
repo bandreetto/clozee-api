@@ -17,6 +17,10 @@ export class PostsService {
     return newPost.toObject();
   }
 
+  async findAllNotDeleted(): Promise<Post[]> {
+    return this.postModel.find({ deleted: { $ne: true } }).lean();
+  }
+
   async findManyByUser(userId: string): Promise<Post[]> {
     return this.postModel.find({ user: userId }).lean();
   }

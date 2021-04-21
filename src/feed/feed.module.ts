@@ -6,6 +6,7 @@ import { LikesModule } from 'src/likes/likes.module';
 import { PostsModule } from 'src/posts/posts.module';
 import { SessionsModule } from '../sessions/sessions.module';
 import { FollowsModule } from '../follows/follows.module';
+import { OrdersModule } from '../orders/orders.module';
 import { Feed, FeedSchema } from './contracts';
 import { SeenPost, SeenPostSchema } from './contracts/seen-post';
 import { PostBlacklist, PostBlacklistSchema } from './contracts/post-blacklist';
@@ -48,6 +49,7 @@ import { User, UserSchema } from 'src/users/contracts';
     CommentsModule,
     SessionsModule,
     FollowsModule,
+    OrdersModule,
   ],
   providers: [FeedResolver, FeedService, FeedConsumer, SeenPostService],
 })
