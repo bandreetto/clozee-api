@@ -7,9 +7,9 @@ import { PostsService } from 'src/posts/posts.service';
 import { FeedTags } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
 import { FeedTagsInput } from 'src/users/contracts/inputs';
-import { Feed, FeedPostConnection } from './contracts';
+import { UserFeed, FeedPostConnection } from './contracts';
 import { decodeCursor, fromPostsToConnection } from './feed.logic';
-import { FeedService } from './feed.service';
+import { UserFeedService } from './user-feed.service';
 import { SeenPostService } from './seen-post.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { SessionsService } from '../sessions/sessions.service';
@@ -24,7 +24,7 @@ export class FeedResolver {
 
   constructor(
     private readonly postsService: PostsService,
-    private readonly feedService: FeedService,
+    private readonly userFeedService: UserFeedService,
     private readonly seenPostService: SeenPostService,
     private readonly sessionsService: SessionsService,
     private readonly eventEmitter: EventEmitter2,
@@ -66,11 +66,11 @@ export class FeedResolver {
     const postBlacklist = await this.seenPostService.findBlacklistedPosts(
       user._id,
     );
-    let feedPosts: Feed[], postsCount: number;
+    let feedPosts: UserFeed[], postsCount: number;
     if (searchTerm) {
-      let searchResult: Feed[];
+      let searchResult: UserFeed[];
       [searchResult, postsCount] = await Promise.all([
-        this.feedService.searchByTerm(
+        this.userFeedService.searchByTerm(
           user._id,
           searchTerm,
           tags,
@@ -82,7 +82,7 @@ export class FeedResolver {
             ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
-        this.feedService.countBySearchTerm(
+        this.userFeedService.countBySearchTerm(
           user._id,
           searchTerm,
           tags,
@@ -97,7 +97,7 @@ export class FeedResolver {
       feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
     } else {
       [feedPosts, postsCount] = await Promise.all([
-        this.feedService.findSortedByScore(
+        this.userFeedService.findSortedByScore(
           user._id,
           args.first,
           args.after && { maxScore: score, before: date },
@@ -107,7 +107,7 @@ export class FeedResolver {
             ...(postBlacklist.blockedUsersPosts || []),
           ],
         ),
-        this.feedService.countByScore(
+        this.userFeedService.countByScore(
           user._id,
           tags,
           args.after && {

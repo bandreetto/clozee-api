@@ -6,3 +6,6 @@ export enum ERROR_CODES {
   POST_ALREADY_SOLD,
   PAYMENT_DENIED,
 }
+
+export const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
+export const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';

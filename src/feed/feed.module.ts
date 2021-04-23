@@ -7,14 +7,16 @@ import { PostsModule } from 'src/posts/posts.module';
 import { SessionsModule } from '../sessions/sessions.module';
 import { FollowsModule } from '../follows/follows.module';
 import { OrdersModule } from '../orders/orders.module';
-import { Feed, FeedSchema } from './contracts';
+import { Feed, FeedSchema, UserFeed, UserFeedSchema } from './contracts';
 import { SeenPost, SeenPostSchema } from './contracts/seen-post';
 import { PostBlacklist, PostBlacklistSchema } from './contracts/post-blacklist';
-import { FeedConsumer } from './feed.consumer';
+import { UserFeedConsumer } from './user-feed.consumer';
 import { FeedResolver } from './feed.resolver';
-import { FeedService } from './feed.service';
 import { SeenPostService } from './seen-post.service';
 import { User, UserSchema } from 'src/users/contracts';
+import { UserFeedService } from './user-feed.service';
+import { FeedService } from './feed.service';
+import { FeedConsumer } from './feed.consumer';
 
 @Module({
   imports: [
@@ -22,6 +24,10 @@ import { User, UserSchema } from 'src/users/contracts';
       {
         name: Feed.name,
         schema: FeedSchema,
+      },
+      {
+        name: UserFeed.name,
+        schema: UserFeedSchema,
       },
       {
         name: SeenPost.name,
@@ -32,11 +38,11 @@ import { User, UserSchema } from 'src/users/contracts';
         schema: PostBlacklistSchema,
       },
       /**
-       * User model is injected here to efficiently create a feed post for every user. In the future, when feeds have its own service with its own database,
-       * this could only be a reference to a mirrored users table on feeds service's database (by following the Saga pattern: https://microservices.io/patterns/data/saga.html),
-       * but as of today feed and users share the same DB so no need to mirror the users collection.
+       * User and Post models are injected here to efficiently create feed posts for every user. In the future, when feeds have its own service with its own database,
+       * this could only be a reference to a mirrored these tables on feeds service's database (by following the Saga pattern: https://microservices.io/patterns/data/saga.html),
+       * but as of today feed and these models share the same DB so no need to mirror the users collection.
        *
-       * This module SHOULD NOT write on users collection.
+       * This module SHOULD NOT write on these collection.
        */
       {
         name: User.name,
@@ -51,6 +57,13 @@ import { User, UserSchema } from 'src/users/contracts';
     FollowsModule,
     OrdersModule,
   ],
-  providers: [FeedResolver, FeedService, FeedConsumer, SeenPostService],
+  providers: [
+    FeedResolver,
+    UserFeedService,
+    UserFeedConsumer,
+    SeenPostService,
+    FeedService,
+    FeedConsumer,
+  ],
 })
 export class FeedModule {}
