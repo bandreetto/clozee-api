@@ -1,12 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { CategoriesService } from 'src/categories/categories.service';
-import { LikesService } from 'src/likes/likes.service';
 import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
 import { Post } from 'src/posts/contracts';
-import { v4 } from 'uuid';
 import { UserFeedService } from './user-feed.service';
-import { CommentsService } from '../comments/comments.service';
 import { LikePayload } from '../likes/contracts/payloads';
 import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
 import { SeenPostService } from './seen-post.service';
@@ -15,10 +11,7 @@ import { BlockUserPayload } from '../users/contracts/payloads';
 import { PostsService } from 'src/posts/posts.service';
 import { FollowsService } from '../follows/follows.service';
 import { Follow } from 'src/follows/contracts';
-import { OrdersService } from 'src/orders/orders.service';
-import { UserFeed } from './contracts';
-import { getPostScore, getFeedTags } from './feed.logic';
-import { Category } from 'src/categories/contracts';
+import { Feed } from './contracts';
 
 const FOLLOWING_POINTS = 20;
 @Injectable()
@@ -27,51 +20,28 @@ export class UserFeedConsumer {
 
   constructor(
     private readonly userFeedService: UserFeedService,
-    private readonly categoriesService: CategoriesService,
-    private readonly likesService: LikesService,
-    private readonly commentsService: CommentsService,
     private readonly seenPostService: SeenPostService,
     private readonly postsService: PostsService,
     private readonly followsService: FollowsService,
-    private readonly ordersService: OrdersService,
   ) {}
 
-  @OnEvent('post.created', { async: true })
-  async createUserFeedPost(payload: Post) {
+  @OnEvent('feed.created', { async: true })
+  async createUserFeedPost(payload: Feed) {
     try {
-      const categoryId =
-        typeof payload.category === 'string'
-          ? payload.category
-          : payload.category._id;
-      const postOwnerId =
-        typeof payload.user === 'string' ? payload.user : payload.user._id;
-      const [
-        category,
-        categoryParents,
-        [{ count: likesCount } = { count: 0 }],
-        commentsCount,
-        follows,
-      ] = await Promise.all([
-        this.categoriesService.findById(categoryId),
-        this.categoriesService.findCategoryParents(categoryId),
-        this.likesService.countByPosts([payload._id]),
-        this.commentsService.countByPost(payload._id),
-        this.followsService.findManyByFollowees([postOwnerId]),
+      const follows = await this.followsService.findManyByFollowees([
+        payload.postOwner,
       ]);
-      const tags = getFeedTags(payload, category, categoryParents);
-
-      const score = getPostScore(payload, likesCount, commentsCount);
 
       const followingUsers = follows.map(f => f.follower);
       this.logger.debug(
         `Trying to create UserFeedPosts for Post ${payload._id}`,
       );
+
       await this.userFeedService.createManyPerUser(
         {
-          _id: v4(),
-          post: payload._id,
-          score,
-          tags,
+          post: payload.post,
+          score: payload.score,
+          tags: payload.tags,
           createdAt: payload.createdAt,
         },
         followingUsers,

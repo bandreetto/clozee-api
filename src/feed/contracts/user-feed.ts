@@ -4,7 +4,7 @@ import { Tags, TagsSchema } from './tags';
 @Schema({ timestamps: true })
 export class UserFeed {
   @Prop()
-  _id: string;
+  _id?: string;
 
   @Prop({ required: true, index: true })
   post: string;

@@ -55,6 +55,7 @@ export class FeedConsumer {
         createdAt: payload.createdAt,
       });
       this.eventEmitter.emit('feed.created', feed);
+      this.logger.log(`New feed created for post ${payload._id}`);
     } catch (error) {
       this.logger.error({
         message:
