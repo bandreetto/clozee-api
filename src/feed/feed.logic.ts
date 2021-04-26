@@ -1,8 +1,9 @@
 import { Category } from 'src/categories/contracts';
+import { FEMALE_CATEGORY_ID, MALE_CATEGORY_ID } from 'src/common/contants';
 import { Connection } from 'src/common/types';
 import { Post } from 'src/posts/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
-import { Feed } from './contracts';
+import { UserFeed } from './contracts';
 import { Tags } from './contracts/tags';
 
 export function encodeCursor(date: Date, score = 0): string {
@@ -17,7 +18,7 @@ export function decodeCursor(cursor: string): [date: Date, score: number] {
 }
 
 export function fromPostsToConnection( 
-  posts: { feedPost: Feed; post: Post, score?: number }[],
+  posts: { feedPost: UserFeed; post: Post, score?: number }[],
   hasNextPage: boolean,
 ): Connection<Post> {
   const edges = posts.map(({ feedPost, post }) => ({
@@ -44,8 +45,6 @@ export function getPostScore(post: Post, numberOfLikes: number, numberOfComments
 }
 
 
-const FEMALE_CATEGORY_ID = 'b6877a2b-163b-4099-958a-17d74604ceed';
-const MALE_CATEGORY_ID = '1b7f9f9d-ab18-4597-ab94-4dc19968208a';
 export function getFeedTags(post: Post, postCategory: Category, parentCategories: Category[]): Tags {
   let gender: GENDER_TAGS;
   const postCategoryParentsIds = parentCategories.map(c => c._id);
