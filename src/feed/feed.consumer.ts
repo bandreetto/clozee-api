@@ -7,6 +7,9 @@ import { LikesService } from 'src/likes/likes.service';
 import { CommentsService } from '../comments/comments.service';
 import { getFeedTags, getPostScore } from './feed.logic';
 import { v4 } from 'uuid';
+import { LikePayload } from 'src/likes/contracts/payloads';
+import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
+import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
 
 @Injectable()
 export class FeedConsumer {
@@ -54,6 +57,78 @@ export class FeedConsumer {
       this.logger.error({
         message:
           'Error while trying to create a FeedPost from the post.created event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('post.deleted', { async: true })
+  async deleteFeedPost(payload: Post) {
+    try {
+      await this.feedService.deleteByPost(payload._id);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while trying to delete FeedPost from post.deleted event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('post.liked', { async: true })
+  async incrementLikeScore(payload: LikePayload) {
+    try {
+      await this.feedService.addToScoreByPost(1, payload.post);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while incrementing post score from post.liked event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('post.unliked', { async: true })
+  async decrementLikeScore(payload: LikePayload) {
+    try {
+      await this.feedService.addToScoreByPost(-1, payload.post);
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while decrementing post score from post.unliked event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('comment.created', { async: true })
+  async incrementCommentScore(payload: CommentCreatedPayload) {
+    try {
+      await this.feedService.addToScoreByPost(1, payload.post._id);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while incrementing post score from comment.created event.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('order.created', { async: true })
+  async deleteSoldPostFromFeed(payload: OrderCreatedPayload) {
+    try {
+      await this.feedService.deleteManyByPosts(payload.posts.map(p => p._id));
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while deleting FeedPost from order.created event.',
         payload,
         error: error.toString(),
         metadata: error,
