@@ -12,6 +12,9 @@ export class Feed {
   @Prop({ required: true })
   post: string;
 
+  @Prop({ required: true })
+  postOwner: string;
+
   @Prop({ type: TagsSchema, required: true })
   tags: Tags;
 

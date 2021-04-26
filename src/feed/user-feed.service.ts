@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserFeed } from './contracts';
+import { Feed, UserFeed } from './contracts';
 import { Model, Document } from 'mongoose';
 import { FeedTags, User } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
@@ -12,10 +12,40 @@ export class UserFeedService {
     @InjectModel(UserFeed.name)
     private readonly userFeedModel: Model<UserFeed & Document>,
     @InjectModel(User.name) private readonly usersModel: Model<User & Document>,
+    @InjectModel(Feed.name) private readonly feedModel: Model<Feed & Document>,
   ) {}
 
-  async createMany(newFeeds: UserFeed[]): Promise<void> {
-    await this.userFeedModel.create(newFeeds);
+  async createManyPerFeed(
+    user: string,
+    followingUsers: string[],
+    followingPoints: number,
+  ): Promise<void> {
+    await this.feedModel.aggregate([
+      {
+        $addFields: {
+          _id: {
+            $concat: ['$post', ':', user],
+          },
+          user,
+          score: {
+            $cond: {
+              if: { $in: ['$postOwner', followingUsers] },
+              then: { $add: ['$score', followingPoints] },
+              else: '$score',
+            },
+          },
+        },
+      },
+      {
+        $unset: 'postOwner',
+      },
+      {
+        $merge: {
+          into: 'userfeeds',
+          on: '_id',
+        },
+      },
+    ]);
   }
 
   async createManyPerUser(

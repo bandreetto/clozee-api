@@ -94,64 +94,13 @@ export class UserFeedConsumer {
     try {
       this.logger.debug(`Trying to create Feed for user ${payload}`);
 
-      const [posts, follows] = await Promise.all([
-        this.postsService.findAllNotDeleted(),
-        this.followsService.findManyByFollowers([payload]),
-      ]);
-      const postsIds = posts.map(p => p._id);
-      const categoriesIds = posts.map(p =>
-        typeof p.category === 'string' ? p.category : p.category._id,
+      const follows = await this.followsService.findManyByFollowers([payload]);
+      const followees = follows.map(f => f.followee);
+      await this.userFeedService.createManyPerFeed(
+        payload,
+        followees,
+        FOLLOWING_POINTS,
       );
-      const [
-        sales,
-        postsLikes,
-        postsComments,
-        categories,
-        categoriesParents,
-      ] = await Promise.all([
-        this.ordersService.findSalesByPosts(postsIds),
-        this.likesService.countByPosts(postsIds),
-        this.commentsService.countByPosts(postsIds),
-        this.categoriesService.findManyByIds(categoriesIds),
-        Promise.all<[string, Category[]]>(
-          categoriesIds.map(async c => [
-            c,
-            await this.categoriesService.findCategoryParents(c),
-          ]),
-        ),
-      ]);
-      const notSoldPosts = posts.filter(
-        p => !sales.map(s => s?.post).includes(p._id),
-      );
-
-      const feeds: UserFeed[] = notSoldPosts.map(post => {
-        const category = categories.find(c => c._id === post.category);
-        const [_categoryId, parentCategories] = categoriesParents.find(
-          ([categoryId, _parents]) => categoryId === category._id,
-        );
-        const { count: likes } = postsLikes.find(
-          postLikes => postLikes._id === post._id,
-        ) || { count: 0 };
-        const { count: comments = 0 } = postsComments.find(
-          postComments => postComments._id === post._id,
-        ) || { count: 0 };
-
-        return {
-          _id: `${v4()}:${payload}`,
-          post: post._id,
-          score: getPostScore(
-            post,
-            likes,
-            comments,
-            follows.map(f => f.followee),
-          ),
-          tags: getFeedTags(post, category, parentCategories),
-          user: payload,
-          createdAt: post.createdAt,
-        };
-      });
-
-      await this.userFeedService.createMany(feeds);
       this.logger.log(`New feed generated for user ${payload}`);
     } catch (error) {
       this.logger.error({

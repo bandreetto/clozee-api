@@ -48,6 +48,8 @@ export class FeedConsumer {
       const feed = await this.feedService.create({
         _id: v4(),
         post: payload._id,
+        postOwner:
+          typeof payload.user === 'string' ? payload.user : payload.user._id,
         score,
         tags,
         createdAt: payload.createdAt,
