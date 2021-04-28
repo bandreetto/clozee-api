@@ -12,7 +12,10 @@ export class AddPostInput {
   @Field()
   description: string;
 
-  @Field(() => [String], { description: 'An array of urls for post images.' })
+  @Field(() => [String], {
+    description:
+      "An array of images id's, get from the UploadPostImage mutation",
+  })
   images: string[];
 
   @Field(() => String, {

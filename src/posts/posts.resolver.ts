@@ -93,10 +93,14 @@ export class PostsResolver {
     @Args('addPostInput') input: AddPostInput,
     @CurrentUser() user: TokenUser,
   ) {
+    const imagesCdn = configuration.images.cdn();
     const createdPost = await this.postsService.create({
       ...input,
       _id: v4(),
       user: user._id,
+      images: input.images.map(
+        imageId => `https://${imagesCdn}/posts/${imageId}`,
+      ),
     });
 
     this.eventEmitter.emit('post.created', createdPost);

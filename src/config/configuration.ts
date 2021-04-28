@@ -10,6 +10,7 @@ export default {
   },
   images: {
     bucket: () => process.env.IMAGES_BUCKET,
+    cdn: () => process.env.IMAGES_CDN,
   },
   firebase: {
     projectId: () => process.env.FIREBASE_PROJECT_ID,
