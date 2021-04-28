@@ -67,9 +67,9 @@ export class AuthResolver {
     if (await this.usersService.existsWithUsername(input.username)) {
       throw new ConflictException('This username already exists.');
     }
-    const avatarUrl =
-      input.avatarId &&
-      `https://${configuration.images.cdn()}/avatars/${input.avatarId}.jpg`;
+    const avatarUrl = input.avatarId
+      ? `https://${configuration.images.cdn()}/avatars/${input.avatarId}.jpg`
+      : input.avatarUrl;
     let user: User;
     const session = await this.usersService.startTransaction();
     try {

@@ -194,10 +194,24 @@ export class UsersResolver {
     return this.usersService.updateAddress(user._id, newAddress);
   }
 
-  @Mutation(() => UploadImageResponse, {
+  @Mutation(() => String, {
     description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
+    deprecationReason: 'Replaced by createUserAvatar. Use it intead.',
   })
-  uploadAvatarUrl(@CurrentUser() user: TokenUser): UploadImageResponse {
+  uploadAvatarUrl(@CurrentUser() user: TokenUser): string {
+    return S3Client.getSignedUrl('putObject', {
+      Bucket: configuration.images.bucket(),
+      Key: `avatars/${user?._id}_${v4()}.jpg`,
+      ContentType: 'image/jpeg',
+      ACL: 'public-read',
+    });
+  }
+
+  @Mutation(() => UploadImageResponse, {
+    description:
+      'Returns the avatar image Id and a pre-signed S3 URL that allows the avatar image upload.',
+  })
+  createUserAvatar(@CurrentUser() user: TokenUser): UploadImageResponse {
     const avatarId = `${user?._id || ''}_${v4()}`;
     return {
       imageId: avatarId,
@@ -215,12 +229,19 @@ export class UsersResolver {
     description: 'Returns the user with the updated avatar url.',
   })
   async updateUserAvatar(
-    @Args('newAvatarId') newAvatarId: string,
+    @Args('newAvatarUrl', {
+      nullable: true,
+      description: 'DEPRECATED. Use newAvatarId parameter',
+    })
+    newAvatarUrl: string,
+    @Args('newAvatarId', { nullable: true }) newAvatarId: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    const imagesCdn = configuration.images.cdn();
+    const avatarUrl = newAvatarId
+      ? `https://${configuration.images.cdn()}/avatars/${newAvatarId}.jpg`
+      : newAvatarUrl;
     const updatedUser = await this.usersService.updateUser(user._id, {
-      avatar: `https://${imagesCdn}/avatars/${newAvatarId}.jpg`,
+      avatar: avatarUrl,
     });
     return updatedUser;
   }

@@ -71,10 +71,27 @@ export class PostsResolver {
   // Mutations
 
   @UseGuards(AuthGuard)
-  @Mutation(() => UploadImageResponse, {
-    description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
+  @Mutation(() => String, {
+    description:
+      'Returns a pre-signed S3 URL that allows the post image upload.',
+    deprecationReason:
+      'Replaced by the mutation createPostImage. Use it intead.',
   })
-  uploadPostImage(@CurrentUser() user: TokenUser): UploadImageResponse {
+  uploadPostImage(@CurrentUser() user: TokenUser): string {
+    return S3Client.getSignedUrl('putObject', {
+      Bucket: configuration.images.bucket(),
+      Key: `posts/${user._id}_${v4()}.jpg`,
+      ContentType: 'image/jpeg',
+      ACL: 'public-read',
+    });
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => UploadImageResponse, {
+    description:
+      'Returns the post image Id and a pre-signed S3 URL that allows the post image upload.',
+  })
+  createPostImage(@CurrentUser() user: TokenUser): UploadImageResponse {
     const imageId = `${user._id}_${v4()}`;
     return {
       imageId,
@@ -94,13 +111,16 @@ export class PostsResolver {
     @CurrentUser() user: TokenUser,
   ) {
     const imagesCdn = configuration.images.cdn();
+    const images = input.imagesIds.length
+      ? input.imagesIds.map(
+          imageId => `https://${imagesCdn}/posts/${imageId}.jpg`,
+        )
+      : input.images;
     const createdPost = await this.postsService.create({
       ...input,
       _id: v4(),
       user: user._id,
-      images: input.images.map(
-        imageId => `https://${imagesCdn}/posts/${imageId}.jpg`,
-      ),
+      images,
     });
 
     this.eventEmitter.emit('post.created', createdPost);

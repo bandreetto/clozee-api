@@ -478,8 +478,13 @@ type Mutation {
   likePost(postId: String!): Post!
   unlikePost(postId: String!): Post!
 
-  """Returns a pre-signed S3 URL that allows the avatar upload."""
-  uploadPostImage: UploadImageResponse!
+  """Returns a pre-signed S3 URL that allows the post image upload."""
+  uploadPostImage: String! @deprecated(reason: "Replaced by the mutation createPostImage. Use it intead.")
+
+  """
+  Returns the post image Id and a pre-signed S3 URL that allows the post image upload.
+  """
+  createPostImage: UploadImageResponse!
   addPost(addPostInput: AddPostInput!): Post!
   editPost(updateFields: UpdatePostFields!, postId: String!): Post!
   deletePost(postId: String!): Post!
@@ -493,10 +498,20 @@ type Mutation {
   updateAddress(address: AddressInput!): User!
 
   """Returns a pre-signed S3 URL that allows the avatar upload."""
-  uploadAvatarUrl: UploadImageResponse!
+  uploadAvatarUrl: String! @deprecated(reason: "Replaced by createUserAvatar. Use it intead.")
+
+  """
+  Returns the avatar image Id and a pre-signed S3 URL that allows the avatar image upload.
+  """
+  createUserAvatar: UploadImageResponse!
 
   """Returns the user with the updated avatar url."""
-  updateUserAvatar(newAvatarId: String!): User!
+  updateUserAvatar(
+    newAvatarId: String
+
+    """DEPRECATED. Use newAvatarId parameter"""
+    newAvatarUrl: String
+  ): User!
   addCreditCard(
     """The credit card's number"""
     number: String!
@@ -537,8 +552,11 @@ input AddPostInput {
   size: SIZES!
   description: String!
 
+  """An array of urls for post images."""
+  images: [String!] = []
+
   """An array of images id's, get from the UploadPostImage mutation"""
-  images: [String!]!
+  imagesIds: [String!] = []
 
   """The id of the post category."""
   category: String!
@@ -636,6 +654,7 @@ input SignUpInput {
   _id: String
   username: String!
   password: String!
+  avatarUrl: String
 
   """
   The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.
