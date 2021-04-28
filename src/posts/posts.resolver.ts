@@ -99,7 +99,7 @@ export class PostsResolver {
       _id: v4(),
       user: user._id,
       images: input.images.map(
-        imageId => `https://${imagesCdn}/posts/${imageId}`,
+        imageId => `https://${imagesCdn}/posts/${imageId}.jpg`,
       ),
     });
 

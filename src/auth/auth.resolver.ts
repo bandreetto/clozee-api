@@ -67,6 +67,9 @@ export class AuthResolver {
     if (await this.usersService.existsWithUsername(input.username)) {
       throw new ConflictException('This username already exists.');
     }
+    const avatarUrl =
+      input.avatarId &&
+      `https://${configuration.images.cdn()}/avatars/${input.avatarId}.jpg`;
     let user: User;
     const session = await this.usersService.startTransaction();
     try {
@@ -76,8 +79,8 @@ export class AuthResolver {
             _id: v4(),
             username: input.username,
             avatar:
-              input.avatarUrl ||
-              `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
+              avatarUrl ||
+              `https://${configuration.images.cdn()}/avatars/default.png`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
@@ -88,8 +91,8 @@ export class AuthResolver {
           {
             username: input.username,
             avatar:
-              input.avatarUrl ||
-              `https://${configuration.images.bucket()}.s3.amazonaws.com/avatars/default.png`,
+              avatarUrl ||
+              `https://${configuration.images.cdn()}/avatars/default.png`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
@@ -131,7 +134,7 @@ export class AuthResolver {
           preSignId: input._id,
           username: input.username,
           feedTags: input.feedTags,
-          avatarUrl: input.avatarUrl,
+          avatarId: input.avatarId,
         },
       });
       throw new InternalServerErrorException(

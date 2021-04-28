@@ -215,11 +215,12 @@ export class UsersResolver {
     description: 'Returns the user with the updated avatar url.',
   })
   async updateUserAvatar(
-    @Args('newAvatarUrl') newAvatarUrl: string,
+    @Args('newAvatarId') newAvatarId: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
+    const imagesCdn = configuration.images.cdn();
     const updatedUser = await this.usersService.updateUser(user._id, {
-      avatar: newAvatarUrl,
+      avatar: `https://${imagesCdn}/avatars/${newAvatarId}.jpg`,
     });
     return updatedUser;
   }

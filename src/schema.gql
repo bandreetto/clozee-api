@@ -496,7 +496,7 @@ type Mutation {
   uploadAvatarUrl: UploadImageResponse!
 
   """Returns the user with the updated avatar url."""
-  updateUserAvatar(newAvatarUrl: String!): User!
+  updateUserAvatar(newAvatarId: String!): User!
   addCreditCard(
     """The credit card's number"""
     number: String!
@@ -636,7 +636,11 @@ input SignUpInput {
   _id: String
   username: String!
   password: String!
-  avatarUrl: String
+
+  """
+  The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.
+  """
+  avatarId: String
 
   """Tags used to customize user's feed"""
   feedTags: FeedTagsInput
