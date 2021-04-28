@@ -201,7 +201,7 @@ export class UsersResolver {
   uploadAvatarUrl(@CurrentUser() user: TokenUser): string {
     return S3Client.getSignedUrl('putObject', {
       Bucket: configuration.images.bucket(),
-      Key: `avatars/${user?._id}_${v4()}.jpg`,
+      Key: `avatars/${user?._id || ''}_${v4()}.jpg`,
       ContentType: 'image/jpeg',
       ACL: 'public-read',
     });
@@ -231,7 +231,7 @@ export class UsersResolver {
   async updateUserAvatar(
     @Args('newAvatarUrl', {
       nullable: true,
-      description: 'DEPRECATED. Use newAvatarId parameter',
+      description: 'DEPRECATED. Use newAvatarId parameter.',
     })
     newAvatarUrl: string,
     @Args('newAvatarId', { nullable: true }) newAvatarId: string,
