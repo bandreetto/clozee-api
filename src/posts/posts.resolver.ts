@@ -19,7 +19,7 @@ import {
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser, TokenTypes } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
+import { TokenUser, UploadImageResponse } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { Post } from './contracts';
@@ -71,16 +71,20 @@ export class PostsResolver {
   // Mutations
 
   @UseGuards(AuthGuard)
-  @Mutation(() => String, {
+  @Mutation(() => UploadImageResponse, {
     description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
   })
-  uploadPostImage(@CurrentUser() user: TokenUser): string {
-    return S3Client.getSignedUrl('putObject', {
-      Bucket: configuration.images.bucket(),
-      Key: `posts/${user._id}_${v4()}.jpg`,
-      ContentType: 'image/jpeg',
-      ACL: 'public-read',
-    });
+  uploadPostImage(@CurrentUser() user: TokenUser): UploadImageResponse {
+    const imageId = `${user._id}_${v4()}`;
+    return {
+      imageId,
+      signedUrl: S3Client.getSignedUrl('putObject', {
+        Bucket: configuration.images.bucket(),
+        Key: `posts/${imageId}.jpg`,
+        ContentType: 'image/jpeg',
+        ACL: 'public-read',
+      }),
+    };
   }
 
   @UseGuards(AuthGuard)

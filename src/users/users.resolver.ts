@@ -16,7 +16,7 @@ import { descend, sort, uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { S3Client } from 'src/common/s3';
-import { TokenUser } from 'src/common/types';
+import { TokenUser, UploadImageResponse } from 'src/common/types';
 import configuration from 'src/config/configuration';
 import { PagarmeService } from 'src/payments/pagarme.service';
 import { Post } from 'src/posts/contracts';
@@ -194,16 +194,20 @@ export class UsersResolver {
     return this.usersService.updateAddress(user._id, newAddress);
   }
 
-  @Mutation(() => String, {
+  @Mutation(() => UploadImageResponse, {
     description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
   })
-  uploadAvatarUrl(@CurrentUser() user: TokenUser): string {
-    return S3Client.getSignedUrl('putObject', {
-      Bucket: configuration.images.bucket(),
-      Key: `avatars/${user?._id || ''}_${v4()}.jpg`,
-      ContentType: 'image/jpeg',
-      ACL: 'public-read',
-    });
+  uploadAvatarUrl(@CurrentUser() user: TokenUser): UploadImageResponse {
+    const avatarId = `${user?._id || ''}_${v4()}`;
+    return {
+      imageId: avatarId,
+      signedUrl: S3Client.getSignedUrl('putObject', {
+        Bucket: configuration.images.bucket(),
+        Key: `avatars/${avatarId}.jpg`,
+        ContentType: 'image/jpeg',
+        ACL: 'public-read',
+      }),
+    };
   }
 
   @UseGuards(AuthGuard)
