@@ -80,7 +80,7 @@ export class AuthResolver {
             username: input.username,
             avatar:
               avatarUrl ||
-              `https://${configuration.images.cdn()}/avatars/default.png`,
+              `https://${configuration.images.cdn()}/avatars/default.jpg`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
@@ -92,7 +92,7 @@ export class AuthResolver {
             username: input.username,
             avatar:
               avatarUrl ||
-              `https://${configuration.images.cdn()}/avatars/default.png`,
+              `https://${configuration.images.cdn()}/avatars/default.jpg`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
