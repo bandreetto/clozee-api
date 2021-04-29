@@ -57,3 +57,14 @@ export interface TransactionableService<SessionType> {
 
   abortTransaction(session: SessionType): Promise<void>;
 }
+
+@ObjectType()
+export class UploadImageResponse {
+  @Field({
+    description: 'The id of the image. Used later to reference this image.',
+  })
+  imageId: string;
+
+  @Field({ description: 'The signed url to allow the upload of the image.' })
+  signedUrl: string;
+}

@@ -16,7 +16,7 @@ import { descend, sort, uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
 import { S3Client } from 'src/common/s3';
-import { TokenUser } from 'src/common/types';
+import { TokenUser, UploadImageResponse } from 'src/common/types';
 import configuration from 'src/config/configuration';
 import { PagarmeService } from 'src/payments/pagarme.service';
 import { Post } from 'src/posts/contracts';
@@ -196,6 +196,7 @@ export class UsersResolver {
 
   @Mutation(() => String, {
     description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
+    deprecationReason: 'Replaced by createUserAvatar. Use it intead.',
   })
   uploadAvatarUrl(@CurrentUser() user: TokenUser): string {
     return S3Client.getSignedUrl('putObject', {
@@ -206,16 +207,41 @@ export class UsersResolver {
     });
   }
 
+  @Mutation(() => UploadImageResponse, {
+    description:
+      'Returns the avatar image Id and a pre-signed S3 URL that allows the avatar image upload.',
+  })
+  createUserAvatar(@CurrentUser() user: TokenUser): UploadImageResponse {
+    const avatarId = `${user?._id || ''}_${v4()}`;
+    return {
+      imageId: avatarId,
+      signedUrl: S3Client.getSignedUrl('putObject', {
+        Bucket: configuration.images.bucket(),
+        Key: `avatars/${avatarId}.jpg`,
+        ContentType: 'image/jpeg',
+        ACL: 'public-read',
+      }),
+    };
+  }
+
   @UseGuards(AuthGuard)
   @Mutation(() => User, {
     description: 'Returns the user with the updated avatar url.',
   })
   async updateUserAvatar(
-    @Args('newAvatarUrl') newAvatarUrl: string,
+    @Args('newAvatarUrl', {
+      nullable: true,
+      description: 'DEPRECATED. Use newAvatarId parameter.',
+    })
+    newAvatarUrl: string,
+    @Args('newAvatarId', { nullable: true }) newAvatarId: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
+    const avatarUrl = newAvatarId
+      ? `https://${configuration.images.cdn()}/avatars/${newAvatarId}.jpg`
+      : newAvatarUrl;
     const updatedUser = await this.usersService.updateUser(user._id, {
-      avatar: newAvatarUrl,
+      avatar: avatarUrl,
     });
     return updatedUser;
   }

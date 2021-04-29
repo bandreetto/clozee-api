@@ -9,8 +9,14 @@ export class SignUpInput {
   username: string;
   @Field()
   password: string;
-  @Field({ nullable: true })
-  avatarUrl: string;
+  @Field({ nullable: true, deprecationReason: 'Replaced by avatarId field.' })
+  avatarUrl?: string;
+  @Field({
+    nullable: true,
+    description:
+      'The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.',
+  })
+  avatarId?: string;
   @Field(() => FeedTagsInput, {
     nullable: true,
     description: "Tags used to customize user's feed",

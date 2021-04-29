@@ -19,7 +19,7 @@ import {
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser, TokenTypes } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
+import { TokenUser, UploadImageResponse } from 'src/common/types';
 import { S3Client } from 'src/common/s3';
 import configuration from 'src/config/configuration';
 import { Post } from './contracts';
@@ -72,7 +72,10 @@ export class PostsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => String, {
-    description: 'Returns a pre-signed S3 URL that allows the avatar upload.',
+    description:
+      'Returns a pre-signed S3 URL that allows the post image upload.',
+    deprecationReason:
+      'Replaced by the mutation createPostImage. Use it intead.',
   })
   uploadPostImage(@CurrentUser() user: TokenUser): string {
     return S3Client.getSignedUrl('putObject', {
@@ -84,15 +87,40 @@ export class PostsResolver {
   }
 
   @UseGuards(AuthGuard)
+  @Mutation(() => UploadImageResponse, {
+    description:
+      'Returns the post image Id and a pre-signed S3 URL that allows the post image upload.',
+  })
+  createPostImage(@CurrentUser() user: TokenUser): UploadImageResponse {
+    const imageId = `${user._id}_${v4()}`;
+    return {
+      imageId,
+      signedUrl: S3Client.getSignedUrl('putObject', {
+        Bucket: configuration.images.bucket(),
+        Key: `posts/${imageId}.jpg`,
+        ContentType: 'image/jpeg',
+        ACL: 'public-read',
+      }),
+    };
+  }
+
+  @UseGuards(AuthGuard)
   @Mutation(() => Post)
   async addPost(
     @Args('addPostInput') input: AddPostInput,
     @CurrentUser() user: TokenUser,
   ) {
+    const imagesCdn = configuration.images.cdn();
+    const images = input.imagesIds.length
+      ? input.imagesIds.map(
+          imageId => `https://${imagesCdn}/posts/${imageId}.jpg`,
+        )
+      : input.images;
     const createdPost = await this.postsService.create({
       ...input,
       _id: v4(),
       user: user._id,
+      images,
     });
 
     this.eventEmitter.emit('post.created', createdPost);

@@ -12,8 +12,19 @@ export class AddPostInput {
   @Field()
   description: string;
 
-  @Field(() => [String], { description: 'An array of urls for post images.' })
+  @Field(() => [String], {
+    description: 'An array of urls for post images.',
+    defaultValue: [],
+    deprecationReason: 'Replaced by the imagesIds field.',
+  })
   images: string[];
+
+  @Field(() => [String], {
+    description:
+      "An array of images id's, get from the UploadPostImage mutation",
+    defaultValue: [],
+  })
+  imagesIds: string[];
 
   @Field(() => String, {
     description: 'The id of the post category.',
