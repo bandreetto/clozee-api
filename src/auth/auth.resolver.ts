@@ -148,7 +148,7 @@ export class AuthResolver {
     const user = await this.usersService.create({
       _id: v4(),
     });
-    this.eventEmitter.emit('user.preSigned', user._id);
+    await this.eventEmitter.emitAsync('user.preSigned', user._id);
     return {
       preSignToken: this.createPreSignToken(user._id),
       userId: user._id,
