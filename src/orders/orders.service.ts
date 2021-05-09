@@ -33,11 +33,17 @@ export class OrdersService implements TransactionableService<ClientSession> {
   }
 
   async findManyByIds(orderIds: string[]): Promise<Order[]> {
-    return this.orderModel.find({ _id: { $in: orderIds } }).lean();
+    return this.orderModel
+      .find({ _id: { $in: orderIds } })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async findByBuyer(userId: string): Promise<Order[]> {
-    return this.orderModel.find({ buyer: userId }).lean();
+    return this.orderModel
+      .find({ buyer: userId })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async findManyByBuyers(userIds: string[]): Promise<Order[]> {
