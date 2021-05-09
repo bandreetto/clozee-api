@@ -39,7 +39,10 @@ import {
   getDonationAmount,
   getClozeeAmount,
 } from './orders.logic';
-import { MINIMUM_TRANSACTION_VALUE } from 'src/common/contants';
+import {
+  MINIMUM_TRANSACTION_VALUE,
+  WIRE_TRANFER_TAX,
+} from 'src/common/contants';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -179,8 +182,8 @@ export class OrdersResolver {
       );
 
       await this.pagarmeService.transaction({
-        clozeeSplit,
-        sellerSplit,
+        clozeeSplit: clozeeSplit - WIRE_TRANFER_TAX,
+        sellerSplit: sellerSplit + WIRE_TRANFER_TAX,
         deliveryFee: order.deliveryInfo.price,
         buyer: user,
         cardId: paymentMethod.cardId,
