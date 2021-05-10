@@ -77,10 +77,12 @@ export class FeedResolver {
           args.first,
           score,
           date,
-          postBlacklist && [
-            ...postBlacklist.posts,
-            ...(postBlacklist.blockedUsersPosts || []),
-          ],
+          postBlacklist
+            ? [
+                ...postBlacklist.posts,
+                ...(postBlacklist.blockedUsersPosts || []),
+              ]
+            : [],
         ),
         this.userFeedService.countBySearchTerm(
           user._id,
@@ -88,10 +90,12 @@ export class FeedResolver {
           tags,
           score,
           date,
-          postBlacklist && [
-            ...postBlacklist.posts,
-            ...(postBlacklist.blockedUsersPosts || []),
-          ],
+          postBlacklist
+            ? [
+                ...postBlacklist.posts,
+                ...(postBlacklist.blockedUsersPosts || []),
+              ]
+            : [],
         ),
       ]);
       feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
@@ -102,10 +106,12 @@ export class FeedResolver {
           args.first,
           args.after && { maxScore: score, before: date },
           tags,
-          postBlacklist && [
-            ...postBlacklist.posts,
-            ...(postBlacklist.blockedUsersPosts || []),
-          ],
+          postBlacklist
+            ? [
+                ...postBlacklist.posts,
+                ...(postBlacklist.blockedUsersPosts || []),
+              ]
+            : [],
         ),
         this.userFeedService.countByScore(
           user._id,
@@ -114,10 +120,12 @@ export class FeedResolver {
             maxScore: score,
             before: date,
           },
-          postBlacklist && [
-            ...postBlacklist.posts,
-            ...(postBlacklist.blockedUsersPosts || []),
-          ],
+          postBlacklist
+            ? [
+                ...postBlacklist.posts,
+                ...(postBlacklist.blockedUsersPosts || []),
+              ]
+            : [],
         ),
       ]);
     }
