@@ -413,13 +413,20 @@ type PostCommentNotification implements Notification {
 }
 
 type Query {
-  """Returns all categories"""
-  categories(roots: Boolean): [Category!]!
+  me: User!
+  user(id: String!): User!
+
+  """A list of 60 users"""
+  users(searchTerm: String): [User!]!
+  banks: [Bank!]!
   post(postId: String!): Post!
   posts(
     """Filter posts by user id"""
     user: String!
   ): [Post!]!
+
+  """Returns all categories"""
+  categories(roots: Boolean): [Category!]!
   order(orderId: String!): Order!
 
   """The orders that the current user has bought."""
@@ -427,12 +434,6 @@ type Query {
 
   """Orders that the current user has sold."""
   mySales: [Order!]!
-  banks: [Bank!]!
-  me: User!
-  user(id: String!): User!
-
-  """A list of 60 users"""
-  users(searchTerm: String): [User!]!
   feed(
     searchTerm: String
     tags: FeedTagsInput
@@ -467,29 +468,10 @@ enum NOTIFICAION_KINDS {
 }
 
 type Mutation {
-  follow(userId: String!): User!
-  unfollow(userId: String!): User!
-
-  """
-  Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
-  """
-  updateDeliveryInfo(seller: String!): Delivery!
-  addComment(input: AddCommentInput!): Comment!
-  likePost(postId: String!): Post!
-  unlikePost(postId: String!): Post!
-
-  """Returns a pre-signed S3 URL that allows the post image upload."""
-  uploadPostImage: String! @deprecated(reason: "Replaced by the mutation createPostImage. Use it intead.")
-
-  """
-  Returns the post image Id and a pre-signed S3 URL that allows the post image upload.
-  """
-  createPostImage: UploadImageResponse!
-  addPost(addPostInput: AddPostInput!): Post!
-  editPost(updateFields: UpdatePostFields!, postId: String!): Post!
-  deletePost(postId: String!): Post!
-  reportPost(postId: String!): Post!
-  checkout(input: CheckoutInput!): Order!
+  signUp(input: SignUpInput!): AuthResponse!
+  preSign: PreSignResponse!
+  logIn(password: String!, username: String!): AuthResponse!
+  refreshToken: AuthResponse!
   updateUserFeedTags(tags: FeedTagsInput!): User!
   savePost(postId: String!): Post!
   unsavePost(postId: String!): Post!
@@ -509,7 +491,7 @@ type Mutation {
   updateUserAvatar(
     newAvatarId: String
 
-    """DEPRECATED. Use newAvatarId parameter"""
+    """DEPRECATED. Use newAvatarId parameter."""
     newAvatarUrl: String
   ): User!
   addCreditCard(
@@ -527,24 +509,102 @@ type Mutation {
   addDeviceToken(deviceToken: String!): User!
   removeDeviceToken: User!
   blockUser(userId: String!): User!
-  signUp(input: SignUpInput!): AuthResponse!
-  preSign: PreSignResponse!
-  logIn(password: String!, username: String!): AuthResponse!
-  refreshToken: AuthResponse!
-  startSession: Session!
+
+  """Returns a pre-signed S3 URL that allows the post image upload."""
+  uploadPostImage: String! @deprecated(reason: "Replaced by the mutation createPostImage. Use it intead.")
+
+  """
+  Returns the post image Id and a pre-signed S3 URL that allows the post image upload.
+  """
+  createPostImage: UploadImageResponse!
+  addPost(addPostInput: AddPostInput!): Post!
+  editPost(updateFields: UpdatePostFields!, postId: String!): Post!
+  deletePost(postId: String!): Post!
+  reportPost(postId: String!): Post!
+  checkout(input: CheckoutInput!): Order!
+
+  """
+  Creates or updates the delivery info from the provided seller to the requesting user. This info may be used by the checkout.
+  """
+  updateDeliveryInfo(seller: String!): Delivery!
+  follow(userId: String!): User!
+  unfollow(userId: String!): User!
+  addComment(input: AddCommentInput!): Comment!
+  likePost(postId: String!): Post!
+  unlikePost(postId: String!): Post!
   markPostAsSeen(
     """The post id."""
     post: String!
   ): String!
+  startSession: Session!
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
 }
 
-input AddCommentInput {
-  """The id of the post the comment is being made."""
-  post: String!
-  body: String!
+input SignUpInput {
+  """The id of the pre-signed user."""
+  _id: String
+  username: String!
+  password: String!
+  avatarUrl: String
+
+  """
+  The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.
+  """
+  avatarId: String
+
+  """Tags used to customize user's feed"""
+  feedTags: FeedTagsInput
+}
+
+input UpdateUserInfoInput {
+  name: String
+  email: String
+  cpf: String
+  phoneNumber: String
+}
+
+input BankInfoInput {
+  """The bank number."""
+  bank: String!
+
+  """User's bank agency."""
+  agency: String!
+
+  """The agency verifying digit."""
+  agencyDv: String
+
+  """User's bank account number."""
+  account: String!
+
+  """The bank account verifying digit."""
+  accountDv: String!
+
+  """The user's bank account type"""
+  accountType: ACCOUNT_TYPES!
+
+  """The name of the account holder."""
+  holderName: String!
+
+  """The document number of the account holder."""
+  holderDocument: String!
+}
+
+input AddressInput {
+  street: String
+  number: Float
+  complement: String
+  district: String
+  zipCode: String
+  city: String
+  state: String
+  coordinates: CoordinatesInput
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
 }
 
 input AddPostInput {
@@ -600,69 +660,10 @@ input CheckoutInput {
   deliveryInfoId: String!
 }
 
-input UpdateUserInfoInput {
-  name: String
-  email: String
-  cpf: String
-  phoneNumber: String
-}
-
-input BankInfoInput {
-  """The bank number."""
-  bank: String!
-
-  """User's bank agency."""
-  agency: String!
-
-  """The agency verifying digit."""
-  agencyDv: String
-
-  """User's bank account number."""
-  account: String!
-
-  """The bank account verifying digit."""
-  accountDv: String!
-
-  """The user's bank account type"""
-  accountType: ACCOUNT_TYPES!
-
-  """The name of the account holder."""
-  holderName: String!
-
-  """The document number of the account holder."""
-  holderDocument: String!
-}
-
-input AddressInput {
-  street: String
-  number: Float
-  complement: String
-  district: String
-  zipCode: String
-  city: String
-  state: String
-  coordinates: CoordinatesInput
-}
-
-input CoordinatesInput {
-  latitude: Float!
-  longitude: Float!
-}
-
-input SignUpInput {
-  """The id of the pre-signed user."""
-  _id: String
-  username: String!
-  password: String!
-  avatarUrl: String
-
-  """
-  The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.
-  """
-  avatarId: String
-
-  """Tags used to customize user's feed"""
-  feedTags: FeedTagsInput
+input AddCommentInput {
+  """The id of the post the comment is being made."""
+  post: String!
+  body: String!
 }
 
 type Subscription {
