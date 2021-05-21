@@ -59,7 +59,7 @@ export class UserFeedConsumer {
     }
   }
 
-  @OnEvent('user.preSigned')
+  @OnEvent('user.preSigned', { async: true })
   async createFeedForUser(payload: string) {
     try {
       this.logger.debug(`Trying to create Feed for user ${payload}`);
@@ -71,12 +71,36 @@ export class UserFeedConsumer {
         followees,
         FOLLOWING_POINTS,
       );
-      this.logger.log(`New feed generated for user ${payload}`);
+      this.logger.log(`Feed created for user ${payload}`);
     } catch (error) {
       this.logger.error({
         message:
           'Error while trying to generate new feed for user after pre-sign.',
         payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('feed.endReached', { async: true })
+  async recreateFeedForUser(userId: string) {
+    try {
+      this.logger.debug(`Trying to recreate Feed for user ${userId}`);
+
+      const follows = await this.followsService.findManyByFollowers([userId]);
+      const followees = follows.map(f => f.followee);
+      await this.userFeedService.createManyPerFeed(
+        userId,
+        followees,
+        FOLLOWING_POINTS,
+      );
+      this.logger.log(`New feed generated for user ${userId}`);
+    } catch (error) {
+      this.logger.error({
+        message:
+          'Error while trying to generate new feed for user after pre-sign.',
+        payload: userId,
         error: error.toString(),
         metadata: error,
       });
@@ -163,27 +187,15 @@ export class UserFeedConsumer {
       this.logger.log(
         `Blacklisting posts from session ${payload._id} of user ${payload.user}`,
       );
-      await this.seenPostService.mergeSessionPostsToBlacklist(
-        payload._id,
-        payload.user,
+      const seenPosts = await this.seenPostService.getSessionPosts(payload._id);
+      const postsIds = seenPosts.map(sp => sp.post);
+      await this.userFeedService.deleteManyByPosts(postsIds, payload.user);
+      this.logger.log(
+        `Posts ${postsIds.join(', ')} blacklisted for user ${payload.user}`,
       );
     } catch (error) {
       this.logger.error({
         message: 'Error while merging session seen posts to blacklist.',
-        error: error.toString(),
-        metadata: error,
-      });
-    }
-  }
-
-  @OnEvent('feed.endReached', { async: true })
-  async clearBlacklist(payload: string) {
-    try {
-      this.logger.log(`Clearing user ${payload} blacklist.`);
-      return this.seenPostService.clearBlacklist(payload);
-    } catch (error) {
-      this.logger.error({
-        message: `Could not clear user ${payload} blacklist.`,
         error: error.toString(),
         metadata: error,
       });

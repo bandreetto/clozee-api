@@ -286,9 +286,10 @@ export class UserFeedService {
     await this.userFeedModel.deleteMany({ post }).lean();
   }
 
-  async deleteManyByPosts(posts: string[]): Promise<void> {
+  async deleteManyByPosts(posts: string[], user?: string): Promise<void> {
     const result = await this.userFeedModel.deleteMany({
       post: { $in: posts },
+      ...(user && { user })
     });
     if (!result.ok)
       throw new InternalServerErrorException({
