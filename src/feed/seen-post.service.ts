@@ -22,6 +22,10 @@ export class SeenPostService {
     return this.postBlacklistModel.findById(_id).lean();
   }
 
+  async getSessionPosts(sessionId: string): Promise<SeenPost[]> {
+    return this.seenPostModel.find({ session: sessionId }).lean()
+  }
+
   async mergeSessionPostsToBlacklist(
     sessionId: string,
     sessionUserId: string,
