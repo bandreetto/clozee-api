@@ -12,6 +12,7 @@ import { Address, AddressSchema } from './address';
 import { BankInfo, BankInfoSchema } from './bank-info';
 import { FeedTags, FeedTagsSchema } from './feed-tags';
 import { PaymentMethod } from './payment-method';
+import { sentitiveData } from '../user.field-middlewares';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -21,7 +22,7 @@ export class User {
   _id: string;
 
   @Prop()
-  @Field({ nullable: true })
+  @Field({ nullable: true, middleware: [sentitiveData] })
   pagarmeRecipientId?: string;
 
   @Prop()
@@ -29,25 +30,25 @@ export class User {
   name?: string;
 
   @Prop()
-  @Field({ nullable: true })
+  @Field({ nullable: true, middleware: [sentitiveData] })
   email?: string;
 
   @Prop()
-  @Field({ nullable: true })
+  @Field({ nullable: true, middleware: [sentitiveData] })
   cpf?: string;
 
   @Prop()
-  @Field({ nullable: true })
+  @Field({ nullable: true, middleware: [sentitiveData] })
   phoneNumber?: string;
 
   @Prop({ type: BankInfoSchema })
-  @Field(() => BankInfo, { nullable: true })
+  @Field(() => BankInfo, { nullable: true, middleware: [sentitiveData] })
   bankInfo?: BankInfo;
 
   @Field(() => [Post])
   posts?: Post[];
 
-  @Field(() => [Post])
+  @Field(() => [Post], { defaultValue: [], middleware: [sentitiveData] })
   savedPosts?: Post[];
 
   @Prop({ index: true })
@@ -59,25 +60,32 @@ export class User {
   avatar?: string;
 
   @Prop({ type: AddressSchema })
-  @Field(() => Address, { nullable: true })
+  @Field(() => Address, { nullable: true, middleware: [sentitiveData] })
   address?: Address;
 
   @Prop({ type: FeedTagsSchema, default: {} })
-  @Field(() => FeedTags, { description: "Tags used to customize user's feed." })
+  @Field(() => FeedTags, {
+    description: "Tags used to customize user's feed.",
+    middleware: [sentitiveData],
+  })
   feedTags?: FeedTags;
 
-  @Field({ description: 'The device token used for push notifications.' })
+  @Field({
+    description: 'The device token used for push notifications.',
+    middleware: [sentitiveData],
+  })
   @Prop()
   deviceToken?: string;
 
   @Field(() => [User], {
     description: 'The list of users blocked by this user.',
   })
-  @Prop({ default: [] })
+  @Prop({ default: [], middleware: [sentitiveData] })
   blockedUsers?: string[] | User[];
 
   @Field(() => [PaymentMethod], {
     description: 'The ids of users credit cards',
+    middleware: [sentitiveData],
   })
   paymentMethods?: PaymentMethod[];
 
