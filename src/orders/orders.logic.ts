@@ -35,6 +35,6 @@ export function getSplitValues(variableTax: number, fixedTax: number, posts: Pos
   const subTotal = getSubTotal(posts);
   const clozeeAmount = getClozeeAmount(variableTax, fixedTax, posts);
   const sellerAmount = subTotal - clozeeAmount;
-  const donationAmount = getDonationPercentage(variableTax, fixedTax, posts);
+  const donationAmount = getDonationAmount(variableTax, fixedTax, posts);
   return [clozeeAmount + donationAmount, sellerAmount - donationAmount];
 };
