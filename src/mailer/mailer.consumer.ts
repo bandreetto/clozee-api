@@ -4,7 +4,13 @@ import { DeliveryMenvCheckoutPayload } from '../delivery/contracts/payloads';
 import { OrderCreatedPayload } from '../orders/contracts/payloads';
 import { UsersService } from '../users/users.service';
 import { MailerService } from './mailer.service';
-import { getSplitValues, getSubTotal } from '../orders/orders.logic';
+import {
+  getSplitValues,
+  getSubTotal,
+  makeClozeeAmountGetter,
+  makeDonationPercentageGetter,
+} from '../orders/orders.logic';
+import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
 
 @Injectable()
 export class MailerConsumer {
@@ -51,7 +57,19 @@ export class MailerConsumer {
         this.usersService.findById(buyerId),
       ]);
       const subTotal = getSubTotal(payload.posts);
-      const [sellerTaxes] = getSplitValues(payload.posts);
+      const getClozeeAmount = makeClozeeAmountGetter(
+        seller.variableTaxOverride || VARIABLE_TAX,
+        seller.fixedTaxOverride || FIXED_TAX,
+      );
+      const getDonationPercentage = makeDonationPercentageGetter(
+        seller.variableTaxOverride || VARIABLE_TAX,
+        seller.fixedTaxOverride || FIXED_TAX,
+      );
+      const [sellerTaxes] = getSplitValues(
+        payload.posts,
+        getClozeeAmount,
+        getDonationPercentage,
+      );
       await this.mailerService.sendSellerMail(
         buyer,
         seller,

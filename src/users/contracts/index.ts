@@ -5,7 +5,7 @@ export * from './feed-tags';
 export * from './payment-method';
 export * from './saved-post';
 
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, Float } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from 'src/posts/contracts';
 import { Address, AddressSchema } from './address';
@@ -82,6 +82,22 @@ export class User {
   })
   @Prop({ default: [], middleware: [sentitiveData] })
   blockedUsers?: string[] | User[];
+
+  @Field(() => Int, {
+    description:
+      'The user specific fixed tax in cents. Overrides clozee default fixed tax.',
+    nullable: true,
+  })
+  @Prop()
+  fixedTaxOverride?: number;
+
+  @Field(() => Float, {
+    description:
+      'A number in the range [0,1] representing the user specific percentage tax. Overrides clozee default percentage tax.',
+    nullable: true,
+  })
+  @Prop()
+  variableTaxOverride?: number;
 
   @Field(() => [PaymentMethod], {
     description: 'The ids of users credit cards',

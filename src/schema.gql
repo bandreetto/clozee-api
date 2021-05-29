@@ -242,6 +242,16 @@ type User {
   """The list of users blocked by this user."""
   blockedUsers: [User!]!
 
+  """
+  The user specific fixed tax in cents. Overrides clozee default fixed tax.
+  """
+  fixedTaxOverride: Int
+
+  """
+  A number in the range [0,1] representing the user specific percentage tax. Overrides clozee default percentage tax.
+  """
+  variableTaxOverride: Float
+
   """The ids of users credit cards"""
   paymentMethods: [PaymentMethod!]!
   followers: [User!]!
