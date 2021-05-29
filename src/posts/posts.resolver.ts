@@ -33,11 +33,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LikesLoader } from '../likes/likes.dataloader';
 import { OrdersService } from 'src/orders/orders.service';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
-import {
-  getDonationAmount,
-  makeDonationPercentageGetter,
-} from 'src/orders/orders.logic';
-import { makeClozeeAmountGetter } from '../orders/orders.logic';
+import { getDonationAmount } from 'src/orders/orders.logic';
 import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
 
 @Resolver(() => Post)
@@ -234,15 +230,10 @@ export class PostsResolver {
   @ResolveField()
   async donationAmount(@Root() post: Post): Promise<number> {
     const user = await this.usersLoader.load(post.user as string);
-    const getClozeeAmount = makeClozeeAmountGetter(
+    return getDonationAmount(
       user.variableTaxOverride || VARIABLE_TAX,
       user.fixedTaxOverride || FIXED_TAX,
+      [post],
     );
-    const getdonationPercentage = makeDonationPercentageGetter(
-      user.variableTaxOverride || VARIABLE_TAX,
-      user.fixedTaxOverride || FIXED_TAX,
-    );
-
-    return getDonationAmount([post], getClozeeAmount, getdonationPercentage);
   }
 }

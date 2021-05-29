@@ -37,8 +37,7 @@ import {
   getSubTotal,
   getSplitValues,
   getDonationAmount,
-  makeClozeeAmountGetter,
-  makeDonationPercentageGetter,
+  getClozeeAmount,
 } from './orders.logic';
 import {
   FIXED_TAX,
@@ -139,18 +138,10 @@ export class OrdersResolver {
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
-    const getClozeeAmount = makeClozeeAmountGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
-    const getDonationPercentage = makeDonationPercentageGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
     const [clozeeSplit, sellerSplit] = getSplitValues(
+      seller.variableTaxOverride || VARIABLE_TAX,
+      seller.fixedTaxOverride || FIXED_TAX,
       posts,
-      getClozeeAmount,
-      getDonationPercentage,
     );
     if (clozeeSplit + sellerSplit < MINIMUM_TRANSACTION_VALUE) {
       this.logger.error({
@@ -161,7 +152,11 @@ export class OrdersResolver {
       });
       throw new BadRequestException('');
     }
-    const clozeeAmount = getClozeeAmount(posts);
+    const clozeeAmount = getClozeeAmount(
+      seller.variableTaxOverride || VARIABLE_TAX,
+      seller.fixedTaxOverride || FIXED_TAX,
+      posts,
+    );
 
     let order: Order;
     const session = await this.ordersService.startTransaction();
@@ -251,18 +246,10 @@ export class OrdersResolver {
       sales.map(s => s.post as string),
     )) as Post[];
     const seller = await this.usersLoader.load(posts[0].user as string);
-    const getClozeeAmount = makeClozeeAmountGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
-    const getDonationPercentage = makeDonationPercentageGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
     const donationAmount = getDonationAmount(
+      seller.variableTaxOverride || VARIABLE_TAX,
+      seller.fixedTaxOverride || FIXED_TAX,
       posts,
-      getClozeeAmount,
-      getDonationPercentage,
     );
     return getSubTotal(posts) - order.clozeeTax - donationAmount;
   }
@@ -301,18 +288,10 @@ export class OrdersResolver {
       sales.map(s => s.post as string),
     )) as Post[];
     const seller = await this.usersLoader.load(posts[0].user as string);
-    const getClozeeAmount = makeClozeeAmountGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
-    const getDonationPercentage = makeDonationPercentageGetter(
-      seller.variableTaxOverride || VARIABLE_TAX,
-      seller.fixedTaxOverride || FIXED_TAX,
-    );
     const donationAmount = getDonationAmount(
+      seller.variableTaxOverride || VARIABLE_TAX,
+      seller.fixedTaxOverride || FIXED_TAX,
       posts,
-      getClozeeAmount,
-      getDonationPercentage,
     );
     return donationAmount;
   }
