@@ -225,7 +225,6 @@ export class UserFeedConsumer {
 
   @OnEvent('follow.created', { async: true })
   async increaseFollowedUserPostsScore(payload: Follow) {
-    console.log('follow');
     try {
       const followeePosts = await this.postsService.findManyByUser(
         payload.followee,
