@@ -11,6 +11,14 @@ export const errorLoggerPlugin = {
           context.errors[0].message === 'Forbidden resource'
         )
           return;
+
+        if (context.errors[0].message === 'This username already exists.') {
+          return logger.warn({
+            message: 'Graphql Warning',
+            warnings: context.errors,
+            query: context.source,
+          });
+        }
         logger.error({
           message: 'Graphql Error',
           errors: context.errors,

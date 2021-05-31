@@ -65,7 +65,13 @@ export class AuthResolver {
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
     if (await this.usersService.existsWithUsername(input.username)) {
-      throw new ConflictException('This username already exists.');
+      throw new ConflictException({
+        message: 'This username already exists.',
+        metadata: {
+          _id: input._id,
+          username: input.username,
+        },
+      });
     }
     const avatarUrl = input.avatarId
       ? `https://${configuration.images.cdn()}/avatars/${input.avatarId}.jpg`
