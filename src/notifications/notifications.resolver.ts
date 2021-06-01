@@ -9,10 +9,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { JwtService } from '@nestjs/jwt';
 import { Token } from 'src/auth/contracts';
 import { isAccessToken } from 'src/auth/auth.logic';
-import {
-  NOTIFICAION_KINDS,
-  NOTIFICATION_ENUM_TO_KIND_MAPPER,
-} from './contracts/enums';
+import { NOTIFICAION_KINDS, NOTIFICATION_ENUM_TO_KIND_MAPPER } from './contracts/enums';
 
 /**
  * 5 hours in seconds => 5 hours * 60 minutes * 60 seconds
@@ -38,8 +35,7 @@ export class NotificationsResolver {
       const notificationKindsValues = variables.notificationKinds.map(
         enumValue => NOTIFICATION_ENUM_TO_KIND_MAPPER[enumValue],
       );
-      if (!notificationKindsValues.includes(payload?.notification?.kind))
-        return false;
+      if (!notificationKindsValues.includes(payload?.notification?.kind)) return false;
       return payload?.notification?.user === variables.userId;
     },
   })
@@ -82,24 +78,16 @@ export class NotificationsResolver {
     @CurrentUser()
     tokenUser: TokenUser,
   ): Promise<Notification[]> {
-    const notifications = await this.notificationsService.findByUser(
-      tokenUser._id,
-    );
-    const notificationKinds = notificationKindsEnum.map(
-      enumValue => NOTIFICATION_ENUM_TO_KIND_MAPPER[enumValue],
-    );
-    return notifications.filter(notification =>
-      notificationKinds.includes(notification.kind),
-    );
+    const notifications = await this.notificationsService.findByUser(tokenUser._id);
+    const notificationKinds = notificationKindsEnum.map(enumValue => NOTIFICATION_ENUM_TO_KIND_MAPPER[enumValue]);
+    return notifications.filter(notification => notificationKinds.includes(notification.kind));
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => [Notification], {
     description: 'Mark all user notifications as seen.',
   })
-  async clearNotifications(
-    @CurrentUser() tokenUser: TokenUser,
-  ): Promise<Notification[]> {
+  async clearNotifications(@CurrentUser() tokenUser: TokenUser): Promise<Notification[]> {
     await this.notificationsService.updateManyByUser(tokenUser._id, {
       unseen: false,
     });

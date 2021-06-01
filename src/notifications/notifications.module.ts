@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PubSub } from 'graphql-subscriptions';
 import { CommentsModule } from 'src/comments/comments.module';
 import { DeliveryModule } from 'src/delivery/delivery.module';
 import { OrdersModule } from 'src/orders/orders.module';
@@ -24,6 +23,10 @@ import { NotificationsResolver } from './notifications.resolver';
 import { NotificationsService } from './notifications.service';
 import { SaleNotificationResolver } from './sale-notification.resolver';
 import { PostCommentNotificationResolver } from './post-comment-notification.resolver';
+import { RedisPubSub } from 'graphql-redis-subscriptions';
+import Redis from 'ioredis';
+import configuration from 'src/config/configuration';
+import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [
@@ -64,7 +67,9 @@ import { PostCommentNotificationResolver } from './post-comment-notification.res
     PostCommentNotificationResolver,
     {
       provide: 'PUB_SUB',
-      useValue: new PubSub(),
+      useValue: new RedisPubSub({
+        publisher: new Redis(configuration.redis.url()),
+      }),
     },
   ],
 })

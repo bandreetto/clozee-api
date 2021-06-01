@@ -31,4 +31,10 @@ export default {
     recipientId: () => process.env.CLOZEE_RECIPIENT_ID,
     token: () => process.env.PAGARME_API_TOKEN,
   },
+  redis: {
+    url: () => process.env.REDIS_URL,
+  },
+  concurrency: {
+    workers: () => process.env.WEB_CONCURRENCY,
+  },
 };
