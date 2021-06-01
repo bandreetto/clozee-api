@@ -69,6 +69,7 @@ import { PubSub } from 'graphql-subscriptions';
       provide: 'PUB_SUB',
       useValue: new RedisPubSub({
         publisher: new Redis(configuration.redis.url()),
+        subscriber: new Redis(configuration.redis.url()),
       }),
     },
   ],
