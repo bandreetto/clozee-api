@@ -1,21 +1,8 @@
-import {
-  Resolver,
-  Args,
-  Mutation,
-  ResolveField,
-  Root,
-  Query,
-} from '@nestjs/graphql';
+import { Resolver, Args, Mutation, ResolveField, Root, Query } from '@nestjs/graphql';
 import { PostsService } from 'src/posts/posts.service';
 import { v4 } from 'uuid';
 import { User } from 'src/users/contracts';
-import {
-  ConflictException,
-  ForbiddenException,
-  GoneException,
-  Logger,
-  UseGuards,
-} from '@nestjs/common';
+import { ConflictException, ForbiddenException, GoneException, Logger, UseGuards } from '@nestjs/common';
 import { Comment } from 'src/comments/contracts';
 import { AuthGuard } from 'src/common/guards';
 import { CurrentUser, TokenTypes } from 'src/common/decorators';
@@ -34,6 +21,7 @@ import { LikesLoader } from '../likes/likes.dataloader';
 import { OrdersService } from 'src/orders/orders.service';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { getDonationAmount } from 'src/orders/orders.logic';
+import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
 
 @Resolver(() => Post)
 export class PostsResolver {
@@ -60,22 +48,16 @@ export class PostsResolver {
   }
 
   @Query(() => [Post])
-  posts(
-    @Args('user', { description: 'Filter posts by user id' }) userId: string,
-  ) {
-    return this.postsService
-      .findManyByUser(userId)
-      .then(posts => posts.filter(post => !post.deleted));
+  posts(@Args('user', { description: 'Filter posts by user id' }) userId: string) {
+    return this.postsService.findManyByUser(userId).then(posts => posts.filter(post => !post.deleted));
   }
 
   // Mutations
 
   @UseGuards(AuthGuard)
   @Mutation(() => String, {
-    description:
-      'Returns a pre-signed S3 URL that allows the post image upload.',
-    deprecationReason:
-      'Replaced by the mutation createPostImage. Use it intead.',
+    description: 'Returns a pre-signed S3 URL that allows the post image upload.',
+    deprecationReason: 'Replaced by the mutation createPostImage. Use it intead.',
   })
   uploadPostImage(@CurrentUser() user: TokenUser): string {
     return S3Client.getSignedUrl('putObject', {
@@ -88,8 +70,7 @@ export class PostsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => UploadImageResponse, {
-    description:
-      'Returns the post image Id and a pre-signed S3 URL that allows the post image upload.',
+    description: 'Returns the post image Id and a pre-signed S3 URL that allows the post image upload.',
   })
   createPostImage(@CurrentUser() user: TokenUser): UploadImageResponse {
     const imageId = `${user._id}_${v4()}`;
@@ -106,15 +87,10 @@ export class PostsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async addPost(
-    @Args('addPostInput') input: AddPostInput,
-    @CurrentUser() user: TokenUser,
-  ) {
+  async addPost(@Args('addPostInput') input: AddPostInput, @CurrentUser() user: TokenUser) {
     const imagesCdn = configuration.images.cdn();
     const images = input.imagesIds.length
-      ? input.imagesIds.map(
-          imageId => `https://${imagesCdn}/posts/${imageId}.jpg`,
-        )
+      ? input.imagesIds.map(imageId => `https://${imagesCdn}/posts/${imageId}.jpg`)
       : input.images;
     const createdPost = await this.postsService.create({
       ...input,
@@ -143,10 +119,7 @@ export class PostsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async deletePost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Post> {
+  async deletePost(@Args('postId') postId: string, @CurrentUser() user: TokenUser): Promise<Post> {
     const userPosts = await this.postsService.findManyByUser(user._id);
     if (!userPosts.some(userPost => userPost._id === postId))
       throw new ForbiddenException('You can only delete your own posts.');
@@ -164,10 +137,7 @@ export class PostsResolver {
   @UseGuards(AuthGuard)
   @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Mutation(() => Post)
-  async reportPost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ) {
+  async reportPost(@Args('postId') postId: string, @CurrentUser() user: TokenUser) {
     const post = await this.postsService.findById(postId);
     this.logger.warn(`Post ${postId} reported by user ${user._id}!`);
     return this.postsService.updateOne(postId, {
@@ -200,15 +170,10 @@ export class PostsResolver {
   }
 
   @ResolveField()
-  async saved(
-    @Root() post: Post,
-    @CurrentUser() tokenUser: TokenUser,
-  ): Promise<boolean> {
+  async saved(@Root() post: Post, @CurrentUser() tokenUser: TokenUser): Promise<boolean> {
     if (!tokenUser) return false;
 
-    const userSavedPosts = await this.usersLoader.savedPosts.load(
-      tokenUser._id,
-    );
+    const userSavedPosts = await this.usersLoader.savedPosts.load(tokenUser._id);
     return userSavedPosts.some(savedPost => savedPost.post === post._id);
   }
 
@@ -218,16 +183,18 @@ export class PostsResolver {
   }
 
   @ResolveField()
-  async liked(
-    @Root() post: Post,
-    @CurrentUser() user: TokenUser,
-  ): Promise<boolean> {
+  async liked(@Root() post: Post, @CurrentUser() user: TokenUser): Promise<boolean> {
     if (!user) return false;
     return this.likesLoader.load(`${post._id}:${user._id}`).then(Boolean);
   }
 
   @ResolveField()
   async donationAmount(@Root() post: Post): Promise<number> {
-    return getDonationAmount([post]);
+    const user = await this.usersLoader.load(post.user as string);
+    return getDonationAmount(
+      typeof user.variableTaxOverride === 'number' ? user.variableTaxOverride : VARIABLE_TAX,
+      typeof user.fixedTaxOverride === 'number' ? user.fixedTaxOverride : FIXED_TAX,
+      [post],
+    );
   }
 }

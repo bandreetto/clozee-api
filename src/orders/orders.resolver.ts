@@ -7,14 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  Args,
-  Mutation,
-  Query,
-  ResolveField,
-  Resolver,
-  Root,
-} from '@nestjs/graphql';
+import { Args, Mutation, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { uniq } from 'ramda';
 import { CurrentUser } from 'src/common/decorators';
 import { AuthGuard } from 'src/common/guards';
@@ -33,16 +26,8 @@ import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { PagarmeService } from 'src/payments/pagarme.service';
-import {
-  getSubTotal,
-  getSplitValues,
-  getDonationAmount,
-  getClozeeAmount,
-} from './orders.logic';
-import {
-  MINIMUM_TRANSACTION_VALUE,
-  WIRE_TRANFER_TAX,
-} from 'src/common/contants';
+import { getSubTotal, getSplitValues, getDonationAmount, getClozeeAmount } from './orders.logic';
+import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE, VARIABLE_TAX, WIRE_TRANFER_TAX } from 'src/common/contants';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -81,43 +66,29 @@ export class OrdersResolver {
   })
   async mySales(@CurrentUser() user: TokenUser) {
     const userPosts = await this.postsService.findManyByUser(user._id);
-    const userSales = await this.ordersService.findSalesByPosts(
-      userPosts.map(post => post._id),
-    );
+    const userSales = await this.ordersService.findSalesByPosts(userPosts.map(post => post._id));
     const orderIds = userSales.map(sale => sale.order) as string[];
     return this.ordersService.findManyByIds(uniq(orderIds));
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => Order)
-  async checkout(
-    @Args('input') input: CheckoutInput,
-    @CurrentUser() tokenUser: TokenUser,
-  ): Promise<Order> {
+  async checkout(@Args('input') input: CheckoutInput, @CurrentUser() tokenUser: TokenUser): Promise<Order> {
     const [user, paymentMethods, posts] = await Promise.all([
       this.usersService.findById(tokenUser._id),
       this.usersService.getUserPaymentMethods(tokenUser._id),
       this.postsService.findManyByIds(input.posts),
     ]);
     if (!user) throw new UnauthorizedException(); // Just a sanity check
-    if (!user.address)
-      throw new BadRequestException(
-        'User must have an address to be able to buy.',
-      );
+    if (!user.address) throw new BadRequestException('User must have an address to be able to buy.');
 
-    const paymentMethod = paymentMethods.find(
-      p => p._id === input.paymentMethodId,
-    );
-    if (!paymentMethod)
-      throw new BadRequestException('Could not find this payment method.');
+    const paymentMethod = paymentMethods.find(p => p._id === input.paymentMethodId);
+    if (!paymentMethod) throw new BadRequestException('Could not find this payment method.');
 
     if (posts.some(post => post.user !== posts[0].user))
-      throw new BadRequestException(
-        'You can only buy posts from the same seller in a checkout.',
-      );
+      throw new BadRequestException('You can only buy posts from the same seller in a checkout.');
 
-    if (user._id === posts[0].user)
-      throw new BadRequestException('You cannot buy your own posts.');
+    if (user._id === posts[0].user) throw new BadRequestException('You cannot buy your own posts.');
 
     const seller = await this.usersService.findById(posts[0].user as string);
     const delivery = await this.deliveryService.findById(input.deliveryInfoId);
@@ -128,15 +99,16 @@ export class OrdersResolver {
         buyer: user._id,
         seller: posts[0].user,
       });
-    if (
-      delivery.buyersZipCode !== user.address.zipCode ||
-      delivery.sellersZipCode !== seller.address.zipCode
-    )
+    if (delivery.buyersZipCode !== user.address.zipCode || delivery.sellersZipCode !== seller.address.zipCode)
       throw new BadRequestException(
         'Delivery info found for this is stale (zip code mismatch). Update the delivery info by using the mutation "deliveryInfo" before attempting to checkout.',
       );
 
-    const [clozeeSplit, sellerSplit] = getSplitValues(posts);
+    const [clozeeSplit, sellerSplit] = getSplitValues(
+      typeof seller.variableTaxOverride === 'number' ? seller.variableTaxOverride : VARIABLE_TAX,
+      typeof seller.fixedTaxOverride === 'number' ? seller.fixedTaxOverride : FIXED_TAX,
+      posts,
+    );
     if (clozeeSplit + sellerSplit < MINIMUM_TRANSACTION_VALUE) {
       this.logger.error({
         message: `The sub-total of the order cannot be less than the minimum transaction value (${MINIMUM_TRANSACTION_VALUE.toLocaleString(
@@ -146,14 +118,16 @@ export class OrdersResolver {
       });
       throw new BadRequestException('');
     }
-    const clozeeAmount = getClozeeAmount(posts);
+    const clozeeAmount = getClozeeAmount(
+      typeof seller.variableTaxOverride === 'number' ? seller.variableTaxOverride : VARIABLE_TAX,
+      typeof seller.fixedTaxOverride === 'number' ? seller.fixedTaxOverride : FIXED_TAX,
+      posts,
+    );
 
     let order: Order;
     const session = await this.ordersService.startTransaction();
     try {
-      const orderNumber = await this.countersService.getCounterAndIncrement(
-        'orders',
-      );
+      const orderNumber = await this.countersService.getCounterAndIncrement('orders');
 
       const orderId = v4();
       const newSales: Sale[] = input.posts.map(post => ({
@@ -209,15 +183,10 @@ export class OrdersResolver {
       /**
        * Check for mongo duplicated error code
        */
-      if (error.code === 11000)
-        throw new ConflictException(
-          'Duplicated Sale error. This post is already sold.',
-        );
+      if (error.code === 11000) throw new ConflictException('Duplicated Sale error. This post is already sold.');
 
       if (error.message === 'Payment Denied') throw error;
-      throw new InternalServerErrorException(
-        'An error occoured while trying to create order and sales.',
-      );
+      throw new InternalServerErrorException('An error occoured while trying to create order and sales.');
     }
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
@@ -232,27 +201,26 @@ export class OrdersResolver {
   @ResolveField()
   async sellerAmount(@Root() order: Order) {
     const sales = await this.salesLoader.byOrder.load(order._id);
-    const posts = (await this.postsLoader.loadMany(
-      sales.map(s => s.post as string),
-    )) as Post[];
-    const donationAmount = getDonationAmount(posts);
+    const posts = (await this.postsLoader.loadMany(sales.map(s => s.post as string))) as Post[];
+    const seller = await this.usersLoader.load(posts[0].user as string);
+    const donationAmount = getDonationAmount(
+      typeof seller.variableTaxOverride === 'number' ? seller.variableTaxOverride : VARIABLE_TAX,
+      typeof seller.fixedTaxOverride === 'number' ? seller.fixedTaxOverride : FIXED_TAX,
+      posts,
+    );
     return getSubTotal(posts) - order.clozeeTax - donationAmount;
   }
 
   @ResolveField()
   async posts(@Root() order: Order): Promise<Post[]> {
     const sales = await this.salesLoader.byOrder.load(order._id);
-    return this.postsLoader.loadMany(
-      sales.map(s => s.post as string),
-    ) as Promise<Post[]>;
+    return this.postsLoader.loadMany(sales.map(s => s.post as string)) as Promise<Post[]>;
   }
 
   @ResolveField()
   async total(@Root() order: Order): Promise<number> {
     const sales = await this.salesLoader.byOrder.load(order._id);
-    const posts = (await this.postsLoader.loadMany(
-      sales.map(s => s.post as string),
-    )) as Post[];
+    const posts = (await this.postsLoader.loadMany(sales.map(s => s.post as string))) as Post[];
     const subTotal = getSubTotal(posts);
     return subTotal + order.deliveryInfo.price;
   }
@@ -260,18 +228,20 @@ export class OrdersResolver {
   @ResolveField()
   async itemsPrice(@Root() order: Order): Promise<number> {
     const sales = await this.salesLoader.byOrder.load(order._id);
-    const posts = (await this.postsLoader.loadMany(
-      sales.map(s => s.post as string),
-    )) as Post[];
+    const posts = (await this.postsLoader.loadMany(sales.map(s => s.post as string))) as Post[];
     return getSubTotal(posts);
   }
 
   @ResolveField()
   async donationAmount(@Root() order: Order): Promise<number> {
     const sales = await this.salesLoader.byOrder.load(order._id);
-    const posts = (await this.postsLoader.loadMany(
-      sales.map(s => s.post as string),
-    )) as Post[];
-    return getDonationAmount(posts);
+    const posts = (await this.postsLoader.loadMany(sales.map(s => s.post as string))) as Post[];
+    const seller = await this.usersLoader.load(posts[0].user as string);
+    const donationAmount = getDonationAmount(
+      typeof seller.variableTaxOverride === 'number' ? seller.variableTaxOverride : VARIABLE_TAX,
+      typeof seller.fixedTaxOverride === 'number' ? seller.fixedTaxOverride : FIXED_TAX,
+      posts,
+    );
+    return donationAmount;
   }
 }
