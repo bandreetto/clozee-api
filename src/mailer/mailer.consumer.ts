@@ -11,17 +11,12 @@ import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
 export class MailerConsumer {
   logger = new Logger(MailerConsumer.name);
 
-  constructor(
-    private readonly mailerService: MailerService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly mailerService: MailerService, private readonly usersService: UsersService) {}
 
   @OnEvent('order.created', { async: true })
   async sendBuyerEmail(payload: OrderCreatedPayload) {
     try {
-      const buyer = await this.usersService.findById(
-        payload.order.buyer as string,
-      );
+      const buyer = await this.usersService.findById(payload.order.buyer as string);
 
       const subTotal = getSubTotal(payload.posts);
 
@@ -53,8 +48,8 @@ export class MailerConsumer {
       ]);
       const subTotal = getSubTotal(payload.posts);
       const [sellerTaxes] = getSplitValues(
-        seller.variableTaxOverride || VARIABLE_TAX,
-        seller.fixedTaxOverride || FIXED_TAX,
+        typeof seller.variableTaxOverride === 'number' ? seller.variableTaxOverride : VARIABLE_TAX,
+        typeof seller.fixedTaxOverride === 'number' ? seller.fixedTaxOverride : FIXED_TAX,
         payload.posts,
       );
       await this.mailerService.sendSellerMail(
