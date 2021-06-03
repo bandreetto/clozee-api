@@ -7,6 +7,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { PostsModule } from '../posts/posts.module';
+import { FollowsModule } from 'src/follows/follows.module';
 import { CommentTagNotificationResolver } from './comment-tag-notification.resolver';
 import {
   CommentTagNotification,
@@ -26,7 +27,6 @@ import { PostCommentNotificationResolver } from './post-comment-notification.res
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
 import configuration from 'src/config/configuration';
-import { PubSub } from 'graphql-subscriptions';
 
 @Module({
   imports: [
@@ -57,6 +57,7 @@ import { PubSub } from 'graphql-subscriptions';
     AuthModule,
     MailerModule,
     PostsModule,
+    FollowsModule,
   ],
   providers: [
     NotificationsResolver,

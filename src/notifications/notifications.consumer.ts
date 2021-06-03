@@ -11,6 +11,7 @@ import { CommentsService } from '../comments/comments.service';
 import { CommentTagNotification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PostCommentNotification } from './contracts/post-comment-notification';
+import { FollowsService } from '../follows/follows.service';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -20,6 +21,7 @@ export class NotificationsConsumer {
     private readonly notificationsService: NotificationsService,
     private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
+    private readonly followsService: FollowsService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -28,18 +30,14 @@ export class NotificationsConsumer {
     try {
       if (!payload.comment.tags.length) return;
       const commentTags = payload.comment.tags as string[];
-      const tagNotifications: CommentTagNotification[] = commentTags.map(
-        userTagged => ({
-          _id: v4(),
-          kind: CommentTagNotification.name,
-          comment: payload.comment._id,
-          user: userTagged,
-          unseen: true,
-        }),
-      );
-      const createdNotifications = await this.notificationsService.createMany(
-        tagNotifications,
-      );
+      const tagNotifications: CommentTagNotification[] = commentTags.map(userTagged => ({
+        _id: v4(),
+        kind: CommentTagNotification.name,
+        comment: payload.comment._id,
+        user: userTagged,
+        unseen: true,
+      }));
+      const createdNotifications = await this.notificationsService.createMany(tagNotifications);
       await Promise.all(
         createdNotifications.map(notification =>
           this.pubSub.publish('notification', {
@@ -64,9 +62,7 @@ export class NotificationsConsumer {
         ...(payload.comment.tags as string[]),
       ]);
       const taggingUser = users.find(user => user._id === payload.comment.user);
-      const taggedUsers = users.filter(
-        u => u.deviceToken && u._id !== taggingUser._id,
-      );
+      const taggedUsers = users.filter(u => u.deviceToken && u._id !== taggingUser._id);
       if (!taggedUsers.length) return;
       await admin.messaging().sendMulticast({
         tokens: taggedUsers.map(u => u.deviceToken),
@@ -97,9 +93,7 @@ export class NotificationsConsumer {
         unseen: true,
         user: payload.post.user as string,
       };
-      const notification = await this.notificationsService.create(
-        postCommentNotification,
-      );
+      const notification = await this.notificationsService.create(postCommentNotification);
       this.pubSub.publish('notification', {
         notification,
       });
@@ -124,9 +118,7 @@ export class NotificationsConsumer {
         order: payload.order._id,
         unseen: true,
       };
-      const createdNotification = await this.notificationsService.create(
-        notification,
-      );
+      const createdNotification = await this.notificationsService.create(notification);
 
       /**
        * Graphql Subscription
@@ -153,8 +145,7 @@ export class NotificationsConsumer {
 
       if (!seller.deviceToken)
         return this.logger.warn({
-          message:
-            'Skipping push notification as seller does not have a device token registered.',
+          message: 'Skipping push notification as seller does not have a device token registered.',
           sellerId: seller._id,
           order: payload.order.number,
         });
@@ -186,15 +177,42 @@ export class NotificationsConsumer {
   async deletePostCommentNotification(payload: Post) {
     try {
       const comments = await this.commentsService.findByPost(payload._id);
-      await this.notificationsService.deleteCommentTagNotifications(
-        comments.map(comment => comment._id),
-      );
+      await this.notificationsService.deleteCommentTagNotifications(comments.map(comment => comment._id));
     } catch (error) {
       this.logger.error({
-        message:
-          'Error while deleting comments notification from post.deleted event.',
+        message: 'Error while deleting comments notification from post.deleted event.',
         payload,
         error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('post.created', { async: true })
+  async sendPushToFollowers(payload: Post) {
+    try {
+      const [follows, user] = await Promise.all([
+        this.followsService.findManyByFollowees([payload.user as string]),
+        this.usersService.findById(payload.user as string),
+      ]);
+      const followers = await this.usersService.findManyByIds(follows.map(f => f.follower));
+      const tokens = followers.map(f => f.deviceToken).filter(t => t);
+      await admin.messaging().sendMulticast({
+        tokens,
+        notification: {
+          title: 'Post novo na área! 🤩',
+          body: `Vem cá ver o que @${user.username} acabou de postar!`,
+        },
+        data: {
+          postId: payload._id,
+        },
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while sending push to followers on new post.',
+        payload,
+        error: error.toString(),
+        metadata: error,
       });
     }
   }
