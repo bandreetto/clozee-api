@@ -7,6 +7,7 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { PostsModule } from '../posts/posts.module';
+import { FollowsModule } from 'src/follows/follows.module';
 import { CommentTagNotificationResolver } from './comment-tag-notification.resolver';
 import {
   CommentTagNotification,
@@ -26,7 +27,8 @@ import { PostCommentNotificationResolver } from './post-comment-notification.res
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
 import configuration from 'src/config/configuration';
-import { PubSub } from 'graphql-subscriptions';
+import { LikesModule } from 'src/likes/likes.module';
+import { NotificationTasks } from './notifications.tasks';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { PubSub } from 'graphql-subscriptions';
     AuthModule,
     MailerModule,
     PostsModule,
+    FollowsModule,
+    LikesModule,
   ],
   providers: [
     NotificationsResolver,
@@ -65,6 +69,7 @@ import { PubSub } from 'graphql-subscriptions';
     NotificationsService,
     NotificationsConsumer,
     PostCommentNotificationResolver,
+    NotificationTasks,
     {
       provide: 'PUB_SUB',
       useValue: new RedisPubSub({

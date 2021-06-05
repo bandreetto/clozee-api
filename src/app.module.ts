@@ -7,10 +7,7 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { CommentsModule } from './comments/comments.module';
-import {
-  TokenMiddleware,
-  WebSocketTokenMiddleware,
-} from './common/middlewares';
+import { TokenMiddleware, WebSocketTokenMiddleware } from './common/middlewares';
 import configuration from './config/configuration';
 import { CountersModule } from './counters/counters.module';
 import { DeliveryModule } from './delivery/delivery.module';
@@ -25,6 +22,7 @@ import { UsersModule } from './users/users.module';
 import { MailerModule } from './mailer/mailer.module';
 import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
 import { FollowsModule } from './follows/follows.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -47,6 +45,7 @@ import { FollowsModule } from './follows/follows.module';
       inject: [JwtService],
     }),
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     UsersModule,
     PostsModule,
     CommentsModule,
