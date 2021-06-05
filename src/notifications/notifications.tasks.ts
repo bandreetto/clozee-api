@@ -20,7 +20,7 @@ export class NotificationTasks {
   async sendLikePushNotifications() {
     try {
       this.logger.log('Sending like pushes to post owners');
-      const twoHoursAgo = dayjs().subtract(10, 'seconds').toDate();
+      const twoHoursAgo = dayjs().subtract(2, 'hours').toDate();
       const last2hoursLikes = await this.likesService.findLikesAfter(twoHoursAgo);
       const [posts, likers] = await Promise.all([
         this.postsService.findManyByIds(last2hoursLikes.map(l => l.post as string)),
@@ -33,10 +33,11 @@ export class NotificationTasks {
           const post = posts.find(p => p.user === postOwner._id);
           const likes = last2hoursLikes.filter(l => l.post === post._id);
           const [oneOfTheLikers, ...otherLikers] = likers.filter(liker => likes.some(like => like.user === liker._id));
-          const body =
-            otherLikers.length > 0
-              ? `@${oneOfTheLikers.username} e outras ${otherLikers.length} pessoas curtiram seu post`
-              : `@${oneOfTheLikers.username} curtiu seu post`;
+          let body: string;
+          if (otherLikers.length === 0) body = `@${oneOfTheLikers.username} curtiu seu post`;
+          if (otherLikers.length === 1)
+            body = `@${oneOfTheLikers.username} e ${otherLikers[1].username} curtiram seu post`;
+          else body = `@${oneOfTheLikers.username} e outras ${otherLikers.length} pessoas curtiram seu post`;
           return {
             token: postOwner.deviceToken,
             notification: {
