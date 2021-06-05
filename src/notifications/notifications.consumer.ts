@@ -57,7 +57,7 @@ export class NotificationsConsumer {
   @OnEvent('comment.created', { async: true })
   async sendCommentTagPushNotification(payload: CommentCreatedPayload) {
     try {
-      this.logger.log(`Sending comment tag push notifications to users ${payload.comment.tags.join(', ')}`);
+      this.logger.log(`Sending comment tag push notification(s) to user(s) ${payload.comment.tags.join(', ')}`);
       const users = await this.usersService.findManyByIds([
         payload.comment.user as string,
         ...(payload.comment.tags as string[]),
