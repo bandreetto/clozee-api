@@ -57,6 +57,7 @@ export class NotificationsConsumer {
   @OnEvent('comment.created', { async: true })
   async sendCommentTagPushNotification(payload: CommentCreatedPayload) {
     try {
+      this.logger.log(`Sending comment tag push notifications to users ${payload.comment.tags.join(', ')}`);
       const users = await this.usersService.findManyByIds([
         payload.comment.user as string,
         ...(payload.comment.tags as string[]),
@@ -67,8 +68,8 @@ export class NotificationsConsumer {
       await admin.messaging().sendMulticast({
         tokens: taggedUsers.map(u => u.deviceToken),
         notification: {
-          title: `@${taggingUser.username} marcou você em um comentário`,
-          body: payload.comment.body,
+          title: 'Clozee Friends 🧡',
+          body: `@${taggingUser.username} marcou você em uma publicação`,
         },
         android: { priority: 'high' },
       });
