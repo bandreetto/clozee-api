@@ -16,7 +16,7 @@ export class NotificationTasks {
     private readonly usersService: UsersService,
   ) {}
 
-  @Cron('* * */2 * * *')
+  @Cron('0 */2 * * *')
   async sendLikePushNotifications() {
     try {
       this.logger.log('Sending like pushes to post owners');
@@ -35,7 +35,7 @@ export class NotificationTasks {
           const [oneOfTheLikers, ...otherLikers] = likers.filter(liker => likes.some(like => like.user === liker._id));
           let body: string;
           if (otherLikers.length === 0) body = `@${oneOfTheLikers.username} curtiu seu post`;
-          if (otherLikers.length === 1)
+          else if (otherLikers.length === 1)
             body = `@${oneOfTheLikers.username} e ${otherLikers[1].username} curtiram seu post`;
           else body = `@${oneOfTheLikers.username} e outras ${otherLikers.length} pessoas curtiram seu post`;
           return {
@@ -46,7 +46,8 @@ export class NotificationTasks {
             },
           };
         });
-      if (!fcmNotifications.length) return this.logger.log('No likes found. Skipping fcm request.');
+      if (!fcmNotifications.length)
+        return this.logger.log('No likes found for users with registered devices. Skipping fcm request.');
       await admin.messaging().sendAll(fcmNotifications);
     } catch (error) {
       this.logger.error({
