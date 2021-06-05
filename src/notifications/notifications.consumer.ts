@@ -71,7 +71,6 @@ export class NotificationsConsumer {
           title: 'Clozee Friends 🧡',
           body: `@${taggingUser.username} marcou você em uma publicação`,
         },
-        android: { priority: 'high' },
       });
     } catch (error) {
       this.logger.error({
