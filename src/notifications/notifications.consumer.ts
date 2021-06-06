@@ -227,12 +227,17 @@ export class NotificationsConsumer {
   @OnEvent('post.created', { async: true })
   async sendPushToFollowers(payload: Post) {
     try {
+      this.logger.log('Sending push to followers on post created by followee.');
       const [follows, user] = await Promise.all([
         this.followsService.findManyByFollowees([payload.user as string]),
         this.usersService.findById(payload.user as string),
       ]);
       const followers = await this.usersService.findManyByIds(follows.map(f => f.follower));
       const tokens = followers.map(f => f.deviceToken).filter(t => t);
+      if (!tokens.length)
+        return this.logger.log(
+          'Skipping push to followers on post created as there are no followers with device tokens registered.',
+        );
       await admin.messaging().sendMulticast({
         tokens,
         notification: {
