@@ -12,6 +12,7 @@ import { CommentTagNotification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PostCommentNotification } from './contracts/post-comment-notification';
 import { FollowsService } from '../follows/follows.service';
+import { PostsService } from 'src/posts/posts.service';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -22,6 +23,7 @@ export class NotificationsConsumer {
     private readonly commentsService: CommentsService,
     private readonly usersService: UsersService,
     private readonly followsService: FollowsService,
+    private readonly postsService: PostsService,
     @Inject('PUB_SUB') private readonly pubSub: PubSub,
   ) {}
 
@@ -57,6 +59,7 @@ export class NotificationsConsumer {
   @OnEvent('comment.created', { async: true })
   async sendCommentTagPushNotification(payload: CommentCreatedPayload) {
     try {
+      this.logger.log(`Sending comment tag push notification(s) to user(s) ${payload.comment.tags.join(', ')}`);
       const users = await this.usersService.findManyByIds([
         payload.comment.user as string,
         ...(payload.comment.tags as string[]),
@@ -67,14 +70,47 @@ export class NotificationsConsumer {
       await admin.messaging().sendMulticast({
         tokens: taggedUsers.map(u => u.deviceToken),
         notification: {
-          title: `@${taggingUser.username} marcou você em um comentário`,
-          body: payload.comment.body,
+          title: 'Clozee Friends 🧡',
+          body: `@${taggingUser.username} marcou você em uma publicação`,
         },
-        android: { priority: 'high' },
       });
     } catch (error) {
       this.logger.error({
         message: 'Error while sending comment tag push notifications.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('comment.created', { async: true })
+  async sendPushNotificationToPostOwner(payload: CommentCreatedPayload) {
+    try {
+      this.logger.log(
+        `Sending comment created push notification to post owner ${payload.commentOwner._id} for comment ${payload.comment._id}`,
+      );
+      const post = await this.postsService.findById(payload.comment.post as string);
+      if (payload.comment.tags.some(tag => tag === post.user))
+        return this.logger.log(
+          'Skipping comment created push notification as post owner will be notified by the tag notification.',
+        );
+      const postOwner = await this.usersService.findById(post.user as string);
+      if (!postOwner.deviceToken)
+        return this.logger.log(
+          'Skipping comment created push notification as post owner does not have any device token registered.',
+        );
+      await admin.messaging().send({
+        token: postOwner.deviceToken,
+        notification: {
+          title: 'Tem gente querendo te dizer algo...',
+          body: `@${payload.commentOwner.username} comentou na sua publicação`,
+          imageUrl: post.images[0],
+        },
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while sending push notification to post owner.',
         payload,
         error: error.toString(),
         metadata: error,
