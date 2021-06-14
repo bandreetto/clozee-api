@@ -15,11 +15,7 @@ export class UserFeedService {
     @InjectModel(Feed.name) private readonly feedModel: Model<Feed & Document>,
   ) {}
 
-  async createManyPerFeed(
-    user: string,
-    followingUsers: string[],
-    followingPoints: number,
-  ): Promise<void> {
+  async createManyPerFeed(user: string, followingUsers: string[], followingPoints: number): Promise<void> {
     await this.feedModel.aggregate([
       {
         $addFields: {
@@ -140,120 +136,12 @@ export class UserFeedService {
             ],
           }
         : null),
-      ...(tags.sizes.length
-        ? { 'tags.size': { $in: tags.sizes } }
-        : { 'tags.size': { $in: Object.values(SIZES) } }),
+      ...(tags.sizes.length ? { 'tags.size': { $in: tags.sizes } } : { 'tags.size': { $in: Object.values(SIZES) } }),
       ...(tags.genders.length
         ? { 'tags.gender': { $in: tags.genders } }
         : { 'tags.gender': { $in: Object.values(GENDER_TAGS) } }),
       post: { $nin: blacklistedPosts },
     });
-  }
-
-  async searchByTerm(
-    user: string,
-    searchTerm: string,
-    tags: FeedTags,
-    limit: number,
-    maxScore = Infinity,
-    createdBefore?: Date,
-    blacklistedPosts: string[] = [],
-  ): Promise<UserFeed[]> {
-    return this.userFeedModel.aggregate([
-      {
-        $search: {
-          index: 'feedsSearch',
-          text: {
-            path: 'tags.searchTerms',
-            query: searchTerm,
-          },
-        },
-      },
-      {
-        $match: {
-          user,
-        },
-      },
-      {
-        $addFields: {
-          searchScore: { $meta: 'searchScore' },
-        },
-      },
-      {
-        $match: {
-          ...(createdBefore ? { createdAt: { $lt: createdBefore } } : null),
-          'tags.size': {
-            $in: tags.sizes.length ? tags.sizes : Object.values(SIZES),
-          },
-          'tags.gender': {
-            $in: tags.genders.length
-              ? tags.genders
-              : Object.values(GENDER_TAGS),
-          },
-          post: { $nin: blacklistedPosts },
-          searchScore: { $lt: maxScore },
-        },
-      },
-      {
-        $sort: {
-          searchScore: -1,
-          createdAt: -1,
-        },
-      },
-      {
-        $limit: limit,
-      },
-    ]);
-  }
-
-  async countBySearchTerm(
-    user: string,
-    searchTerm: string,
-    tags: FeedTags,
-    maxScore = Infinity,
-    createdBefore?: Date,
-    blacklistedPosts: string[] = [],
-  ): Promise<number> {
-    const [result] = await this.userFeedModel.aggregate([
-      {
-        $search: {
-          index: 'feedsSearch',
-          text: {
-            path: 'tags.searchTerms',
-            query: searchTerm,
-          },
-        },
-      },
-      {
-        $match: {
-          user,
-        },
-      },
-      {
-        $addFields: {
-          score: { $meta: 'searchScore' },
-        },
-      },
-      {
-        $match: {
-          ...(createdBefore ? { createdAt: { $lt: createdBefore } } : null),
-          'tags.size': {
-            $in: tags.sizes.length ? tags.sizes : Object.values(SIZES),
-          },
-          'tags.gender': {
-            $in: tags.genders.length
-              ? tags.genders
-              : Object.values(GENDER_TAGS),
-          },
-          post: { $nin: blacklistedPosts },
-          score: { $lt: maxScore },
-        },
-      },
-      {
-        $count: 'searchCount',
-      },
-    ]);
-    return result?.searchCount || 0;
   }
 
   async addToScores(amount: number, feedIds: string[]): Promise<void> {
@@ -289,7 +177,7 @@ export class UserFeedService {
   async deleteManyByPosts(posts: string[], user?: string): Promise<void> {
     const result = await this.userFeedModel.deleteMany({
       post: { $in: posts },
-      ...(user && { user })
+      ...(user && { user }),
     });
     if (!result.ok)
       throw new InternalServerErrorException({

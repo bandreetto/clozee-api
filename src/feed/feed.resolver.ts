@@ -7,7 +7,7 @@ import { PostsService } from 'src/posts/posts.service';
 import { FeedTags } from 'src/users/contracts';
 import { GENDER_TAGS } from 'src/users/contracts/enum';
 import { FeedTagsInput } from 'src/users/contracts/inputs';
-import { UserFeed, FeedPostConnection } from './contracts';
+import { UserFeed, FeedPostConnection, Feed } from './contracts';
 import { decodeCursor, fromPostsToConnection } from './feed.logic';
 import { UserFeedService } from './user-feed.service';
 import { SeenPostService } from './seen-post.service';
@@ -17,6 +17,7 @@ import { v4 } from 'uuid';
 import { TOKEN_TYPES } from 'src/auth/contracts/enums';
 import { EventEmitter2 } from 'eventemitter2';
 import { uniq } from 'ramda';
+import { FeedService } from './feed.service';
 
 @Resolver()
 export class FeedResolver {
@@ -25,6 +26,7 @@ export class FeedResolver {
   constructor(
     private readonly postsService: PostsService,
     private readonly userFeedService: UserFeedService,
+    private readonly feedService: FeedService,
     private readonly seenPostService: SeenPostService,
     private readonly sessionsService: SessionsService,
     private readonly eventEmitter: EventEmitter2,
@@ -46,12 +48,8 @@ export class FeedResolver {
     }
     let tags: FeedTags;
     if (feedTags) {
-      const sizes = feedTags.sizes.length
-        ? feedTags.sizes
-        : Object.values(SIZES);
-      const genders = feedTags.genders.length
-        ? feedTags.genders
-        : Object.values(GENDER_TAGS);
+      const sizes = feedTags.sizes.length ? feedTags.sizes : Object.values(SIZES);
+      const genders = feedTags.genders.length ? feedTags.genders : Object.values(GENDER_TAGS);
       tags = {
         sizes: uniq([...sizes, SIZES.OTHER, SIZES.UNIQUE]),
         genders: uniq([...genders, GENDER_TAGS.NEUTRAL]),
@@ -63,42 +61,28 @@ export class FeedResolver {
       };
     }
 
-    const postBlacklist = await this.seenPostService.findBlacklistedPosts(
-      user._id,
-    );
+    const postBlacklist = await this.seenPostService.findBlacklistedPosts(user._id);
     let feedPosts: UserFeed[], postsCount: number;
     if (searchTerm) {
-      let searchResult: UserFeed[];
+      let searchResult: Feed[];
       [searchResult, postsCount] = await Promise.all([
-        this.userFeedService.searchByTerm(
-          user._id,
+        this.feedService.searchByTerm(
           searchTerm,
           tags,
           args.first,
           score,
           date,
-          postBlacklist
-            ? [
-                ...postBlacklist.posts,
-                ...(postBlacklist.blockedUsersPosts || []),
-              ]
-            : [],
+          postBlacklist ? [...postBlacklist.posts, ...(postBlacklist.blockedUsersPosts || [])] : [],
         ),
-        this.userFeedService.countBySearchTerm(
-          user._id,
+        this.feedService.countBySearchTerm(
           searchTerm,
           tags,
           score,
           date,
-          postBlacklist
-            ? [
-                ...postBlacklist.posts,
-                ...(postBlacklist.blockedUsersPosts || []),
-              ]
-            : [],
+          postBlacklist ? [...postBlacklist.posts, ...(postBlacklist.blockedUsersPosts || [])] : [],
         ),
       ]);
-      feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore }));
+      feedPosts = searchResult.map(p => ({ ...p, score: p.searchScore, user: user._id }));
     } else {
       [feedPosts, postsCount] = await Promise.all([
         this.userFeedService.findSortedByScore(
@@ -106,12 +90,7 @@ export class FeedResolver {
           args.first,
           args.after && { maxScore: score, before: date },
           tags,
-          postBlacklist
-            ? [
-                ...postBlacklist.posts,
-                ...(postBlacklist.blockedUsersPosts || []),
-              ]
-            : [],
+          postBlacklist ? [...postBlacklist.posts, ...(postBlacklist.blockedUsersPosts || [])] : [],
         ),
         this.userFeedService.countByScore(
           user._id,
@@ -120,54 +99,38 @@ export class FeedResolver {
             maxScore: score,
             before: date,
           },
-          postBlacklist
-            ? [
-                ...postBlacklist.posts,
-                ...(postBlacklist.blockedUsersPosts || []),
-              ]
-            : [],
+          postBlacklist ? [...postBlacklist.posts, ...(postBlacklist.blockedUsersPosts || [])] : [],
         ),
       ]);
     }
 
-    const posts = await this.postsService.findManyByIds(
-      feedPosts.map(f => f.post),
-    );
+    const posts = await this.postsService.findManyByIds(feedPosts.map(f => f.post));
     const orderedPosts = feedPosts.map(feedPost => ({
       feedPost,
       post: posts.find(post => post._id === feedPost.post),
     }));
     const hasNextPage = postsCount - args.first > 0;
     const connection = fromPostsToConnection(orderedPosts, hasNextPage);
-    if (!hasNextPage && user?._id)
-      await this.eventEmitter.emitAsync('feed.endReached', user._id);
+    if (!hasNextPage && user?._id) await this.eventEmitter.emitAsync('feed.endReached', user._id);
     return connection;
   }
 
   @UseGuards(AuthGuard)
   @TokenTypes(TOKEN_TYPES.ACCESS, TOKEN_TYPES.PRE_SIGN)
   @Mutation(() => String)
-  markPostAsSeen(
-    @Args('post', { description: 'The post id.' }) post: string,
-    @CurrentUser() user: TokenUser,
-  ): string {
+  markPostAsSeen(@Args('post', { description: 'The post id.' }) post: string, @CurrentUser() user: TokenUser): string {
     const seenPostId = v4();
     this.sessionsService
       .findByUser(user._id, true)
       .then(([session]) => {
-        if (!session)
-          throw new ForbiddenException('No open session found for this user.');
+        if (!session) throw new ForbiddenException('No open session found for this user.');
         return this.seenPostService.create({
           _id: seenPostId,
           post,
           session: session._id,
         });
       })
-      .then(() =>
-        this.logger.log(
-          `Post ${post} marked as seen for user ${user._id}. SeenPostId: ${seenPostId}`,
-        ),
-      )
+      .then(() => this.logger.log(`Post ${post} marked as seen for user ${user._id}. SeenPostId: ${seenPostId}`))
       .catch(error =>
         this.logger.error({
           message: `Failed to mark post ${post} as seen for user ${user._id}`,
