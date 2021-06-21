@@ -6,10 +6,14 @@ interface Notification {
   _id: String!
   kind: String!
 
-  """Flag indicating if this notification is new and/or unseen."""
+  """
+  Flag indicating if this notification is new and/or unseen.
+  """
   unseen: Boolean!
 
-  """The moment this notification was sent."""
+  """
+  The moment this notification was sent.
+  """
   createdAt: DateTime!
 }
 
@@ -40,32 +44,50 @@ type Bank {
 }
 
 type BankInfo {
-  """The user banking institution."""
+  """
+  The user banking institution.
+  """
   bank: Bank!
 
-  """User's bank agency."""
+  """
+  User's bank agency.
+  """
   agency: String!
 
-  """The agency verifying digit."""
+  """
+  The agency verifying digit.
+  """
   agencyDv: String
 
-  """User's bank account number."""
+  """
+  User's bank account number.
+  """
   account: String!
 
-  """The bank account verifying digit."""
+  """
+  The bank account verifying digit.
+  """
   accountDv: String
 
-  """The user's bank account type."""
+  """
+  The user's bank account type.
+  """
   accountType: ACCOUNT_TYPES!
 
-  """The name of the account holder."""
+  """
+  The name of the account holder.
+  """
   holderName: String!
 
-  """The document number of the account holder."""
+  """
+  The document number of the account holder.
+  """
   holderDocument: String!
 }
 
-"""Bank account types."""
+"""
+Bank account types.
+"""
 enum ACCOUNT_TYPES {
   CURRENT
   SAVINGS
@@ -74,14 +96,20 @@ enum ACCOUNT_TYPES {
 }
 
 type FeedTags {
-  """User sizes preferences."""
+  """
+  User sizes preferences.
+  """
   sizes: [SIZES!]!
 
-  """User clothing model preference."""
+  """
+  User clothing model preference.
+  """
   genders: [GENDER_TAGS!]
 }
 
-"""Possible product sizes"""
+"""
+Possible product sizes
+"""
 enum SIZES {
   UNIQUE
   PP
@@ -118,7 +146,9 @@ enum SIZES {
   OTHER
 }
 
-"""Possible gender tags to be used on feed customization."""
+"""
+Possible gender tags to be used on feed customization.
+"""
 enum GENDER_TAGS {
   MALE
   FEMALE
@@ -128,13 +158,19 @@ enum GENDER_TAGS {
 type PaymentMethod {
   _id: String!
 
-  """Card id provided by the payment gateway."""
+  """
+  Card id provided by the payment gateway.
+  """
   cardId: String!
 
-  """Last 4 digits of the credit card."""
+  """
+  Last 4 digits of the credit card.
+  """
   lastDigits: String!
 
-  """The card's flag."""
+  """
+  The card's flag.
+  """
   flag: String!
 }
 
@@ -142,13 +178,19 @@ type Comment {
   _id: String!
   body: String!
 
-  """The users tagged on this comment"""
+  """
+  The users tagged on this comment
+  """
   tags: [User!]!
 
-  """The post that the comment belongs to"""
+  """
+  The post that the comment belongs to
+  """
   post: Post!
 
-  """The user who made the comment"""
+  """
+  The user who made the comment
+  """
   user: User!
   createdAt: DateTime!
 }
@@ -170,30 +212,46 @@ type Post {
   user: User!
   title: String!
 
-  """Size of the product being announced on this post."""
+  """
+  Size of the product being announced on this post.
+  """
   size: SIZES!
   description: String
 
-  """An array of urls for post images."""
+  """
+  An array of urls for post images.
+  """
   images: [String!]!
 
-  """The category of this post."""
+  """
+  The category of this post.
+  """
   category: Category!
 
-  """Price of the item being announced in cents."""
+  """
+  Price of the item being announced in cents.
+  """
   price: Float!
 
-  """The percentage of the seller's profit being destined to donation."""
+  """
+  The percentage of the seller's profit being destined to donation.
+  """
   donationPercentage: Float!
 
-  """The calculated amount of the post's price going to donation in cents."""
+  """
+  The calculated amount of the post's price going to donation in cents.
+  """
   donationAmount: Int!
 
-  """The condition of the post's product"""
+  """
+  The condition of the post's product
+  """
   condition: POST_CONDITIONS!
   comments: [Comment!]!
 
-  """A boolean indicating whether this post was sold or not."""
+  """
+  A boolean indicating whether this post was sold or not.
+  """
   sold: Boolean!
 
   """
@@ -201,7 +259,9 @@ type Post {
   """
   saved: Boolean!
 
-  """The amount of likes this post had."""
+  """
+  The amount of likes this post had.
+  """
   likes: Float!
 
   """
@@ -211,7 +271,9 @@ type Post {
   createdAt: DateTime!
 }
 
-"""Possible post's product conditions."""
+"""
+Possible post's product conditions.
+"""
 enum POST_CONDITIONS {
   NEW
   USED_NEW
@@ -233,13 +295,19 @@ type User {
   avatar: String
   address: Address
 
-  """Tags used to customize user's feed."""
+  """
+  Tags used to customize user's feed.
+  """
   feedTags: FeedTags!
 
-  """The device token used for push notifications."""
+  """
+  The device token used for push notifications.
+  """
   deviceToken: String!
 
-  """The list of users blocked by this user."""
+  """
+  The list of users blocked by this user.
+  """
   blockedUsers: [User!]!
 
   """
@@ -252,20 +320,28 @@ type User {
   """
   variableTaxOverride: Float
 
-  """The ids of users credit cards"""
+  """
+  The ids of users credit cards
+  """
   paymentMethods: [PaymentMethod!]!
   followers: [User!]!
 
-  """The list of users following this user."""
+  """
+  The list of users following this user.
+  """
   following: [User!]!
 
-  """A boolean indicating weather the current user is following this user."""
+  """
+  A boolean indicating weather the current user is following this user.
+  """
   isFollowing: Boolean!
   createdAt: DateTime!
 }
 
 type AuthResponse {
-  """The token's owner user."""
+  """
+  The token's owner user.
+  """
   me: User!
 
   """
@@ -273,48 +349,72 @@ type AuthResponse {
   """
   token: String!
 
-  """A long lived token, used to get a new access token."""
+  """
+  A long lived token, used to get a new access token.
+  """
   refreshToken: String!
 }
 
 type PreSignResponse {
-  """The pre-signed user token."""
+  """
+  The pre-signed user token.
+  """
   preSignToken: String!
 
-  """The pre-signed user id. Use it to create the user later."""
+  """
+  The pre-signed user id. Use it to create the user later.
+  """
   userId: String!
 }
 
 type PageInfo {
-  """The first cursor of this page."""
+  """
+  The first cursor of this page.
+  """
   startCursor: String
 
-  """The last cursor of this page."""
+  """
+  The last cursor of this page.
+  """
   endCursor: String
 
-  """A boolean indicating if there are more edges after this page."""
+  """
+  A boolean indicating if there are more edges after this page.
+  """
   hasNextPage: Boolean!
 }
 
 type UploadImageResponse {
-  """The id of the image. Used later to reference this image."""
+  """
+  The id of the image. Used later to reference this image.
+  """
   imageId: String!
 
-  """The signed url to allow the upload of the image."""
+  """
+  The signed url to allow the upload of the image.
+  """
   signedUrl: String!
 }
 
 type DeliveryInfo {
-  """The menv delivery orderId."""
+  """
+  The menv delivery orderId.
+  """
   menvDeliveryOrderId: Int
 
-  """The delivery label URL."""
+  """
+  The delivery label URL.
+  """
   deliveryLabelUrl: String
 
-  """The delivery fare in cents."""
+  """
+  The delivery fare in cents.
+  """
   price: Int!
 
-  """The expected delivery time in business days."""
+  """
+  The expected delivery time in business days.
+  """
   deliveryTime: Int!
 }
 
@@ -327,22 +427,34 @@ type Order {
   sellersAddress: Address!
   deliveryInfo: DeliveryInfo!
 
-  """The amount charged from the seller."""
+  """
+  The amount charged from the seller.
+  """
   clozeeTax: Float!
 
-  """The final amount that the seller will receive."""
+  """
+  The final amount that the seller will receive.
+  """
   sellerAmount: Float!
 
-  """The posts of this order."""
+  """
+  The posts of this order.
+  """
   posts: [Post!]!
 
-  """The total price of this order in cents."""
+  """
+  The total price of this order in cents.
+  """
   total: Float!
 
-  """The sum of the post's prices for this order."""
+  """
+  The sum of the post's prices for this order.
+  """
   itemsPrice: Float!
 
-  """The amount of this order that was donated."""
+  """
+  The amount of this order that was donated.
+  """
   donationAmount: Float!
   createdAt: DateTime!
 }
@@ -352,11 +464,15 @@ type Delivery {
   buyersZipCode: String!
   sellersZipCode: String!
 
-  """The delivery fare in cents."""
+  """
+  The delivery fare in cents.
+  """
   price: Int!
   menvServiceNumber: Float!
 
-  """The expected delivery time in business days."""
+  """
+  The expected delivery time in business days.
+  """
   deliveryTime: Int!
 }
 
@@ -367,12 +483,16 @@ type Session {
 type FeedPostEdge {
   node: Post!
 
-  """An opaque cursor representing this edge position."""
+  """
+  An opaque cursor representing this edge position.
+  """
   cursor: String!
 }
 
 type FeedPostConnection {
-  """An array of post edges containing the node (Post) and its cursor."""
+  """
+  An array of post edges containing the node (Post) and its cursor.
+  """
   edges: [FeedPostEdge!]!
   pageInfo: PageInfo!
 }
@@ -381,13 +501,19 @@ type CommentTagNotification implements Notification {
   _id: String!
   kind: String!
 
-  """Flag indicating if this notification is new and/or unseen."""
+  """
+  Flag indicating if this notification is new and/or unseen.
+  """
   unseen: Boolean!
 
-  """The moment this notification was sent."""
+  """
+  The moment this notification was sent.
+  """
   createdAt: DateTime!
 
-  """The comment that the user was tagged on."""
+  """
+  The comment that the user was tagged on.
+  """
   comment: Comment!
 }
 
@@ -395,13 +521,19 @@ type SaleNotification implements Notification {
   _id: String!
   kind: String!
 
-  """Flag indicating if this notification is new and/or unseen."""
+  """
+  Flag indicating if this notification is new and/or unseen.
+  """
   unseen: Boolean!
 
-  """The moment this notification was sent."""
+  """
+  The moment this notification was sent.
+  """
   createdAt: DateTime!
 
-  """The order of the sales."""
+  """
+  The order of the sales.
+  """
   order: Order!
 }
 
@@ -409,62 +541,95 @@ type PostCommentNotification implements Notification {
   _id: String!
   kind: String!
 
-  """Flag indicating if this notification is new and/or unseen."""
+  """
+  Flag indicating if this notification is new and/or unseen.
+  """
   unseen: Boolean!
 
-  """The moment this notification was sent."""
+  """
+  The moment this notification was sent.
+  """
   createdAt: DateTime!
 
-  """The comment created on the post"""
+  """
+  The comment created on the post
+  """
   comment: Comment!
 
-  """The post that the comment was commented on."""
+  """
+  The post that the comment was commented on.
+  """
   post: Post!
 }
 
 type SearchCategory {
   id: Float!
 
-  """The title of the category to be displayed to the user."""
+  """
+  The title of the category to be displayed to the user.
+  """
   title: String!
 
-  """The search term to be used."""
+  """
+  The search term to be used.
+  """
   searchTerm: String!
 
-  """Url to the search category image."""
+  """
+  Url to the search category image.
+  """
   imageUrl: String!
+}
+type ExploreCategory {
+  _id: String!
+  name: String!
+  searchTerm: String!
 }
 
 type Query {
   me: User!
   user(id: String!): User!
 
-  """A list of 60 users"""
+  """
+  A list of 60 users
+  """
   users(searchTerm: String): [User!]!
   banks: [Bank!]!
   post(postId: String!): Post!
   posts(
-    """Filter posts by user id"""
+    """
+    Filter posts by user id
+    """
     user: String!
   ): [Post!]!
 
-  """Returns all categories"""
+  """
+  Returns all categories
+  """
   categories(roots: Boolean): [Category!]!
   order(orderId: String!): Order!
 
-  """The orders that the current user has bought."""
+  """
+  The orders that the current user has bought.
+  """
   myOrders: [Order!]!
 
-  """Orders that the current user has sold."""
+  """
+  Orders that the current user has sold.
+  """
   mySales: [Order!]!
   feed(
     searchTerm: String
     tags: FeedTagsInput
 
-    """The first N elements to return after the cursor."""
+    """
+    The first N elements to return after the cursor.
+    """
     first: Float!
 
-    """Only return edges after this cursor."""
+    """
+    Only return edges after this cursor.
+    """
     after: String
   ): FeedPostConnection!
   notifications(
@@ -474,17 +639,28 @@ type Query {
     notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
   ): [Notification!]!
   searchCategories: [SearchCategory!]!
+
+  """
+  Returns explore data
+  """
+  explore: [ExploreCategory!]!
 }
 
 input FeedTagsInput {
-  """User's preferred sizes."""
+  """
+  User's preferred sizes.
+  """
   sizes: [SIZES!]!
 
-  """Users prefered clothing models."""
+  """
+  Users prefered clothing models.
+  """
   genders: [GENDER_TAGS!]!
 }
 
-"""The kinds of notification existing in the app."""
+"""
+The kinds of notification existing in the app.
+"""
 enum NOTIFICAION_KINDS {
   COMMENT_TAG
   SALE
@@ -503,7 +679,9 @@ type Mutation {
   updateBankInfo(bankInfo: BankInfoInput!): User!
   updateAddress(address: AddressInput!): User!
 
-  """Returns a pre-signed S3 URL that allows the avatar upload."""
+  """
+  Returns a pre-signed S3 URL that allows the avatar upload.
+  """
   uploadAvatarUrl: String! @deprecated(reason: "Replaced by createUserAvatar. Use it intead.")
 
   """
@@ -511,15 +689,21 @@ type Mutation {
   """
   createUserAvatar: UploadImageResponse!
 
-  """Returns the user with the updated avatar url."""
+  """
+  Returns the user with the updated avatar url.
+  """
   updateUserAvatar(
     newAvatarId: String
 
-    """DEPRECATED. Use newAvatarId parameter."""
+    """
+    DEPRECATED. Use newAvatarId parameter.
+    """
     newAvatarUrl: String
   ): User!
   addCreditCard(
-    """The credit card's number"""
+    """
+    The credit card's number
+    """
     number: String!
     holderName: String!
 
@@ -534,7 +718,9 @@ type Mutation {
   removeDeviceToken: User!
   blockUser(userId: String!): User!
 
-  """Returns a pre-signed S3 URL that allows the post image upload."""
+  """
+  Returns a pre-signed S3 URL that allows the post image upload.
+  """
   uploadPostImage: String! @deprecated(reason: "Replaced by the mutation createPostImage. Use it intead.")
 
   """
@@ -557,17 +743,23 @@ type Mutation {
   likePost(postId: String!): Post!
   unlikePost(postId: String!): Post!
   markPostAsSeen(
-    """The post id."""
+    """
+    The post id.
+    """
     post: String!
   ): String!
   startSession: Session!
 
-  """Mark all user notifications as seen."""
+  """
+  Mark all user notifications as seen.
+  """
   clearNotifications: [Notification!]!
 }
 
 input SignUpInput {
-  """The id of the pre-signed user."""
+  """
+  The id of the pre-signed user.
+  """
   _id: String
   username: String!
   password: String!
@@ -578,7 +770,9 @@ input SignUpInput {
   """
   avatarId: String
 
-  """Tags used to customize user's feed"""
+  """
+  Tags used to customize user's feed
+  """
   feedTags: FeedTagsInput
 }
 
@@ -590,28 +784,44 @@ input UpdateUserInfoInput {
 }
 
 input BankInfoInput {
-  """The bank number."""
+  """
+  The bank number.
+  """
   bank: String!
 
-  """User's bank agency."""
+  """
+  User's bank agency.
+  """
   agency: String!
 
-  """The agency verifying digit."""
+  """
+  The agency verifying digit.
+  """
   agencyDv: String
 
-  """User's bank account number."""
+  """
+  User's bank account number.
+  """
   account: String!
 
-  """The bank account verifying digit."""
+  """
+  The bank account verifying digit.
+  """
   accountDv: String!
 
-  """The user's bank account type"""
+  """
+  The user's bank account type
+  """
   accountType: ACCOUNT_TYPES!
 
-  """The name of the account holder."""
+  """
+  The name of the account holder.
+  """
   holderName: String!
 
-  """The document number of the account holder."""
+  """
+  The document number of the account holder.
+  """
   holderDocument: String!
 }
 
@@ -636,22 +846,34 @@ input AddPostInput {
   size: SIZES!
   description: String!
 
-  """An array of urls for post images."""
+  """
+  An array of urls for post images.
+  """
   images: [String!] = []
 
-  """An array of images id's, get from the UploadPostImage mutation"""
+  """
+  An array of images id's, get from the UploadPostImage mutation
+  """
   imagesIds: [String!] = []
 
-  """The id of the post category."""
+  """
+  The id of the post category.
+  """
   category: String!
 
-  """The condition of this post's product."""
+  """
+  The condition of this post's product.
+  """
   condition: POST_CONDITIONS!
 
-  """Price of the item being announced in cents."""
+  """
+  Price of the item being announced in cents.
+  """
   price: Int!
 
-  """The percentage of the seller's profit being destined to donation."""
+  """
+  The percentage of the seller's profit being destined to donation.
+  """
   donationPercentage: Float = 0
 }
 
@@ -659,33 +881,49 @@ input UpdatePostFields {
   title: String
   description: String
 
-  """The new price of the item in cents."""
+  """
+  The new price of the item in cents.
+  """
   price: Int
   size: String
 
-  """An array of urls for the new post images."""
+  """
+  An array of urls for the new post images.
+  """
   images: [String!]
 
-  """The new category id of this post."""
+  """
+  The new category id of this post.
+  """
   category: String
 
-  """The new condition of the post's product"""
+  """
+  The new condition of the post's product
+  """
   condition: POST_CONDITIONS
 }
 
 input CheckoutInput {
-  """The array of posts being bought."""
+  """
+  The array of posts being bought.
+  """
   posts: [String!]!
 
-  """The id of the user's payment method to use on the checkout."""
+  """
+  The id of the user's payment method to use on the checkout.
+  """
   paymentMethodId: String!
 
-  """The id of the delivery info for this checkout."""
+  """
+  The id of the delivery info for this checkout.
+  """
   deliveryInfoId: String!
 }
 
 input AddCommentInput {
-  """The id of the post the comment is being made."""
+  """
+  The id of the post the comment is being made.
+  """
   post: String!
   body: String!
 }
