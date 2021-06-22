@@ -42,7 +42,7 @@ export class CmsService {
     return response.data.map(searchCategory => ({
       id: searchCategory.id,
       title: searchCategory.title,
-      imageUrl: searchCategory.image.url,
+      imageUrl: `${configuration.cms.url()}${searchCategory.image.url}`,
       searchTerm: searchCategory.searchTerm,
     }));
   }
