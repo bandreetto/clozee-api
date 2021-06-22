@@ -422,6 +422,19 @@ type PostCommentNotification implements Notification {
   post: Post!
 }
 
+type SearchCategory {
+  id: Float!
+
+  """The title of the category to be displayed to the user."""
+  title: String!
+
+  """The search term to be used."""
+  searchTerm: String!
+
+  """Url to the search category image."""
+  imageUrl: String!
+}
+
 type Query {
   me: User!
   user(id: String!): User!
@@ -460,6 +473,7 @@ type Query {
     """
     notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
   ): [Notification!]!
+  searchCategories: [SearchCategory!]!
 }
 
 input FeedTagsInput {
