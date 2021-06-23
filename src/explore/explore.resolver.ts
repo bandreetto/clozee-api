@@ -1,15 +1,19 @@
 import { UseGuards } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
 import { AuthGuard } from 'src/common/guards';
-import { ExploreCategory } from './contracts/index';
+import { Explore } from './contracts/index';
+import { CmsService } from '../cms/cms.service';
 
 @Resolver()
 export class ExploreResolver {
-  constructor() {}
+  constructor(private readonly cmsService: CmsService) {}
 
   @UseGuards(AuthGuard)
-  @Query(() => [ExploreCategory], { description: 'Returns explore data' })
-  explore(): Promise<ExploreCategory[]> {
-    return null;
+  @Query(() => Explore, { description: 'Returns explore data' })
+  async explore(): Promise<Explore> {
+    return {
+      users: [],
+      categories: await this.cmsService.getSearchCategories(),
+    };
   }
 }

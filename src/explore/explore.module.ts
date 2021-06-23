@@ -1,17 +1,9 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { ExploreCategory, ExploreCategorySchema } from './contracts';
+import { CmsModule } from 'src/cms/cms.module';
 import { ExploreResolver } from './explore.resolver';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: ExploreCategory.name,
-        schema: ExploreCategorySchema,
-      },
-    ]),
-  ],
+  imports: [CmsModule],
   providers: [ExploreResolver],
 })
 export class ExploreModule {}

@@ -1,9 +1,9 @@
 import { Module, HttpModule } from '@nestjs/common';
-import { CmsResolver } from './cms.resolver';
 import { CmsService } from './cms.service';
 
 @Module({
   imports: [HttpModule],
-  providers: [CmsResolver, CmsService],
+  providers: [CmsService],
+  exports: [CmsService],
 })
 export class CmsModule {}
