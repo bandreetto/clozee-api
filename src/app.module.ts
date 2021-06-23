@@ -24,6 +24,7 @@ import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
 import { FollowsModule } from './follows/follows.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CmsModule } from './cms/cms.module';
+import { ExploreModule } from './explore/explore.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { CmsModule } from './cms/cms.module';
     MailerModule,
     FollowsModule,
     CmsModule,
+    ExploreModule,
   ],
 })
 export class AppModule {

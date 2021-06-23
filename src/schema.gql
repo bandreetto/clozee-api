@@ -435,6 +435,17 @@ type SearchCategory {
   imageUrl: String!
 }
 
+type SearchUser {
+  userId: String!
+  username: String!
+  avatarUrl: String!
+}
+
+type Explore {
+  users: [SearchUser!]!
+  categories: [SearchCategory!]!
+}
+
 type Query {
   me: User!
   user(id: String!): User!
@@ -473,7 +484,9 @@ type Query {
     """
     notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
   ): [Notification!]!
-  searchCategories: [SearchCategory!]!
+
+  """Returns explore data"""
+  explore: Explore!
 }
 
 input FeedTagsInput {
