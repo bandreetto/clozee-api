@@ -11,6 +11,7 @@ export class CmsService {
   private token: string;
 
   constructor(private readonly httpService: HttpService) {
+    this.logger.log('Authenticating with CMS Service');
     this.authPromise = httpService
       .post<CMSAuthResponse>(`${configuration.cms.url()}/auth/local`, {
         identifier: configuration.cms.identifier(),
@@ -19,6 +20,7 @@ export class CmsService {
       .toPromise()
       .then(response => {
         this.token = response.data.jwt;
+        this.logger.log('Authentication with CMS Service succeeded!');
       })
       .catch(error => {
         this.logger.error({
