@@ -23,6 +23,7 @@ import { MailerModule } from './mailer/mailer.module';
 import { errorLoggerPlugin } from './common/apollo-plugins/error-logger';
 import { FollowsModule } from './follows/follows.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CmsModule } from './cms/cms.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     SessionsModule,
     MailerModule,
     FollowsModule,
+    CmsModule,
   ],
 })
 export class AppModule {

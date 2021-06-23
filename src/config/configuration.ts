@@ -37,4 +37,9 @@ export default {
   concurrency: {
     workers: () => process.env.WEB_CONCURRENCY,
   },
+  cms: {
+    url: () => process.env.CLOZEE_CMS_URL,
+    identifier: () => process.env.CLOZEE_CMS_IDENTIFIER,
+    password: () => process.env.CLOZEE_CMS_PASSWORD,
+  },
 };
