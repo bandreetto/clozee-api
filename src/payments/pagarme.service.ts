@@ -43,7 +43,7 @@ export class PagarmeService {
       billing: {
         address: {
           city: buyer.address.city,
-          complementary: buyer.address.complement || '',
+          ...(buyer.address.complement ? { complementary: buyer.address.complement } : null),
           country: 'br',
           state: buyer.address.state,
           street: buyer.address.street,
