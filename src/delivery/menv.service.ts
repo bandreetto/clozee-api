@@ -1,18 +1,9 @@
-import {
-  HttpService,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { HttpService, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ascend, assocPath } from 'ramda';
 import configuration from 'src/config/configuration';
 import { Post } from 'src/posts/contracts';
 import { User } from 'src/users/contracts';
-import {
-  MenvAddToCartResponse,
-  MenvCalculateResponse,
-  MenvCheckoutResponse,
-} from './contracts/dtos';
+import { MenvAddToCartResponse, MenvCalculateResponse, MenvCheckoutResponse } from './contracts/dtos';
 
 const formatZipCode = (zipCode: string) => {
   return zipCode.replace(/\s/g, '').replace('-', '');
@@ -42,9 +33,7 @@ export class MenvService {
     destinationZipCode: string,
   ): Promise<{ price: number; deliveryTime: number; id: number }> {
     if (!originZipCode || !destinationZipCode) {
-      throw new Error(
-        'Origin and destination zipCodes required to calculate delivery',
-      );
+      throw new Error('Origin and destination zipCodes required to calculate delivery');
     }
 
     try {
@@ -64,6 +53,7 @@ export class MenvService {
               length: 30,
               weight: 1,
             },
+            services: '1,2', // Restrict services to PAC and SEDEX only
           },
           this.requestConfig,
         )
@@ -76,9 +66,7 @@ export class MenvService {
       }
 
       const cheapestDeliveryOption = deliveryOptions.sort(
-        ascend<MenvCalculateResponse>(option =>
-          fromPriceToNumber(option.price),
-        ),
+        ascend<MenvCalculateResponse>(option => fromPriceToNumber(option.price)),
       )[0];
 
       return {
@@ -90,11 +78,7 @@ export class MenvService {
       this.logger.error({
         message: 'Error while calculating delivery fee',
         error: error.toString(),
-        metadata: assocPath(
-          ['config', 'headers', 'Authorization'],
-          'redacted',
-          error,
-        ),
+        metadata: assocPath(['config', 'headers', 'Authorization'], 'redacted', error),
         originZipCode,
         destinationZipCode,
       });
@@ -182,11 +166,7 @@ export class MenvService {
 
     try {
       const response = await this.httpClient
-        .post<MenvAddToCartResponse>(
-          `${configuration.menv.apiUrl()}/me/cart`,
-          data,
-          this.requestConfig,
-        )
+        .post<MenvAddToCartResponse>(`${configuration.menv.apiUrl()}/me/cart`, data, this.requestConfig)
         .toPromise();
 
       return { orderId: response.data.id };
@@ -194,11 +174,7 @@ export class MenvService {
       this.logger.error({
         message: 'Error while trying to add delivery to cart',
         error: error.toString(),
-        metadata: assocPath(
-          ['config', 'headers', 'Authorization'],
-          'redacted',
-          error,
-        ),
+        metadata: assocPath(['config', 'headers', 'Authorization'], 'redacted', error),
       });
       throw new InternalServerErrorException();
     }
@@ -231,11 +207,7 @@ export class MenvService {
       this.logger.error({
         message: 'Error while checking out delivery',
         error: error.toString(),
-        metadata: assocPath(
-          ['config', 'headers', 'Authorization'],
-          'redacted',
-          error,
-        ),
+        metadata: assocPath(['config', 'headers', 'Authorization'], 'redacted', error),
         orders,
       });
       throw new InternalServerErrorException();
@@ -263,11 +235,7 @@ export class MenvService {
       this.logger.error({
         message: 'Error while generating labels',
         error: error.toString(),
-        metadata: assocPath(
-          ['config', 'headers', 'Authorization'],
-          'redacted',
-          error,
-        ),
+        metadata: assocPath(['config', 'headers', 'Authorization'], 'redacted', error),
         orders,
       });
       throw new InternalServerErrorException();
@@ -296,11 +264,7 @@ export class MenvService {
       this.logger.error({
         message: 'Error while printing labels',
         error: error.toString(),
-        metadata: assocPath(
-          ['config', 'headers', 'Authorization'],
-          'redacted',
-          error,
-        ),
+        metadata: assocPath(['config', 'headers', 'Authorization'], 'redacted', error),
         orders,
       });
       throw new InternalServerErrorException();
