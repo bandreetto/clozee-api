@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import pagarme from 'pagarme';
 import R from 'ramda';
 import configuration from 'src/config/configuration';
@@ -47,7 +43,7 @@ export class PagarmeService {
       billing: {
         address: {
           city: buyer.address.city,
-          complementary: buyer.address.complement,
+          complementary: buyer.address.complement || '',
           country: 'br',
           state: buyer.address.state,
           street: buyer.address.street,
@@ -115,14 +111,10 @@ export class PagarmeService {
 
       const bankAccount: BankAccountCreateOptions = {
         agencia: user.bankInfo.agency,
-        ...(user.bankInfo.agencyDv
-          ? { agencia_dv: formatDigit(user.bankInfo.agencyDv) }
-          : null),
+        ...(user.bankInfo.agencyDv ? { agencia_dv: formatDigit(user.bankInfo.agencyDv) } : null),
         bank_code: String(user.bankInfo.bank),
         conta: user.bankInfo.account,
-        ...(user.bankInfo.accountDv
-          ? { conta_dv: formatDigit(user.bankInfo.accountDv) }
-          : null),
+        ...(user.bankInfo.accountDv ? { conta_dv: formatDigit(user.bankInfo.accountDv) } : null),
         document_number: formatCPF(user.bankInfo.holderDocument),
         legal_name: user.bankInfo.holderName,
         type: fromAccountTypeToPagarmeType(user.bankInfo.accountType),
@@ -135,9 +127,7 @@ export class PagarmeService {
         metadata: {
           userId: user._id,
         },
-        bank_account: R.reject(R.anyPass([R.isEmpty, R.isNil, R.equals('')]))(
-          bankAccount,
-        ),
+        bank_account: R.reject(R.anyPass([R.isEmpty, R.isNil, R.equals('')]))(bankAccount),
       });
 
       return response.id;
@@ -151,10 +141,7 @@ export class PagarmeService {
     }
   }
 
-  async updateRecipient(
-    bankInfo: User['bankInfo'],
-    recipientId: string,
-  ): Promise<string> {
+  async updateRecipient(bankInfo: User['bankInfo'], recipientId: string): Promise<string> {
     try {
       const client = await pagarme.client.connect({
         api_key: configuration.pagarme.token(),
@@ -163,14 +150,10 @@ export class PagarmeService {
         id: recipientId,
         bank_account: {
           agencia: bankInfo.agency,
-          ...(bankInfo.agencyDv
-            ? { agencia_dv: formatDigit(bankInfo.agencyDv) }
-            : null),
+          ...(bankInfo.agencyDv ? { agencia_dv: formatDigit(bankInfo.agencyDv) } : null),
           bank_code: String(bankInfo.bank),
           conta: bankInfo.account,
-          ...(bankInfo.accountDv
-            ? { conta_dv: formatDigit(bankInfo.accountDv) }
-            : null),
+          ...(bankInfo.accountDv ? { conta_dv: formatDigit(bankInfo.accountDv) } : null),
           document_number: formatCPF(bankInfo.holderDocument),
           legal_name: bankInfo.holderName,
           type: fromAccountTypeToPagarmeType(bankInfo.accountType),
@@ -210,8 +193,7 @@ export class PagarmeService {
       return response as ICreateCardResponse;
     } catch (error) {
       this.logger.error({
-        message:
-          'An error occoured while trying to create pagarme credit card.',
+        message: 'An error occoured while trying to create pagarme credit card.',
         error: error.toString(),
         metadata: error,
       });
