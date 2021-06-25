@@ -41,11 +41,15 @@ export class CmsService {
       })
       .toPromise();
 
-    return response.data.map(searchCategory => ({
-      id: searchCategory.id,
-      title: searchCategory.title,
-      imageUrl: `${configuration.cms.url()}${searchCategory.image.url}`,
-      searchTerm: searchCategory.searchTerm,
-    }));
+    return response.data.map(searchCategory => {
+      const imagePath = searchCategory.image?.url;
+      if (!imagePath) this.logger.warn(`Could not find image for category ${searchCategory.id}`);
+      return {
+        id: searchCategory.id,
+        title: searchCategory.title,
+        imageUrl: `${configuration.cms.url()}${imagePath}`,
+        searchTerm: searchCategory.searchTerm,
+      };
+    });
   }
 }
