@@ -8,8 +8,7 @@ export class PageInfo {
   @Field({ description: 'The last cursor of this page.', nullable: true })
   endCursor: string;
   @Field({
-    description:
-      'A boolean indicating if there are more edges after this page.',
+    description: 'A boolean indicating if there are more edges after this page.',
   })
   hasNextPage: boolean;
 }
@@ -67,4 +66,9 @@ export class UploadImageResponse {
 
   @Field({ description: 'The signed url to allow the upload of the image.' })
   signedUrl: string;
+}
+
+export enum SORT_DIRECTION {
+  ASC = 1,
+  DESC = -1,
 }
