@@ -42,12 +42,15 @@ export class CmsService {
       .toPromise();
 
     return response.data.map(searchCategory => {
-      const imagePath = searchCategory.image?.url;
-      if (!imagePath) this.logger.warn(`Could not find image for category ${searchCategory.id}`);
+      let imageUrl = searchCategory.image?.url;
+      if (!imageUrl) {
+        imageUrl = '';
+        this.logger.warn(`Could not find image for category ${searchCategory.id}`);
+      } else imageUrl = `${configuration.cms.cdn()}/${searchCategory.image.hash}${searchCategory.image.ext}`;
       return {
         id: searchCategory.id,
         title: searchCategory.title,
-        imageUrl: `${configuration.cms.url()}${imagePath}`,
+        imageUrl,
         searchTerm: searchCategory.searchTerm,
       };
     });
