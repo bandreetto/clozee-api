@@ -36,7 +36,7 @@ export class NotificationTasks {
           let body: string;
           if (otherLikers.length === 0) body = `@${oneOfTheLikers.username} curtiu seu post`;
           else if (otherLikers.length === 1)
-            body = `@${oneOfTheLikers.username} e ${otherLikers[1].username} curtiram seu post`;
+            body = `@${oneOfTheLikers.username} e ${otherLikers[0].username} curtiram seu post`;
           else body = `@${oneOfTheLikers.username} e outras ${otherLikers.length} pessoas curtiram seu post`;
           return {
             token: postOwner.deviceToken,
