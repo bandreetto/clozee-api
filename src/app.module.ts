@@ -33,7 +33,6 @@ import { ExploreModule } from './explore/explore.module';
       useNewUrlParser: true,
       useCreateIndex: true,
       keepAlive: true,
-      keepAliveInitialDelay: 1000,
     }),
     GraphQLModule.forRootAsync({
       imports: [AuthModule],
