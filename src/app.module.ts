@@ -25,6 +25,7 @@ import { FollowsModule } from './follows/follows.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CmsModule } from './cms/cms.module';
 import { ExploreModule } from './explore/explore.module';
+import { ClozeeEventsModule } from './clozee-events/clozee-events.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { ExploreModule } from './explore/explore.module';
     FollowsModule,
     CmsModule,
     ExploreModule,
+    ClozeeEventsModule,
   ],
 })
 export class AppModule {

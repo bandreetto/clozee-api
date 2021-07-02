@@ -28,6 +28,7 @@ export class ExploreResolver {
     return {
       users: [],
       categories: [],
+      events: [],
     };
   }
 
