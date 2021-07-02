@@ -436,7 +436,7 @@ type SearchCategory {
 }
 
 type ClozeeEvent {
-  id: Float!
+  id: Int!
   title: String!
 
   """The url for the event banner midia."""
