@@ -1,4 +1,7 @@
 import { Module } from '@nestjs/common';
+import { ClozeeEventsResolver } from './clozee-events.resolver';
 
-@Module({})
+@Module({
+  providers: [ClozeeEventsResolver]
+})
 export class ClozeeEventsModule {}

@@ -503,6 +503,7 @@ type Query {
 
   """Returns explore data"""
   explore: Explore!
+  event(id: Float!): ClozeeEvent!
 }
 
 input FeedTagsInput {
