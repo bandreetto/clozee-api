@@ -1,5 +1,5 @@
 import { Field, ObjectType, Int } from '@nestjs/graphql';
-import { Post } from 'src/posts/contracts';
+import { Post } from '../../posts/contracts';
 
 @ObjectType()
 export class ClozeeEvent {

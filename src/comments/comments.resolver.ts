@@ -2,18 +2,18 @@ import { Args, Mutation, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { v4 } from 'uuid';
 import { CommentsService } from './comments.service';
 import { Comment } from './contracts';
-import { PostsService } from 'src/posts/posts.service';
-import { Post } from 'src/posts/contracts';
-import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/contracts';
+import { PostsService } from '../posts/posts.service';
+import { Post } from '../posts/contracts';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/contracts';
 import { NotFoundException, UseGuards } from '@nestjs/common';
-import { AuthGuard } from 'src/common/guards';
-import { CurrentUser } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
+import { AuthGuard } from '../common/guards';
+import { CurrentUser } from '../common/decorators';
+import { TokenUser } from '../common/types';
 import { AddCommentInput } from './contracts/inputs';
-import { PostsLoader } from 'src/posts/posts.dataloader';
+import { PostsLoader } from '../posts/posts.dataloader';
 import { getTaggedUsersFromComment } from './comments.logic';
-import { UsersLoader } from 'src/users/users.dataloaders';
+import { UsersLoader } from '../users/users.dataloaders';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Resolver(() => Comment)
@@ -29,22 +29,14 @@ export class CommentsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Comment)
-  async addComment(
-    @Args('input') input: AddCommentInput,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Comment> {
+  async addComment(@Args('input') input: AddCommentInput, @CurrentUser() user: TokenUser): Promise<Comment> {
     const post = await this.postsService.findById(input.post);
 
-    if (!post)
-      throw new NotFoundException(
-        `Could not find a post with the id ${input.post}`,
-      );
+    if (!post) throw new NotFoundException(`Could not find a post with the id ${input.post}`);
 
     const usernames = getTaggedUsersFromComment(input.body);
     const users = await this.usersService.findManyByUsernames(usernames);
-    const tags = users
-      .filter(user => usernames.some(username => user.username === username))
-      .map(user => user._id);
+    const tags = users.filter(user => usernames.some(username => user.username === username)).map(user => user._id);
     const createdComment = await this.commentsService.create({
       _id: v4(),
       body: input.body,
@@ -74,8 +66,6 @@ export class CommentsResolver {
 
   @ResolveField()
   async tags(@Root() comment: Comment): Promise<User[]> {
-    return this.usersLoader.loadMany(comment.tags as string[]) as Promise<
-      User[]
-    >;
+    return this.usersLoader.loadMany(comment.tags as string[]) as Promise<User[]>;
   }
 }

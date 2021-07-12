@@ -1,9 +1,9 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { FollowsModule } from 'src/follows/follows.module';
-import { OrdersModule } from 'src/orders/orders.module';
-import { PaymentsModule } from 'src/payments/payments.module';
-import { PostsModule } from 'src/posts/posts.module';
+import { FollowsModule } from '../follows/follows.module';
+import { OrdersModule } from '../orders/orders.module';
+import { PaymentsModule } from '../payments/payments.module';
+import { PostsModule } from '../posts/posts.module';
 import { BankInfoResolver } from './bank-info.resolver';
 import { BanksResolver } from './banks.resolver';
 import { BanksService } from './banks.service';
@@ -64,14 +64,7 @@ import { UsersService } from './users.service';
     forwardRef(() => FollowsModule),
     PaymentsModule,
   ],
-  providers: [
-    UsersService,
-    UsersResolver,
-    UsersLoader,
-    BanksResolver,
-    BanksService,
-    BankInfoResolver,
-  ],
+  providers: [UsersService, UsersResolver, UsersLoader, BanksResolver, BanksService, BankInfoResolver],
   exports: [UsersService, UsersLoader],
 })
 export class UsersModule {}

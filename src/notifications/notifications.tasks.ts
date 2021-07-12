@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import dayjs from 'dayjs';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { LikesService } from '../likes/likes.service';
 import { PostsService } from '../posts/posts.service';
 import { admin } from '../common/firebase-admin';

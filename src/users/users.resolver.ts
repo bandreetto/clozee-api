@@ -1,27 +1,16 @@
-import {
-  BadRequestException,
-  UseGuards,
-  NotFoundException,
-} from '@nestjs/common';
-import {
-  Args,
-  Mutation,
-  Query,
-  ResolveField,
-  Resolver,
-  Root,
-} from '@nestjs/graphql';
+import { BadRequestException, UseGuards, NotFoundException } from '@nestjs/common';
+import { Args, Mutation, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { EventEmitter2 } from 'eventemitter2';
 import { descend, sort, uniq } from 'ramda';
-import { CurrentUser } from 'src/common/decorators';
-import { AuthGuard } from 'src/common/guards';
-import { S3Client } from 'src/common/s3';
-import { TokenUser, UploadImageResponse } from 'src/common/types';
-import configuration from 'src/config/configuration';
-import { PagarmeService } from 'src/payments/pagarme.service';
-import { Post } from 'src/posts/contracts';
-import { PostsLoader } from 'src/posts/posts.dataloader';
-import { PostsService } from 'src/posts/posts.service';
+import { CurrentUser } from '../common/decorators';
+import { AuthGuard } from '../common/guards';
+import { S3Client } from '../common/s3';
+import { TokenUser, UploadImageResponse } from '../common/types';
+import configuration from '../config/configuration';
+import { PagarmeService } from '../payments/pagarme.service';
+import { Post } from '../posts/contracts';
+import { PostsLoader } from '../posts/posts.dataloader';
+import { PostsService } from '../posts/posts.service';
 import { v4 } from 'uuid';
 import { FeedTags, PaymentMethod, User } from './contracts';
 import {
@@ -101,10 +90,7 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  updateUserFeedTags(
-    @Args('tags') tagsInput: FeedTagsInput,
-    @CurrentUser() { _id }: TokenUser,
-  ): Promise<User> {
+  updateUserFeedTags(@Args('tags') tagsInput: FeedTagsInput, @CurrentUser() { _id }: TokenUser): Promise<User> {
     const feedTags: FeedTags = {
       sizes: uniq(tagsInput.sizes),
       genders: uniq(tagsInput.genders),
@@ -117,10 +103,7 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async savePost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Post> {
+  async savePost(@Args('postId') postId: string, @CurrentUser() user: TokenUser): Promise<Post> {
     await this.usersService.upsertSavedPost({
       user: user._id,
       post: postId,
@@ -131,10 +114,7 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async unsavePost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Post> {
+  async unsavePost(@Args('postId') postId: string, @CurrentUser() user: TokenUser): Promise<Post> {
     await this.usersService.upsertSavedPost({
       user: user._id,
       post: postId,
@@ -145,29 +125,20 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async updateUserInfo(
-    @Args('input') input: UpdateUserInfoInput,
-    @CurrentUser() user: TokenUser,
-  ): Promise<User> {
+  async updateUserInfo(@Args('input') input: UpdateUserInfoInput, @CurrentUser() user: TokenUser): Promise<User> {
     return this.usersService.updateUser(user._id, input);
   }
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async updateBankInfo(
-    @Args('bankInfo') input: BankInfoInput,
-    @CurrentUser() user: TokenUser,
-  ): Promise<User> {
+  async updateBankInfo(@Args('bankInfo') input: BankInfoInput, @CurrentUser() user: TokenUser): Promise<User> {
     const userData = await this.usersService.findById(user._id);
     const userAlreadyHasBankInfo = !!userData.bankInfo;
     const isChangingHolderDocument =
-      userAlreadyHasBankInfo &&
-      userData.bankInfo.holderDocument !== input.holderDocument;
+      userAlreadyHasBankInfo && userData.bankInfo.holderDocument !== input.holderDocument;
 
     if (isChangingHolderDocument) {
-      throw new BadRequestException(
-        'Cannot update the account holder document',
-      );
+      throw new BadRequestException('Cannot update the account holder document');
     }
 
     const userRecipientId = userData.pagarmeRecipientId;
@@ -187,10 +158,7 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  updateAddress(
-    @Args('address') newAddress: AddressInput,
-    @CurrentUser() user: TokenUser,
-  ) {
+  updateAddress(@Args('address') newAddress: AddressInput, @CurrentUser() user: TokenUser) {
     return this.usersService.updateAddress(user._id, newAddress);
   }
 
@@ -208,8 +176,7 @@ export class UsersResolver {
   }
 
   @Mutation(() => UploadImageResponse, {
-    description:
-      'Returns the avatar image Id and a pre-signed S3 URL that allows the avatar image upload.',
+    description: 'Returns the avatar image Id and a pre-signed S3 URL that allows the avatar image upload.',
   })
   createUserAvatar(@CurrentUser() user: TokenUser): UploadImageResponse {
     const avatarId = `${user?._id || ''}_${v4()}`;
@@ -237,9 +204,7 @@ export class UsersResolver {
     @Args('newAvatarId', { nullable: true }) newAvatarId: string,
     @CurrentUser() user: TokenUser,
   ): Promise<User> {
-    const avatarUrl = newAvatarId
-      ? `https://${configuration.images.cdn()}/avatars/${newAvatarId}.jpg`
-      : newAvatarUrl;
+    const avatarUrl = newAvatarId ? `https://${configuration.images.cdn()}/avatars/${newAvatarId}.jpg` : newAvatarUrl;
     const updatedUser = await this.usersService.updateUser(user._id, {
       avatar: avatarUrl,
     });
@@ -248,16 +213,8 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async addCreditCard(
-    @Args() input: AddCreditCardInput,
-    @CurrentUser() user: TokenUser,
-  ): Promise<User> {
-    const card = await this.pagarmeService.createCard(
-      input.number,
-      input.holderName,
-      input.expirationDate,
-      input.cvv,
-    );
+  async addCreditCard(@Args() input: AddCreditCardInput, @CurrentUser() user: TokenUser): Promise<User> {
+    const card = await this.pagarmeService.createCard(input.number, input.holderName, input.expirationDate, input.cvv);
     await this.usersService.addPaymentMethod(user._id, {
       flag: card.brand,
       cardId: card.id,
@@ -279,10 +236,7 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  addDeviceToken(
-    @Args('deviceToken') deviceToken: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<User> {
+  addDeviceToken(@Args('deviceToken') deviceToken: string, @CurrentUser() user: TokenUser): Promise<User> {
     return this.usersService.updateUser(user._id, { deviceToken });
   }
 
@@ -294,17 +248,10 @@ export class UsersResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async blockUser(
-    @Args('userId') blockedUserId: string,
-    @CurrentUser() user: User,
-  ): Promise<User> {
+  async blockUser(@Args('userId') blockedUserId: string, @CurrentUser() user: User): Promise<User> {
     const userBlocked = await this.usersService.findById(blockedUserId);
-    if (!userBlocked)
-      throw new NotFoundException('Could not find the user to block.');
-    const updatedUser = await this.usersService.addToBlockedUsers(
-      user._id,
-      blockedUserId,
-    );
+    if (!userBlocked) throw new NotFoundException('Could not find the user to block.');
+    const updatedUser = await this.usersService.addToBlockedUsers(user._id, blockedUserId);
     this.eventEmitter.emit('user.blocked', {
       blockingUser: updatedUser,
       blockedUserId: blockedUserId,
@@ -327,12 +274,8 @@ export class UsersResolver {
   @ResolveField()
   async savedPosts(@Root() user: User): Promise<Post[]> {
     const savedPosts = await this.usersLoader.savedPosts.load(user._id);
-    const postsIds = savedPosts
-      .sort(descend(post => post.updatedAt))
-      .map(s => s.post);
-    const posts = await Promise.all(
-      postsIds.map(post => this.postsLoader.load(post)),
-    );
+    const postsIds = savedPosts.sort(descend(post => post.updatedAt)).map(s => s.post);
+    const posts = await Promise.all(postsIds.map(post => this.postsLoader.load(post)));
     return posts.filter(post => !post.deleted);
   }
 
@@ -352,24 +295,17 @@ export class UsersResolver {
   @ResolveField()
   async followers(@Root() user: User): Promise<User[]> {
     const follows = await this.followsLoader.byFollowee.load(user._id);
-    return Promise.all(
-      follows.map(follow => this.usersLoader.load(follow.follower)),
-    );
+    return Promise.all(follows.map(follow => this.usersLoader.load(follow.follower)));
   }
 
   @ResolveField()
   async following(@Root() user: User): Promise<User[]> {
     const follows = await this.followsLoader.byFollower.load(user._id);
-    return Promise.all(
-      follows.map(follow => this.usersLoader.load(follow.followee)),
-    );
+    return Promise.all(follows.map(follow => this.usersLoader.load(follow.followee)));
   }
 
   @ResolveField()
-  async isFollowing(
-    @Root() user: User,
-    @CurrentUser() currentUser: TokenUser,
-  ): Promise<boolean> {
+  async isFollowing(@Root() user: User, @CurrentUser() currentUser: TokenUser): Promise<boolean> {
     const follows = await this.followsLoader.byFollowee.load(user._id);
     return !!follows.find(follow => follow.follower === currentUser?._id);
   }

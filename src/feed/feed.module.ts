@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CategoriesModule } from 'src/categories/categories.module';
-import { CommentsModule } from 'src/comments/comments.module';
-import { LikesModule } from 'src/likes/likes.module';
-import { PostsModule } from 'src/posts/posts.module';
+import { CategoriesModule } from '../categories/categories.module';
+import { CommentsModule } from '../comments/comments.module';
+import { LikesModule } from '../likes/likes.module';
+import { PostsModule } from '../posts/posts.module';
 import { SessionsModule } from '../sessions/sessions.module';
 import { FollowsModule } from '../follows/follows.module';
 import { OrdersModule } from '../orders/orders.module';
@@ -13,7 +13,7 @@ import { PostBlacklist, PostBlacklistSchema } from './contracts/post-blacklist';
 import { UserFeedConsumer } from './user-feed.consumer';
 import { FeedResolver } from './feed.resolver';
 import { SeenPostService } from './seen-post.service';
-import { User, UserSchema } from 'src/users/contracts';
+import { User, UserSchema } from '../users/contracts';
 import { UserFeedService } from './user-feed.service';
 import { FeedService } from './feed.service';
 import { FeedConsumer } from './feed.consumer';
@@ -57,13 +57,6 @@ import { FeedConsumer } from './feed.consumer';
     FollowsModule,
     OrdersModule,
   ],
-  providers: [
-    FeedResolver,
-    UserFeedService,
-    UserFeedConsumer,
-    SeenPostService,
-    FeedService,
-    FeedConsumer,
-  ],
+  providers: [FeedResolver, UserFeedService, UserFeedConsumer, SeenPostService, FeedService, FeedConsumer],
 })
 export class FeedModule {}

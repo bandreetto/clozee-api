@@ -1,4 +1,4 @@
-import { ACCOUNT_TYPES } from 'src/users/contracts/enum';
+import { ACCOUNT_TYPES } from '../users/contracts/enum';
 import { BankAccountTypes } from './contracts/dtos';
 
 export const formatZipCode = (zipCode: string) => {
@@ -9,9 +9,7 @@ export const formatCPF = (cpf: string) => {
   return cpf.replace(/\./g, '').replace('-', '');
 };
 
-export const fromAccountTypeToPagarmeType = (
-  accountType: ACCOUNT_TYPES,
-): BankAccountTypes => {
+export const fromAccountTypeToPagarmeType = (accountType: ACCOUNT_TYPES): BankAccountTypes => {
   switch (accountType) {
     case ACCOUNT_TYPES.CURRENT:
       return 'conta_corrente';

@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Comment } from 'src/comments/contracts';
+import { Comment } from '../../comments/contracts';
 import { Notification } from '.';
 
 @Schema()
@@ -21,6 +21,4 @@ export class CommentTagNotification implements Notification {
   comment: string | Comment;
 }
 
-export const CommentTagNotificationSchema = SchemaFactory.createForClass(
-  CommentTagNotification,
-);
+export const CommentTagNotificationSchema = SchemaFactory.createForClass(CommentTagNotification);

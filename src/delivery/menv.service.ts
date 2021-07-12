@@ -1,8 +1,8 @@
 import { HttpService, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { ascend, assocPath } from 'ramda';
-import configuration from 'src/config/configuration';
-import { Post } from 'src/posts/contracts';
-import { User } from 'src/users/contracts';
+import configuration from '../config/configuration';
+import { Post } from '../posts/contracts';
+import { User } from '../users/contracts';
 import { MenvAddToCartResponse, MenvCalculateResponse, MenvCheckoutResponse } from './contracts/dtos';
 
 const formatZipCode = (zipCode: string) => {

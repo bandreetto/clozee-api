@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CommentsModule } from 'src/comments/comments.module';
-import { DeliveryModule } from 'src/delivery/delivery.module';
-import { OrdersModule } from 'src/orders/orders.module';
-import { UsersModule } from 'src/users/users.module';
-import { AuthModule } from 'src/auth/auth.module';
+import { CommentsModule } from '../comments/comments.module';
+import { DeliveryModule } from '../delivery/delivery.module';
+import { OrdersModule } from '../orders/orders.module';
+import { UsersModule } from '../users/users.module';
+import { AuthModule } from '../auth/auth.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { PostsModule } from '../posts/posts.module';
-import { FollowsModule } from 'src/follows/follows.module';
+import { FollowsModule } from '../follows/follows.module';
 import { CommentTagNotificationResolver } from './comment-tag-notification.resolver';
 import {
   CommentTagNotification,
@@ -26,8 +26,8 @@ import { SaleNotificationResolver } from './sale-notification.resolver';
 import { PostCommentNotificationResolver } from './post-comment-notification.resolver';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
-import configuration from 'src/config/configuration';
-import { LikesModule } from 'src/likes/likes.module';
+import configuration from '../config/configuration';
+import { LikesModule } from '../likes/likes.module';
 import { NotificationTasks } from './notifications.tasks';
 
 @Module({

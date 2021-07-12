@@ -1,10 +1,10 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CategoriesModule } from 'src/categories/categories.module';
-import { CommentsModule } from 'src/comments/comments.module';
-import { OrdersModule } from 'src/orders/orders.module';
-import { UsersModule } from 'src/users/users.module';
-import { LikesModule } from 'src/likes/likes.module';
+import { CategoriesModule } from '../categories/categories.module';
+import { CommentsModule } from '../comments/comments.module';
+import { OrdersModule } from '../orders/orders.module';
+import { UsersModule } from '../users/users.module';
+import { LikesModule } from '../likes/likes.module';
 import { Post, PostSchema } from './contracts';
 import { PostsLoader } from './posts.dataloader';
 import { PostsResolver } from './posts.resolver';

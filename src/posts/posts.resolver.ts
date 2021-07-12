@@ -1,27 +1,27 @@
 import { Resolver, Args, Mutation, ResolveField, Root, Query } from '@nestjs/graphql';
-import { PostsService } from 'src/posts/posts.service';
+import { PostsService } from '../posts/posts.service';
 import { v4 } from 'uuid';
-import { User } from 'src/users/contracts';
+import { User } from '../users/contracts';
 import { ConflictException, ForbiddenException, GoneException, Logger, UseGuards } from '@nestjs/common';
-import { Comment } from 'src/comments/contracts';
-import { AuthGuard } from 'src/common/guards';
-import { CurrentUser, TokenTypes } from 'src/common/decorators';
-import { TokenUser, UploadImageResponse } from 'src/common/types';
-import { S3Client } from 'src/common/s3';
-import configuration from 'src/config/configuration';
+import { Comment } from '../comments/contracts';
+import { AuthGuard } from '../common/guards';
+import { CurrentUser, TokenTypes } from '../common/decorators';
+import { TokenUser, UploadImageResponse } from '../common/types';
+import { S3Client } from '../common/s3';
+import configuration from '../config/configuration';
 import { Post } from './contracts';
 import { AddPostInput, UpdatePostFields } from './contracts/inputs';
-import { Category } from 'src/categories/contracts';
-import { CommentsLoader } from 'src/comments/comments.dataloader';
-import { UsersLoader } from 'src/users/users.dataloaders';
-import { CategoriesLoader } from 'src/categories/categories.dataloader';
-import { SalesLoader } from 'src/orders/sales.dataloader';
+import { Category } from '../categories/contracts';
+import { CommentsLoader } from '../comments/comments.dataloader';
+import { UsersLoader } from '../users/users.dataloaders';
+import { CategoriesLoader } from '../categories/categories.dataloader';
+import { SalesLoader } from '../orders/sales.dataloader';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { LikesLoader } from '../likes/likes.dataloader';
-import { OrdersService } from 'src/orders/orders.service';
-import { TOKEN_TYPES } from 'src/auth/contracts/enums';
-import { getDonationAmount } from 'src/orders/orders.logic';
-import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
+import { OrdersService } from '../orders/orders.service';
+import { TOKEN_TYPES } from '../auth/contracts/enums';
+import { getDonationAmount } from '../orders/orders.logic';
+import { VARIABLE_TAX, FIXED_TAX } from '../common/contants';
 
 @Resolver(() => Post)
 export class PostsResolver {

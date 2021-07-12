@@ -1,8 +1,8 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { User } from 'src/users/contracts';
-import { Comment } from 'src/comments/contracts';
-import { Category } from 'src/categories/contracts';
+import { User } from '../../users/contracts';
+import { Comment } from '../../comments/contracts';
+import { Category } from '../../categories/contracts';
 import { POST_CONDITIONS, SIZES } from './enums';
 
 @Schema({ timestamps: true })
@@ -47,14 +47,12 @@ export class Post {
   @Prop({ required: true, min: 0, max: 100 })
   @Field({
     defaultValue: 0,
-    description:
-      "The percentage of the seller's profit being destined to donation.",
+    description: "The percentage of the seller's profit being destined to donation.",
   })
   donationPercentage: number;
 
   @Field(() => Int, {
-    description:
-      "The calculated amount of the post's price going to donation in cents.",
+    description: "The calculated amount of the post's price going to donation in cents.",
   })
   donationAmount?: number;
 

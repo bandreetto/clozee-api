@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Connection, Edge, PageInfo } from 'src/common/types';
-import { Post } from 'src/posts/contracts';
+import { Connection, Edge, PageInfo } from '../../common/types';
+import { Post } from '../../posts/contracts';
 
 @ObjectType()
 export class FeedPostEdge implements Edge<Post> {
@@ -13,8 +13,7 @@ export class FeedPostEdge implements Edge<Post> {
 @ObjectType()
 export class FeedPostConnection implements Connection<Post> {
   @Field(() => [FeedPostEdge], {
-    description:
-      'An array of post edges containing the node (Post) and its cursor.',
+    description: 'An array of post edges containing the node (Post) and its cursor.',
   })
   edges: FeedPostEdge[];
   @Field()

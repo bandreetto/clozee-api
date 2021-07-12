@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Client } from '@sendgrid/client';
-import configuration from 'src/config/configuration';
-import { Order } from 'src/orders/contracts';
-import { Post } from 'src/posts/contracts';
-import { User } from 'src/users/contracts';
+import configuration from '../config/configuration';
+import { Order } from '../orders/contracts';
+import { Post } from '../posts/contracts';
+import { User } from '../users/contracts';
 import { formatEmailCurrency } from '../notifications/notifications.logic';
 
 @Injectable()
@@ -88,13 +88,7 @@ export class MailerService {
       );
   }
 
-  async sendBuyerEmail(
-    buyer: User,
-    order: Order,
-    boughtPosts: Post[],
-    subTotal: number,
-    total: number,
-  ) {
+  async sendBuyerEmail(buyer: User, order: Order, boughtPosts: Post[], subTotal: number, total: number) {
     const buyersAddressWithoutComplement = `${buyer.address.street}, ${buyer.address.number}`;
     const buyersAddressWithComplement = `${buyersAddressWithoutComplement}, ${buyer.address.complement}`;
     await this.sgClient
@@ -115,9 +109,7 @@ export class MailerService {
                 username: buyer.username,
                 full_name: buyer.name,
                 phone_number: buyer.phoneNumber,
-                address_line_1: buyer.address.complement
-                  ? buyersAddressWithComplement
-                  : buyersAddressWithoutComplement,
+                address_line_1: buyer.address.complement ? buyersAddressWithComplement : buyersAddressWithoutComplement,
                 address_line_2: `${buyer.address.city} - ${buyer.address.state} | ${buyer.address.zipCode}`,
                 orderItems: boughtPosts.map(post => ({
                   name: post.title,

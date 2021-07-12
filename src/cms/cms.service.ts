@@ -1,5 +1,6 @@
-import { Injectable, HttpService, Logger } from '@nestjs/common';
-import configuration from 'src/config/configuration';
+import { Injectable, HttpService, Logger, NotImplementedException } from '@nestjs/common';
+import { ClozeeEvent } from '../clozee-events/contracts';
+import configuration from '../config/configuration';
 import { SearchCategory } from './contracts';
 import { SearchCategoryDTO, CMSAuthResponse } from './contracts/dtos';
 
@@ -53,5 +54,9 @@ export class CmsService {
         searchTerm: searchCategory.searchTerm,
       };
     });
+  }
+
+  async getEvents(range: { before?: Date; after?: Date }): Promise<ClozeeEvent[]> {
+    throw new NotImplementedException();
   }
 }

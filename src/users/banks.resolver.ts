@@ -1,6 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Query, Resolver } from '@nestjs/graphql';
-import { AuthGuard } from 'src/common/guards';
+import { AuthGuard } from '../common/guards';
 import { BanksService } from './banks.service';
 import { Bank } from './contracts';
 

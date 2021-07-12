@@ -9,25 +9,25 @@ import {
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Args, Mutation, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { uniq } from 'ramda';
-import { CurrentUser } from 'src/common/decorators';
-import { AuthGuard } from 'src/common/guards';
-import { TokenUser } from 'src/common/types';
-import { CountersService } from 'src/counters/counters.service';
-import { DeliveryService } from 'src/delivery/delivery.service';
-import { Post } from 'src/posts/contracts';
-import { PostsLoader } from 'src/posts/posts.dataloader';
-import { PostsService } from 'src/posts/posts.service';
-import { User } from 'src/users/contracts';
-import { UsersLoader } from 'src/users/users.dataloaders';
-import { UsersService } from 'src/users/users.service';
+import { CurrentUser } from '../common/decorators';
+import { AuthGuard } from '../common/guards';
+import { TokenUser } from '../common/types';
+import { CountersService } from '../counters/counters.service';
+import { DeliveryService } from '../delivery/delivery.service';
+import { Post } from '../posts/contracts';
+import { PostsLoader } from '../posts/posts.dataloader';
+import { PostsService } from '../posts/posts.service';
+import { User } from '../users/contracts';
+import { UsersLoader } from '../users/users.dataloaders';
+import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { Order, Sale } from './contracts';
 import { CheckoutInput } from './contracts/inputs';
 import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
-import { PagarmeService } from 'src/payments/pagarme.service';
+import { PagarmeService } from '../payments/pagarme.service';
 import { getSubTotal, getSplitValues, getDonationAmount, getClozeeAmount } from './orders.logic';
-import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE, VARIABLE_TAX, WIRE_TRANFER_TAX } from 'src/common/contants';
+import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE, VARIABLE_TAX, WIRE_TRANFER_TAX } from '../common/contants';
 
 @Resolver(() => Order)
 export class OrdersResolver {

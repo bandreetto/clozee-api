@@ -3,8 +3,8 @@ export * from './delivery-info';
 
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Post } from 'src/posts/contracts';
-import { Address, AddressSchema, User } from 'src/users/contracts';
+import { Post } from '../../posts/contracts';
+import { Address, AddressSchema, User } from '../../users/contracts';
 import { DeliveryInfo, DeliveryInfoSchema } from './delivery-info';
 
 @Schema({ timestamps: true })

@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import pagarme from 'pagarme';
 import R from 'ramda';
-import configuration from 'src/config/configuration';
-import { User } from 'src/users/contracts';
+import configuration from '../config/configuration';
+import { User } from '../users/contracts';
 import { ICreateCardResponse, ITransaction } from './contracts';
 import { BankAccountCreateOptions } from './contracts/dtos';
 import {

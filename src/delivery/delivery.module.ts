@@ -1,7 +1,7 @@
 import { forwardRef, HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { OrdersModule } from 'src/orders/orders.module';
-import { UsersModule } from 'src/users/users.module';
+import { OrdersModule } from '../orders/orders.module';
+import { UsersModule } from '../users/users.module';
 import { MailerModule } from '../mailer/mailer.module';
 import { Delivery, DeliverySchema } from './contracts';
 import { DeliveryConsumer } from './delivery.consumer';

@@ -7,7 +7,7 @@ export * from './saved-post';
 
 import { Field, Int, ObjectType, Float } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Post } from 'src/posts/contracts';
+import { Post } from '../../posts/contracts';
 import { Address, AddressSchema } from './address';
 import { BankInfo, BankInfoSchema } from './bank-info';
 import { FeedTags, FeedTagsSchema } from './feed-tags';
@@ -84,8 +84,7 @@ export class User {
   blockedUsers?: string[] | User[];
 
   @Field(() => Int, {
-    description:
-      'The user specific fixed tax in cents. Overrides clozee default fixed tax.',
+    description: 'The user specific fixed tax in cents. Overrides clozee default fixed tax.',
     nullable: true,
   })
   @Prop()
@@ -114,8 +113,7 @@ export class User {
   following?: User[];
 
   @Field({
-    description:
-      'A boolean indicating weather the current user is following this user.',
+    description: 'A boolean indicating weather the current user is following this user.',
   })
   isFollowing?: boolean;
 

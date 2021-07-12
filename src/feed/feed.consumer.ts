@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
-import { Post } from 'src/posts/contracts';
+import { Post } from '../posts/contracts';
 import { FeedService } from './feed.service';
-import { CategoriesService } from 'src/categories/categories.service';
-import { LikesService } from 'src/likes/likes.service';
+import { CategoriesService } from '../categories/categories.service';
+import { LikesService } from '../likes/likes.service';
 import { CommentsService } from '../comments/comments.service';
 import { getFeedTags, getPostScore } from './feed.logic';
 import { v4 } from 'uuid';
-import { LikePayload } from 'src/likes/contracts/payloads';
-import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
-import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
+import { LikePayload } from '../likes/contracts/payloads';
+import { CommentCreatedPayload } from '../comments/contracts/payloads';
+import { OrderCreatedPayload } from '../orders/contracts/payloads';
 
 @Injectable()
 export class FeedConsumer {
@@ -26,16 +26,8 @@ export class FeedConsumer {
   @OnEvent('post.created', { async: true })
   async createFeedPost(payload: Post) {
     try {
-      const categoryId =
-        typeof payload.category === 'string'
-          ? payload.category
-          : payload.category._id;
-      const [
-        category,
-        categoryParents,
-        [{ count: likesCount } = { count: 0 }],
-        commentsCount,
-      ] = await Promise.all([
+      const categoryId = typeof payload.category === 'string' ? payload.category : payload.category._id;
+      const [category, categoryParents, [{ count: likesCount } = { count: 0 }], commentsCount] = await Promise.all([
         this.categoriesService.findById(categoryId),
         this.categoriesService.findCategoryParents(categoryId),
         this.likesService.countByPosts([payload._id]),
@@ -48,8 +40,7 @@ export class FeedConsumer {
       const feed = await this.feedService.create({
         _id: v4(),
         post: payload._id,
-        postOwner:
-          typeof payload.user === 'string' ? payload.user : payload.user._id,
+        postOwner: typeof payload.user === 'string' ? payload.user : payload.user._id,
         score,
         tags,
         createdAt: payload.createdAt,
@@ -58,8 +49,7 @@ export class FeedConsumer {
       this.logger.log(`New feed created for post ${payload._id}`);
     } catch (error) {
       this.logger.error({
-        message:
-          'Error while trying to create a FeedPost from the post.created event.',
+        message: 'Error while trying to create a FeedPost from the post.created event.',
         payload,
         error: error.toString(),
         metadata: error,
@@ -73,8 +63,7 @@ export class FeedConsumer {
       await this.feedService.deleteByPost(payload._id);
     } catch (error) {
       this.logger.error({
-        message:
-          'Error while trying to delete FeedPost from post.deleted event.',
+        message: 'Error while trying to delete FeedPost from post.deleted event.',
         payload,
         error: error.toString(),
         metadata: error,
@@ -116,8 +105,7 @@ export class FeedConsumer {
       await this.feedService.addToScoreByPost(1, payload.post._id);
     } catch (error) {
       this.logger.error({
-        message:
-          'Error while incrementing post score from comment.created event.',
+        message: 'Error while incrementing post score from comment.created event.',
         payload,
         error: error.toString(),
         metadata: error,

@@ -1,5 +1,5 @@
 import { credential, initializeApp } from 'firebase-admin';
-import configuration from 'src/config/configuration';
+import configuration from '../config/configuration';
 
 export const admin = initializeApp({
   credential: credential.cert({

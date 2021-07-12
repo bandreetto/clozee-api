@@ -1,5 +1,5 @@
 import { Field, Float, InputType, ArgsType } from '@nestjs/graphql';
-import { SIZES } from 'src/posts/contracts/enums';
+import { SIZES } from '../../posts/contracts/enums';
 import { ACCOUNT_TYPES, GENDER_TAGS } from './enum';
 
 @InputType()
@@ -44,8 +44,7 @@ export class AddCreditCardInput {
   @Field()
   holderName: string;
   @Field({
-    description:
-      "The month and year of the card's expiration date, following the fomat MMYY",
+    description: "The month and year of the card's expiration date, following the fomat MMYY",
   })
   expirationDate: string;
   @Field()

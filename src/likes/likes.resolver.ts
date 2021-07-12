@@ -1,8 +1,8 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { CurrentUser } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
-import { Post } from 'src/posts/contracts';
+import { CurrentUser } from '../common/decorators';
+import { TokenUser } from '../common/types';
+import { Post } from '../posts/contracts';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { LikesService } from './likes.service';
 import { PostsService } from '../posts/posts.service';
@@ -20,10 +20,7 @@ export class LikesResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async likePost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Post> {
+  async likePost(@Args('postId') postId: string, @CurrentUser() user: TokenUser): Promise<Post> {
     await this.likesService.upsertLike({
       _id: `${postId}:${user._id}`,
       post: postId,
@@ -37,10 +34,7 @@ export class LikesResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => Post)
-  async unlikePost(
-    @Args('postId') postId: string,
-    @CurrentUser() user: TokenUser,
-  ): Promise<Post> {
+  async unlikePost(@Args('postId') postId: string, @CurrentUser() user: TokenUser): Promise<Post> {
     await this.likesService.upsertLike({
       _id: `${postId}:${user._id}`,
       post: postId,
