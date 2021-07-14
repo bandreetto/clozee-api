@@ -39,7 +39,7 @@ export class ExploreResolver {
           bannerUrl: 'https://placekitten.com/500/200',
         },
         {
-          id: 1,
+          id: 2,
           posts: await this.postsService.findLastDistinctUsersPosts(3),
           title: 'Feira que vai começar',
           startAt: dayjs().add(2, 'hours').toDate(),
