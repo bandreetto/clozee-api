@@ -37,7 +37,7 @@ export class ExploreResolver {
           startAt: dayjs().subtract(4, 'hours').toDate(),
           endAt: dayjs().subtract(2, 'hours').toDate(),
           bannerUrl: 'https://placekitten.com/500/200',
-        }
+        },
         {
           id: 1,
           posts: await this.postsService.findLastDistinctUsersPosts(3),
