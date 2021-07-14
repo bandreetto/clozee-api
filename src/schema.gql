@@ -435,6 +435,19 @@ type SearchCategory {
   imageUrl: String!
 }
 
+type ClozeeEvent {
+  id: Float!
+  title: String!
+
+  """The url for the event banner midia."""
+  bannerUrl: String!
+  startAt: DateTime!
+  endAt: DateTime!
+
+  """The posts featured on this event."""
+  posts: [Post!]!
+}
+
 type SearchUser {
   userId: String!
   username: String!
@@ -444,6 +457,9 @@ type SearchUser {
 type Explore {
   users: [SearchUser!]!
   categories: [SearchCategory!]!
+
+  """A list of upcoming events."""
+  events: [ClozeeEvent!]!
 }
 
 type Query {
@@ -487,6 +503,7 @@ type Query {
 
   """Returns explore data"""
   explore: Explore!
+  event(id: Float!): ClozeeEvent!
 }
 
 input FeedTagsInput {

@@ -2,7 +2,6 @@ import { Injectable, HttpService, Logger } from '@nestjs/common';
 import configuration from 'src/config/configuration';
 import { SearchCategory } from './contracts';
 import { SearchCategoryDTO, CMSAuthResponse } from './contracts/dtos';
-import { AxiosResponse } from 'axios';
 
 @Injectable()
 export class CmsService {

@@ -1,5 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { SearchCategory } from 'src/cms/contracts';
+import { ClozeeEvent } from 'src/clozee-events/contracts';
 import { SearchUser } from './search-user';
 
 @ObjectType()
@@ -8,4 +9,6 @@ export class Explore {
   users: SearchUser[];
   @Field(() => [SearchCategory])
   categories: SearchCategory[];
+  @Field(() => [ClozeeEvent], { description: 'A list of upcoming events.' })
+  events: ClozeeEvent[];
 }
