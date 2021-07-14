@@ -12,6 +12,7 @@ import { SORT_DIRECTION } from 'src/common/types';
 import { OrdersService } from 'src/orders/orders.service';
 import { UsersLoader } from '../users/users.dataloaders';
 import { uniq } from 'ramda';
+import dayjs from 'dayjs';
 
 @Resolver(() => Explore)
 export class ExploreResolver {
@@ -28,7 +29,24 @@ export class ExploreResolver {
     return {
       users: [],
       categories: [],
-      events: [],
+      events: [
+        {
+          id: 1,
+          posts: await this.postsService.findLastDistinctUsersPosts(3),
+          title: 'Feira que começou',
+          startAt: dayjs().subtract(2, 'hours').toDate(),
+          endAt: dayjs().add(2, 'hours').toDate(),
+          bannerUrl: 'https://placekitten.com/500/200',
+        },
+        {
+          id: 1,
+          posts: await this.postsService.findLastDistinctUsersPosts(3),
+          title: 'Feira que vai começar',
+          startAt: dayjs().add(2, 'hours').toDate(),
+          endAt: dayjs().add(4, 'hours').toDate(),
+          bannerUrl: 'https://placekitten.com/500/200',
+        },
+      ],
     };
   }
 
