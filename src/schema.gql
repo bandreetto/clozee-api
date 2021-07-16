@@ -264,6 +264,19 @@ type User {
   createdAt: DateTime!
 }
 
+type Delivery {
+  _id: String!
+  buyersZipCode: String!
+  sellersZipCode: String!
+
+  """The delivery fare in cents."""
+  price: Int!
+  menvServiceNumber: Float!
+
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
+}
+
 type AuthResponse {
   """The token's owner user."""
   me: User!
@@ -345,19 +358,6 @@ type Order {
   """The amount of this order that was donated."""
   donationAmount: Float!
   createdAt: DateTime!
-}
-
-type Delivery {
-  _id: String!
-  buyersZipCode: String!
-  sellersZipCode: String!
-
-  """The delivery fare in cents."""
-  price: Int!
-  menvServiceNumber: Float!
-
-  """The expected delivery time in business days."""
-  deliveryTime: Int!
 }
 
 type Session {
