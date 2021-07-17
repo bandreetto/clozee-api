@@ -1,4 +1,5 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import dayjs from 'dayjs';
 import { PostsService } from 'src/posts/posts.service';
 import { ClozeeEvent } from './contracts';
 
@@ -12,8 +13,8 @@ export class ClozeeEventsResolver {
       id,
       title: 'Feirinha da Clozee',
       bannerUrl: 'https://placekitten.com/500/200',
-      startAt: new Date(),
-      endAt: new Date(),
+      startAt: dayjs().subtract(2, 'hours').toDate(),
+      endAt: dayjs().add(2, 'hours').toDate(),
       posts: await this.postsService.findLastDistinctUsersPosts(3),
     };
   }
