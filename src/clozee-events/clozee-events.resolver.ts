@@ -11,7 +11,7 @@ export class ClozeeEventsResolver {
     return {
       id,
       title: 'Feirinha da Clozee',
-      bannerUrl: 'url do banner',
+      bannerUrl: 'https://placekitten.com/500/200',
       startAt: new Date(),
       endAt: new Date(),
       posts: await this.postsService.findLastDistinctUsersPosts(3),
