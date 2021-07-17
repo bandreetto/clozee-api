@@ -1,8 +1,11 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
+import { PostsService } from 'src/posts/posts.service';
 import { ClozeeEvent } from './contracts';
 
 @Resolver(() => ClozeeEvent)
 export class ClozeeEventsResolver {
+  constructor(private readonly postsService: PostsService) {}
+
   @Query(() => ClozeeEvent)
   async event(@Args('id') id: number): Promise<ClozeeEvent> {
     return {
@@ -11,7 +14,7 @@ export class ClozeeEventsResolver {
       bannerUrl: 'url do banner',
       startAt: new Date(),
       endAt: new Date(),
-      posts: [],
+      posts: await this.postsService.findLastDistinctUsersPosts(3),
     };
   }
 }
