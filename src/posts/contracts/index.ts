@@ -44,7 +44,7 @@ export class Post {
   @Field({ description: 'Price of the item being announced in cents.' })
   price: number;
 
-  @Prop({ required: true, min: 0, max: 100 })
+  @Prop({ required: true, min: 0, max: 100, default: 0 })
   @Field({
     defaultValue: 0,
     description: "The percentage of the seller's profit being destined to donation.",

@@ -48,8 +48,9 @@ export class PostsResolver {
   }
 
   @Query(() => [Post])
-  posts(@Args('user', { description: 'Filter posts by user id' }) userId: string) {
-    return this.postsService.findManyByUser(userId).then(posts => posts.filter(post => !post.deleted));
+  async posts(@Args('user', { description: 'Filter posts by user id' }) userId: string) {
+    const posts = await this.postsService.findManyByUser(userId);
+    return posts.filter(post => !post.deleted);
   }
 
   // Mutations

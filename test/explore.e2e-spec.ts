@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 dotenv.config({
-  path: '.env.e2e',
+  path: '.e2e.env',
 });
 
 import { Test, TestingModule } from '@nestjs/testing';
@@ -15,77 +15,72 @@ import { POST_CONDITIONS, SIZES } from '../src/posts/contracts/enums';
 import faker from 'faker';
 import dayjs from 'dayjs';
 import { AppModule } from '../src/app.module';
+import { Given, givenFactory } from './given';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { async } from 'rxjs';
 
 describe('Explore (e2e)', () => {
+  let given: Given;
+  let moduleFixture: TestingModule;
   let app: INestApplication;
-  const cmsServiceMock: Pick<CmsService, 'getEvents'> = {
-    async getEvents(range: { before: Date; after: Date }): Promise<ClozeeEvent[]> {
-      const startAt = faker.date.between(range.after, range.before);
-      return [
-        {
-          id: faker.datatype.number(),
-          title: faker.lorem.sentence(),
-          bannerUrl: faker.image.imageUrl(),
-          startAt,
-          endAt: dayjs(startAt).add(4, 'hours').toDate(),
-          posts: [
-            {
-              _id: faker.datatype.uuid(),
-              title: faker.image.fashion(),
-              size: SIZES.P,
-              user: faker.datatype.uuid(),
-              price: faker.datatype.number({
-                min: 700,
-              }),
-              images: [faker.image.imageUrl()],
-              category: faker.datatype.uuid(),
-              condition: POST_CONDITIONS.NEW,
-              description: faker.lorem.sentence(),
-              donationPercentage: faker.datatype.number(100),
-              createdAt: faker.date.past(),
-            },
-          ] as Post[],
-        },
-      ] as ClozeeEvent[];
-    },
-  };
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+  beforeAll(async done => {
+    moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     })
       .overrideProvider(CmsService)
-      .useValue(cmsServiceMock)
+      .useValue({ getEvents: () => {} })
       .compile();
-
+    given = await givenFactory(moduleFixture);
     app = moduleFixture.createNestApplication();
     await app.init();
+    done();
   });
 
-  it.only('should return the list of upcoming events', () => {
+  beforeEach(async done => {
+    const connection = await moduleFixture.resolve(getConnectionToken());
+    await connection.dropDatabase();
+    done();
+  });
+
+  afterAll(async done => {
+    await app.close();
+    const connection = await moduleFixture.resolve(getConnectionToken());
+    await connection.close();
+    done();
+  });
+
+  it('should return the list of upcoming events', async done => {
+    const events = await given.cms.withUpcomingEventsRegistered();
     const exploreEventsQuery = gql`
-      explore {
-        events {
-          id
-          title
-          bannerUrl
-          startAt
-          endAt
-          posts {
-            _id
+      {
+        explore {
+          events {
+            id
             title
-            imageUrl
+            bannerUrl
+            startAt
+            endAt
+            posts {
+              _id
+              title
+              images
+            }
           }
         }
       }
     `;
-
-    return request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post('/graphql')
       .send({
         query: print(exploreEventsQuery),
       })
       .expect(200)
-      .expect('Hello World!');
+      .then(response => {
+        expect(response.body).toEqual({ explore: { events } });
+        return response;
+      });
+
+    done();
   });
 });

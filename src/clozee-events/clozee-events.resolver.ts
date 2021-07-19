@@ -1,6 +1,6 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import dayjs from 'dayjs';
-import { PostsService } from 'src/posts/posts.service';
+import { PostsService } from '../posts/posts.service';
 import { ClozeeEvent } from './contracts';
 
 @Resolver(() => ClozeeEvent)
