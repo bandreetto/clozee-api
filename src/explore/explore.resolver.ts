@@ -8,8 +8,8 @@ import { LikesService } from '../likes/likes.service';
 import { SORT_DIRECTION } from '../common/types';
 import { OrdersService } from '../orders/orders.service';
 import { UsersLoader } from '../users/users.dataloaders';
-import { uniq } from 'ramda';
-import dayjs from 'dayjs';
+import { sortBy, uniq } from 'ramda';
+import { ClozeeEvent } from '../clozee-events/contracts';
 
 @Resolver(() => Explore)
 export class ExploreResolver {
@@ -26,32 +26,7 @@ export class ExploreResolver {
     return {
       users: [],
       categories: [],
-      events: [
-        {
-          id: 3,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que já terminou',
-          startAt: dayjs().subtract(4, 'hours').toDate(),
-          endAt: dayjs().subtract(2, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-        {
-          id: 1,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que começou',
-          startAt: dayjs().subtract(2, 'hours').toDate(),
-          endAt: dayjs().add(2, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-        {
-          id: 2,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que vai começar',
-          startAt: dayjs().add(2, 'hours').toDate(),
-          endAt: dayjs().add(4, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-      ],
+      events: [],
     };
   }
 
@@ -79,5 +54,14 @@ export class ExploreResolver {
   @ResolveField()
   categories(): Promise<SearchCategory[]> {
     return this.cmsService.getSearchCategories();
+  }
+
+  @ResolveField()
+  async events(): Promise<ClozeeEvent[]> {
+    const eventsToCome = await this.cmsService.getEvents({
+      after: new Date(),
+    });
+
+    return sortBy(event => event.startAt, eventsToCome);
   }
 }

@@ -18,6 +18,7 @@ import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { async } from 'rxjs';
+import { omit } from 'ramda';
 
 describe('Explore (e2e)', () => {
   let given: Given;
@@ -52,6 +53,15 @@ describe('Explore (e2e)', () => {
 
   it('should return the list of upcoming events', async done => {
     const events = await given.cms.withUpcomingEventsRegistered();
+    const eventsAsGQLResponse = events.map(e => ({
+      ...e,
+      startAt: e.startAt.toISOString(),
+      endAt: e.endAt.toISOString(),
+      posts: (e.posts as Post[]).map(p => ({
+        ...omit(['category', 'deleted', 'reportedBy', 'updatedAt', 'user'], p),
+        createdAt: p.createdAt.toISOString(),
+      })),
+    }));
     const exploreEventsQuery = gql`
       {
         explore {
@@ -63,8 +73,14 @@ describe('Explore (e2e)', () => {
             endAt
             posts {
               _id
+              condition
+              createdAt
+              description
+              price
+              size
               title
               images
+              donationPercentage
             }
           }
         }
@@ -77,7 +93,7 @@ describe('Explore (e2e)', () => {
       })
       .expect(200)
       .then(response => {
-        expect(response.body).toEqual({ explore: { events } });
+        expect(response.body).toEqual({ data: { explore: { events: eventsAsGQLResponse } } });
         return response;
       });
 

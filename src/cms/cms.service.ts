@@ -2,7 +2,7 @@ import { Injectable, HttpService, Logger, NotImplementedException } from '@nestj
 import { ClozeeEvent } from '../clozee-events/contracts';
 import configuration from '../config/configuration';
 import { SearchCategory } from './contracts';
-import { SearchCategoryDTO, CMSAuthResponse } from './contracts/dtos';
+import { SearchCategoryDTO, CMSAuthResponse, EventDTO } from './contracts/dtos';
 
 @Injectable()
 export class CmsService {
@@ -57,6 +57,25 @@ export class CmsService {
   }
 
   async getEvents(range: { before?: Date; after?: Date }): Promise<ClozeeEvent[]> {
-    throw new NotImplementedException();
+    await this.authPromise;
+    const response = await this.httpService
+      .get<EventDTO[]>(`${configuration.cms.url()}/events`, {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+        },
+        params: {
+          ...(range.after ? { startAt_gte: range.after } : null),
+          ...(range.before ? { startAt_lte: range.before } : null),
+        },
+      })
+      .toPromise();
+    return response.data.map(eventDTO => ({
+      id: eventDTO.id,
+      title: eventDTO.title,
+      startAt: new Date(eventDTO.startAt),
+      endAt: new Date(eventDTO.endAt),
+      posts: eventDTO.posts.map(p => p.postId),
+      bannerUrl: eventDTO.banner.url,
+    }));
   }
 }

@@ -17,7 +17,7 @@ export interface CMSAuthResponse {
   };
 }
 
-export interface SearchCategoryImageDTO {
+export interface StrapiImageDTO {
   id: number;
   name: string;
   alternativeText: string;
@@ -57,5 +57,17 @@ export interface SearchCategoryDTO {
   created_at: Date;
   updated_at: Date;
   description?: string;
-  image: SearchCategoryImageDTO;
+  image: StrapiImageDTO;
+}
+
+export interface EventDTO {
+  id: number;
+  title: string;
+  banner: StrapiImageDTO;
+  startAt: string;
+  endAt: string;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+  posts: { id: number; postId: string }[];
 }

@@ -14,5 +14,5 @@ export class ClozeeEvent {
   @Field()
   endAt: Date;
   @Field(() => [Post], { description: 'The posts featured on this event.' })
-  posts: Post[];
+  posts: Post[] | string[];
 }
