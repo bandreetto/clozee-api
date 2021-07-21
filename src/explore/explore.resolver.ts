@@ -1,15 +1,15 @@
 import { Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { Explore } from './contracts/index';
-import { CmsService } from '../cms/cms.service';
-import { PostsService } from '../posts/posts.service';
-import { SearchUser } from './contracts/search-user';
-import { SearchCategory } from '../cms/contracts/search-category';
-import { LikesService } from '../likes/likes.service';
-import { SORT_DIRECTION } from '../common/types';
-import { OrdersService } from '../orders/orders.service';
-import { UsersLoader } from '../users/users.dataloaders';
 import { sortBy, uniq } from 'ramda';
 import { ClozeeEvent } from '../clozee-events/contracts';
+import { CmsService } from '../cms/cms.service';
+import { SearchCategory } from '../cms/contracts/search-category';
+import { SORT_DIRECTION } from '../common/types';
+import { LikesService } from '../likes/likes.service';
+import { OrdersService } from '../orders/orders.service';
+import { PostsService } from '../posts/posts.service';
+import { UsersLoader } from '../users/users.dataloaders';
+import { Explore } from './contracts/index';
+import { SearchUser } from './contracts/search-user';
 
 @Resolver(() => Explore)
 export class ExploreResolver {
@@ -59,7 +59,7 @@ export class ExploreResolver {
   @ResolveField()
   async events(): Promise<ClozeeEvent[]> {
     const eventsToCome = await this.cmsService.getEvents({
-      after: new Date(),
+      endAfter: new Date(),
     });
 
     return sortBy(event => event.startAt, eventsToCome);
