@@ -12,19 +12,18 @@ export class Category {
   name: string;
   @Prop({ type: String, index: true })
   @Field(() => Category, { nullable: true })
-  parent: string | Category;
+  parent?: string | Category;
 
   @Field(() => [Category], {
-    description:
-      'Every parent of this category, from its direct parent to the category root.',
+    description: 'Every parent of this category, from its direct parent to the category root.',
   })
-  ancestrals: Category[];
+  ancestrals?: Category[];
 
   @Field(() => [Category])
-  children: Category[];
+  children?: Category[];
 
-  path: Category[];
-  depht: number;
+  path?: Category[];
+  depht?: number;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

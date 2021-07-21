@@ -1,11 +1,11 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { CurrentUser } from 'src/common/decorators';
-import { TokenUser } from 'src/common/types';
-import { User } from 'src/users/contracts';
+import { CurrentUser } from '../common/decorators';
+import { TokenUser } from '../common/types';
+import { User } from '../users/contracts';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { FollowsService } from './follows.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { EventEmitter2 } from 'eventemitter2';
 
 @Resolver()
@@ -18,10 +18,7 @@ export class FollowsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async follow(
-    @Args('userId') followee: string,
-    @CurrentUser() follower: TokenUser,
-  ): Promise<User> {
+  async follow(@Args('userId') followee: string, @CurrentUser() follower: TokenUser): Promise<User> {
     const follow = await this.followsService.upsertFollow({
       _id: `${follower._id}:${followee}`,
       follower: follower._id,
@@ -35,10 +32,7 @@ export class FollowsResolver {
 
   @UseGuards(AuthGuard)
   @Mutation(() => User)
-  async unfollow(
-    @Args('userId') followee: string,
-    @CurrentUser() follower: TokenUser,
-  ) {
+  async unfollow(@Args('userId') followee: string, @CurrentUser() follower: TokenUser) {
     const follow = await this.followsService.upsertFollow({
       _id: `${follower._id}:${followee}`,
       follower: follower._id,

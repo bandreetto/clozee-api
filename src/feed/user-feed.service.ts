@@ -2,9 +2,9 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Feed, UserFeed } from './contracts';
 import { Model, Document } from 'mongoose';
-import { FeedTags, User } from 'src/users/contracts';
-import { GENDER_TAGS } from 'src/users/contracts/enum';
-import { SIZES } from 'src/posts/contracts/enums';
+import { FeedTags, User } from '../users/contracts';
+import { GENDER_TAGS } from '../users/contracts/enum';
+import { SIZES } from '../posts/contracts/enums';
 
 @Injectable()
 export class UserFeedService {

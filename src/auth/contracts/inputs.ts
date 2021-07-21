@@ -1,5 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import { FeedTagsInput } from 'src/users/contracts/inputs';
+import { FeedTagsInput } from '../../users/contracts/inputs';
 
 @InputType()
 export class SignUpInput {
@@ -13,8 +13,7 @@ export class SignUpInput {
   avatarUrl?: string;
   @Field({
     nullable: true,
-    description:
-      'The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.',
+    description: 'The id of the image to use as avatar. Got from the mutation uploadAvatarUrl.',
   })
   avatarId?: string;
   @Field(() => FeedTagsInput, {

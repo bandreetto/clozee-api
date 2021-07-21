@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
-import { reconciliateByKey } from 'src/common/reconciliators';
+import { reconciliateByKey } from '../common/reconciliators';
 import { CategoriesService } from './categories.service';
 import { Category } from './contracts';
 
@@ -8,9 +8,7 @@ import { Category } from './contracts';
 export class CategoriesLoader extends DataLoader<string, Category> {
   constructor(private readonly categoriesService: CategoriesService) {
     super((ids: string[]) =>
-      this.categoriesService
-        .findManyByIds(ids)
-        .then(categories => reconciliateByKey('_id', ids, categories)),
+      this.categoriesService.findManyByIds(ids).then(categories => reconciliateByKey('_id', ids, categories)),
     );
   }
 
@@ -20,10 +18,6 @@ export class CategoriesLoader extends DataLoader<string, Category> {
   byParent = new DataLoader<string, Category[]>((parentIds: string[]) =>
     this.categoriesService
       .findByParents(parentIds)
-      .then(categories =>
-        parentIds.map(parentId =>
-          categories.filter(category => category.parent === parentId),
-        ),
-      ),
+      .then(categories => parentIds.map(parentId => categories.filter(category => category.parent === parentId))),
   );
 }

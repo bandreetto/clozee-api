@@ -1,21 +1,16 @@
 import { ResolveField, Resolver, Root } from '@nestjs/graphql';
-import { CommentsLoader } from 'src/comments/comments.dataloader';
+import { CommentsLoader } from '../comments/comments.dataloader';
 import { PostCommentNotification } from './contracts';
-import { Comment } from 'src/comments/contracts';
-import { Post } from 'src/posts/contracts';
-import { PostsLoader } from 'src/posts/posts.dataloader';
+import { Comment } from '../comments/contracts';
+import { Post } from '../posts/contracts';
+import { PostsLoader } from '../posts/posts.dataloader';
 
 @Resolver(() => PostCommentNotification)
 export class PostCommentNotificationResolver {
-  constructor(
-    private readonly commentsLoader: CommentsLoader,
-    private readonly postsLoader: PostsLoader,
-  ) {}
+  constructor(private readonly commentsLoader: CommentsLoader, private readonly postsLoader: PostsLoader) {}
 
   @ResolveField()
-  async comment(
-    @Root() notification: PostCommentNotification,
-  ): Promise<Comment> {
+  async comment(@Root() notification: PostCommentNotification): Promise<Comment> {
     if (typeof notification.comment !== 'string') return notification.comment;
     return this.commentsLoader.load(notification.comment);
   }

@@ -1,6 +1,6 @@
 import { Injectable, Scope } from '@nestjs/common';
 import DataLoader from 'dataloader';
-import { reconciliateByKey } from 'src/common/reconciliators';
+import { reconciliateByKey } from '../common/reconciliators';
 import { Sale } from './contracts';
 import { OrdersService } from './orders.service';
 
@@ -11,14 +11,10 @@ export class SalesLoader {
   byOrder = new DataLoader<string, Sale[]>((orderIds: string[]) =>
     this.ordersService
       .findSalesByOrders(orderIds)
-      .then(sales =>
-        orderIds.map(orderId => sales.filter(sale => sale.order === orderId)),
-      ),
+      .then(sales => orderIds.map(orderId => sales.filter(sale => sale.order === orderId))),
   );
 
   byPost = new DataLoader<string, Sale>((postIds: string[]) =>
-    this.ordersService
-      .findSalesByPosts(postIds)
-      .then(posts => reconciliateByKey('post', postIds, posts)),
+    this.ordersService.findSalesByPosts(postIds).then(posts => reconciliateByKey('post', postIds, posts)),
   );
 }

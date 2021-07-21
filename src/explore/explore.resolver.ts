@@ -1,18 +1,15 @@
-import { UseGuards } from '@nestjs/common';
 import { Query, ResolveField, Resolver } from '@nestjs/graphql';
-import { AuthGuard } from 'src/common/guards';
 import { Explore } from './contracts/index';
 import { CmsService } from '../cms/cms.service';
-import { PostsLoader } from '../posts/posts.dataloader';
-import { PostsService } from 'src/posts/posts.service';
+import { PostsService } from '../posts/posts.service';
 import { SearchUser } from './contracts/search-user';
 import { SearchCategory } from '../cms/contracts/search-category';
-import { LikesService } from 'src/likes/likes.service';
-import { SORT_DIRECTION } from 'src/common/types';
-import { OrdersService } from 'src/orders/orders.service';
+import { LikesService } from '../likes/likes.service';
+import { SORT_DIRECTION } from '../common/types';
+import { OrdersService } from '../orders/orders.service';
 import { UsersLoader } from '../users/users.dataloaders';
-import { uniq } from 'ramda';
-import dayjs from 'dayjs';
+import { sortBy, uniq } from 'ramda';
+import { ClozeeEvent } from '../clozee-events/contracts';
 
 @Resolver(() => Explore)
 export class ExploreResolver {
@@ -29,32 +26,7 @@ export class ExploreResolver {
     return {
       users: [],
       categories: [],
-      events: [
-        {
-          id: 3,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que já terminou',
-          startAt: dayjs().subtract(4, 'hours').toDate(),
-          endAt: dayjs().subtract(2, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-        {
-          id: 1,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que começou',
-          startAt: dayjs().subtract(2, 'hours').toDate(),
-          endAt: dayjs().add(2, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-        {
-          id: 2,
-          posts: await this.postsService.findLastDistinctUsersPosts(3),
-          title: 'Feira que vai começar',
-          startAt: dayjs().add(2, 'hours').toDate(),
-          endAt: dayjs().add(4, 'hours').toDate(),
-          bannerUrl: 'https://placekitten.com/500/200',
-        },
-      ],
+      events: [],
     };
   }
 
@@ -82,5 +54,14 @@ export class ExploreResolver {
   @ResolveField()
   categories(): Promise<SearchCategory[]> {
     return this.cmsService.getSearchCategories();
+  }
+
+  @ResolveField()
+  async events(): Promise<ClozeeEvent[]> {
+    const eventsToCome = await this.cmsService.getEvents({
+      after: new Date(),
+    });
+
+    return sortBy(event => event.startAt, eventsToCome);
   }
 }

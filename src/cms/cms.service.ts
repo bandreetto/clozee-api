@@ -1,7 +1,8 @@
-import { Injectable, HttpService, Logger } from '@nestjs/common';
-import configuration from 'src/config/configuration';
+import { Injectable, HttpService, Logger, NotImplementedException } from '@nestjs/common';
+import { ClozeeEvent } from '../clozee-events/contracts';
+import configuration from '../config/configuration';
 import { SearchCategory } from './contracts';
-import { SearchCategoryDTO, CMSAuthResponse } from './contracts/dtos';
+import { SearchCategoryDTO, CMSAuthResponse, EventDTO } from './contracts/dtos';
 
 @Injectable()
 export class CmsService {
@@ -53,5 +54,62 @@ export class CmsService {
         searchTerm: searchCategory.searchTerm,
       };
     });
+  }
+
+  async getEvents(range: { before?: Date; after?: Date }): Promise<ClozeeEvent[]> {
+    await this.authPromise;
+    const response = await this.httpService
+      .get<EventDTO[]>(`${configuration.cms.url()}/events`, {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+        },
+        params: {
+          ...(range.after ? { startAt_gte: range.after } : null),
+          ...(range.before ? { startAt_lte: range.before } : null),
+        },
+      })
+      .toPromise();
+    return response.data.map(eventDTO => {
+      let bannerUrl = eventDTO.banner?.url;
+      if (!bannerUrl) {
+        bannerUrl = '';
+        this.logger.warn(`Could not find image for clozee-event ${eventDTO.id}`);
+      } else bannerUrl = `${configuration.cms.cdn()}/${eventDTO.banner.hash}${eventDTO.banner.ext}`;
+
+      return {
+        id: eventDTO.id,
+        title: eventDTO.title,
+        startAt: new Date(eventDTO.startAt),
+        endAt: new Date(eventDTO.endAt),
+        posts: eventDTO.posts.map(p => p.postId),
+        bannerUrl,
+      };
+    });
+  }
+
+  async getEventById(eventId: number): Promise<ClozeeEvent> {
+    await this.authPromise;
+    const { data: eventDTO } = await this.httpService
+      .get<EventDTO>(`${configuration.cms.url()}/events/${eventId}`, {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+        },
+      })
+      .toPromise();
+
+    let bannerUrl = eventDTO.banner?.url;
+    if (!bannerUrl) {
+      bannerUrl = '';
+      this.logger.warn(`Could not find image for clozee-event ${eventDTO.id}`);
+    } else bannerUrl = `${configuration.cms.cdn()}/${eventDTO.banner.hash}${eventDTO.banner.ext}`;
+
+    return {
+      id: eventDTO.id,
+      title: eventDTO.title,
+      startAt: new Date(eventDTO.startAt),
+      endAt: new Date(eventDTO.endAt),
+      posts: eventDTO.posts.map(p => p.postId),
+      bannerUrl,
+    };
   }
 }

@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { SearchCategory } from 'src/cms/contracts';
-import { ClozeeEvent } from 'src/clozee-events/contracts';
+import { SearchCategory } from '../../cms/contracts';
+import { ClozeeEvent } from '../../clozee-events/contracts';
 import { SearchUser } from './search-user';
 
 @ObjectType()

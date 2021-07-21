@@ -1,14 +1,14 @@
 import { Inject, UseGuards, ForbiddenException } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
-import { CurrentUser } from 'src/common/decorators';
-import { AuthGuard } from 'src/common/guards';
-import { TokenUser } from 'src/common/types';
+import { CurrentUser } from '../common/decorators';
+import { AuthGuard } from '../common/guards';
+import { TokenUser } from '../common/types';
 import { Notification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PubSub } from 'graphql-subscriptions';
 import { JwtService } from '@nestjs/jwt';
-import { Token } from 'src/auth/contracts';
-import { isAccessToken } from 'src/auth/auth.logic';
+import { Token } from '../auth/contracts';
+import { isAccessToken } from '../auth/auth.logic';
 import { NOTIFICAION_KINDS, NOTIFICATION_ENUM_TO_KIND_MAPPER } from './contracts/enums';
 
 /**

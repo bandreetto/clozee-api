@@ -1,23 +1,17 @@
-import {
-  ConflictException,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-  UseGuards,
-} from '@nestjs/common';
+import { ConflictException, InternalServerErrorException, Logger, NotFoundException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { randomBytes, scryptSync } from 'crypto';
-import { User } from 'src/users/contracts';
-import { UsersService } from 'src/users/users.service';
+import { User } from '../users/contracts';
+import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { AuthService } from './auth.service';
 import { SignUpInput } from './contracts/inputs';
 import { JwtService } from '@nestjs/jwt';
-import configuration from 'src/config/configuration';
+import configuration from '../config/configuration';
 import { AuthResponse, PreSignResponse, RefreshToken } from './contracts';
 import { TOKEN_TYPES } from './contracts/enums';
-import { AuthGuard } from 'src/common/guards';
-import { CurrentToken, TokenTypes } from 'src/common/decorators';
+import { AuthGuard } from '../common/guards';
+import { CurrentToken, TokenTypes } from '../common/decorators';
 import { EventEmitter2 } from 'eventemitter2';
 
 const SCRYPT_KEYLEN = 64;
@@ -57,10 +51,7 @@ export class AuthResolver {
     );
 
   createPreSignToken = (userId: string) =>
-    this.jwtService.sign(
-      {},
-      { header: { typ: TOKEN_TYPES.PRE_SIGN }, subject: userId },
-    );
+    this.jwtService.sign({}, { header: { typ: TOKEN_TYPES.PRE_SIGN }, subject: userId });
 
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
@@ -84,9 +75,7 @@ export class AuthResolver {
           {
             _id: v4(),
             username: input.username,
-            avatar:
-              avatarUrl ||
-              `https://${configuration.images.cdn()}/avatars/default.jpg`,
+            avatar: avatarUrl || `https://${configuration.images.cdn()}/avatars/default.jpg`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
@@ -96,9 +85,7 @@ export class AuthResolver {
           input._id,
           {
             username: input.username,
-            avatar:
-              avatarUrl ||
-              `https://${configuration.images.cdn()}/avatars/default.jpg`,
+            avatar: avatarUrl || `https://${configuration.images.cdn()}/avatars/default.jpg`,
             ...(input.feedTags ? { feedTags: input.feedTags } : null),
           },
           session,
@@ -109,11 +96,7 @@ export class AuthResolver {
           );
       }
       const salt = randomBytes(SALT_LEN);
-      const passwordHash = scryptSync(
-        input.password,
-        salt,
-        SCRYPT_KEYLEN,
-      ).toString('base64');
+      const passwordHash = scryptSync(input.password, salt, SCRYPT_KEYLEN).toString('base64');
       await this.authService.create(
         {
           _id: v4(),
@@ -143,9 +126,7 @@ export class AuthResolver {
           avatarId: input.avatarId,
         },
       });
-      throw new InternalServerErrorException(
-        'An error occoured while trying to signup a new user.',
-      );
+      throw new InternalServerErrorException('An error occoured while trying to signup a new user.');
     }
   }
 
@@ -162,22 +143,14 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthResponse)
-  async logIn(
-    @Args('username') username: string,
-    @Args('password') password: string,
-  ): Promise<AuthResponse> {
+  async logIn(@Args('username') username: string, @Args('password') password: string): Promise<AuthResponse> {
     const user = await this.usersService.findByUsername(username);
 
     if (!user) throw new NotFoundException('User not found.');
 
     const { salt, passwordHash } = await this.authService.findByUser(user._id);
-    const loginPasswordHash = scryptSync(
-      password,
-      Buffer.from(salt, 'base64'),
-      SCRYPT_KEYLEN,
-    ).toString('base64');
-    if (passwordHash !== loginPasswordHash)
-      throw new NotFoundException('User not found.');
+    const loginPasswordHash = scryptSync(password, Buffer.from(salt, 'base64'), SCRYPT_KEYLEN).toString('base64');
+    if (passwordHash !== loginPasswordHash) throw new NotFoundException('User not found.');
 
     return {
       me: user,
@@ -189,9 +162,7 @@ export class AuthResolver {
   @UseGuards(AuthGuard)
   @TokenTypes(TOKEN_TYPES.REFRESH)
   @Mutation(() => AuthResponse)
-  async refreshToken(
-    @CurrentToken() token: RefreshToken,
-  ): Promise<AuthResponse> {
+  async refreshToken(@CurrentToken() token: RefreshToken): Promise<AuthResponse> {
     const { sub } = token.payload;
     const user = await this.usersService.findById(sub);
     if (!user) throw new NotFoundException('User not found.');

@@ -1,9 +1,9 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { Post } from 'src/posts/contracts';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
+import { Post } from '../../posts/contracts';
 
 @ObjectType()
 export class ClozeeEvent {
-  @Field()
+  @Field(() => Int)
   id: number;
   @Field()
   title: string;
@@ -14,5 +14,5 @@ export class ClozeeEvent {
   @Field()
   endAt: Date;
   @Field(() => [Post], { description: 'The posts featured on this event.' })
-  posts: Post[];
+  posts: Post[] | string[];
 }

@@ -8,11 +8,13 @@ export class PostsService {
   constructor(@InjectModel(Post.name) private readonly postModel: Model<Post & Document>) {}
 
   async create(post: Omit<Post, 'comments'>): Promise<Post> {
-    const newPost = await this.postModel.create({
+    const postDocument = await this.postModel.create({
       ...post,
       comments: [],
     });
-    return newPost.toObject();
+    const newPost = postDocument.toObject();
+    delete newPost.__v;
+    return newPost;
   }
 
   async findAllNotDeleted(): Promise<Post[]> {

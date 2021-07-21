@@ -1,18 +1,18 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { PubSub } from 'graphql-subscriptions';
-import { CommentCreatedPayload } from 'src/comments/contracts/payloads';
-import { admin } from 'src/common/firebase-admin';
-import { OrderCreatedPayload } from 'src/orders/contracts/payloads';
-import { Post } from 'src/posts/contracts';
-import { UsersService } from 'src/users/users.service';
+import { CommentCreatedPayload } from '../comments/contracts/payloads';
+import { admin } from '../common/firebase-admin';
+import { OrderCreatedPayload } from '../orders/contracts/payloads';
+import { Post } from '../posts/contracts';
+import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { CommentsService } from '../comments/comments.service';
 import { CommentTagNotification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PostCommentNotification } from './contracts/post-comment-notification';
 import { FollowsService } from '../follows/follows.service';
-import { PostsService } from 'src/posts/posts.service';
+import { PostsService } from '../posts/posts.service';
 
 @Injectable()
 export class NotificationsConsumer {

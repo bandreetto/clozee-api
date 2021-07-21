@@ -1,6 +1,6 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 import { Follow, FollowSchema } from './contracts';
 import { FollowsLoader } from './follows.dataloader';
 import { FollowsResolver } from './follows.resolver';

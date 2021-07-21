@@ -264,25 +264,17 @@ type User {
   createdAt: DateTime!
 }
 
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
+type Delivery {
+  _id: String!
+  buyersZipCode: String!
+  sellersZipCode: String!
 
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
+  """The delivery fare in cents."""
+  price: Int!
+  menvServiceNumber: Float!
 
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
+  """The expected delivery time in business days."""
+  deliveryTime: Int!
 }
 
 type PageInfo {
@@ -347,17 +339,25 @@ type Order {
   createdAt: DateTime!
 }
 
-type Delivery {
-  _id: String!
-  buyersZipCode: String!
-  sellersZipCode: String!
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
 
-  """The delivery fare in cents."""
-  price: Int!
-  menvServiceNumber: Float!
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
 
-  """The expected delivery time in business days."""
-  deliveryTime: Int!
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
 }
 
 type Session {
@@ -436,7 +436,7 @@ type SearchCategory {
 }
 
 type ClozeeEvent {
-  id: Float!
+  id: Int!
   title: String!
 
   """The url for the event banner midia."""

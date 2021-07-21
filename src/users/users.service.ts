@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document, ClientSession } from 'mongoose';
-import { escapeRegex } from 'src/common/regex';
-import { TransactionableService } from 'src/common/types';
+import { escapeRegex } from '../common/regex';
+import { TransactionableService } from '../common/types';
 import { Address, PaymentMethod, SavedPost, User } from './contracts';
 
 @Injectable()
@@ -53,34 +53,19 @@ export class UsersService implements TransactionableService<ClientSession> {
 
   async addPost(id: string, postUrl: string): Promise<User> {
     return this.userModel
-      .findByIdAndUpdate(
-        { _id: id },
-        { $push: { sellingProducts: postUrl } },
-        { new: true },
-      )
+      .findByIdAndUpdate({ _id: id }, { $push: { sellingProducts: postUrl } }, { new: true })
       .lean<User>();
   }
 
-  async updateAddress(
-    userId: string,
-    newAddress: Partial<Address>,
-  ): Promise<User> {
+  async updateAddress(userId: string, newAddress: Partial<Address>): Promise<User> {
     const updatedUser = await this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $set: { address: newAddress } },
-        { new: true },
-      )
+      .findByIdAndUpdate(userId, { $set: { address: newAddress } }, { new: true })
       .lean<User>();
 
     return updatedUser as User;
   }
 
-  async updateUser(
-    userId: string,
-    fieldsToUpdate: Partial<User>,
-    session?: ClientSession,
-  ): Promise<User> {
+  async updateUser(userId: string, fieldsToUpdate: Partial<User>, session?: ClientSession): Promise<User> {
     const updatedUser = await this.userModel
       .findByIdAndUpdate(
         userId,
@@ -117,20 +102,14 @@ export class UsersService implements TransactionableService<ClientSession> {
   ): Promise<User[]> {
     const filtersArray = [];
     if (filters.username) {
-      const usernameRegex = new RegExp(
-        `${filters.startsWith ? '^' : ''}${escapeRegex(filters.username)}`,
-        'i',
-      );
+      const usernameRegex = new RegExp(`${filters.startsWith ? '^' : ''}${escapeRegex(filters.username)}`, 'i');
       filtersArray.push({
         username: usernameRegex,
       });
     }
 
     if (filters.name) {
-      const nameRegex = new RegExp(
-        `${filters.startsWith ? '^' : ''}${escapeRegex(filters.name)}`,
-        'i',
-      );
+      const nameRegex = new RegExp(`${filters.startsWith ? '^' : ''}${escapeRegex(filters.name)}`, 'i');
       filtersArray.push({
         name: nameRegex,
       });
@@ -182,10 +161,7 @@ export class UsersService implements TransactionableService<ClientSession> {
 
   // Payment Methods
 
-  async addPaymentMethod(
-    userId: string,
-    paymentMethod: Omit<PaymentMethod, 'user'>,
-  ): Promise<PaymentMethod> {
+  async addPaymentMethod(userId: string, paymentMethod: Omit<PaymentMethod, 'user'>): Promise<PaymentMethod> {
     const createdMethod = await this.paymentMethodModel.create({
       ...paymentMethod,
       user: userId,
@@ -193,10 +169,7 @@ export class UsersService implements TransactionableService<ClientSession> {
     return createdMethod.toObject();
   }
 
-  async deletePaymentMethod(
-    userId: string,
-    paymentMethodId: string,
-  ): Promise<void> {
+  async deletePaymentMethod(userId: string, paymentMethodId: string): Promise<void> {
     await this.paymentMethodModel.deleteOne({
       _id: paymentMethodId,
       user: userId,

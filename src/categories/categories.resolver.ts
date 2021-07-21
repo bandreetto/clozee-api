@@ -1,7 +1,7 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { ascend } from 'ramda';
-import { AuthGuard } from 'src/common/guards';
+import { AuthGuard } from '../common/guards';
 import { CategoriesLoader } from './categories.dataloader';
 import { isOthersCategory } from './categories.logic';
 import { CategoriesService } from './categories.service';
@@ -16,9 +16,7 @@ export class CategoriesResolver {
 
   @UseGuards(AuthGuard)
   @Query(() => [Category], { description: 'Returns all categories' })
-  categories(
-    @Args('roots', { nullable: true }) root: boolean,
-  ): Promise<Category[]> {
+  categories(@Args('roots', { nullable: true }) root: boolean): Promise<Category[]> {
     if (root) return this.categoriesService.findRootCategories();
     return this.categoriesService.find();
   }
@@ -33,10 +31,7 @@ export class CategoriesResolver {
       return sortedCategories;
     }
 
-    return [
-      ...sortedCategories.filter(cat => !isOthersCategory(cat)),
-      othersCat,
-    ];
+    return [...sortedCategories.filter(cat => !isOthersCategory(cat)), othersCat];
   }
 
   @ResolveField()

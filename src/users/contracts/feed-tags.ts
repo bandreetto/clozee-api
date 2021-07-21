@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SIZES } from 'src/posts/contracts/enums';
+import { SIZES } from '../../posts/contracts/enums';
 import { GENDER_TAGS } from './enum';
 
 @Schema({ _id: false })

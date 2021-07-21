@@ -5,7 +5,7 @@ import { OrderCreatedPayload } from '../orders/contracts/payloads';
 import { UsersService } from '../users/users.service';
 import { MailerService } from './mailer.service';
 import { getSplitValues, getSubTotal } from '../orders/orders.logic';
-import { VARIABLE_TAX, FIXED_TAX } from 'src/common/contants';
+import { VARIABLE_TAX, FIXED_TAX } from '../common/contants';
 
 @Injectable()
 export class MailerConsumer {

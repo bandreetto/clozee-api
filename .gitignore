@@ -4,7 +4,7 @@
 
 # Config
 .env
-.env.production
+.env.e2e
 
 # Logs
 logs
@@ -35,3 +35,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Docker
+.docker-volumes

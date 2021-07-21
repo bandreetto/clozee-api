@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Order } from 'src/orders/contracts';
+import { Order } from '../../orders/contracts';
 import { Notification } from '.';
 
 @Schema()
@@ -21,6 +21,4 @@ export class SaleNotification implements Notification {
   order: string | Order;
 }
 
-export const SaleNotificationSchema = SchemaFactory.createForClass(
-  SaleNotification,
-);
+export const SaleNotificationSchema = SchemaFactory.createForClass(SaleNotification);

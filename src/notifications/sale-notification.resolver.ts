@@ -1,6 +1,6 @@
 import { ResolveField, Resolver, Root } from '@nestjs/graphql';
-import { Order } from 'src/orders/contracts';
-import { OrdersLoader } from 'src/orders/orders.dataloader';
+import { Order } from '../orders/contracts';
+import { OrdersLoader } from '../orders/orders.dataloader';
 import { SaleNotification } from './contracts';
 
 @Resolver(() => SaleNotification)
