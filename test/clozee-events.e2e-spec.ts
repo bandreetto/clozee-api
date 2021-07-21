@@ -3,22 +3,21 @@ dotenv.config({
   path: '.e2e.env',
 });
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
-import { CmsService } from '../src/cms/cms.service';
-import { Post } from '../src/posts/contracts/index';
-import { AppModule } from '../src/app.module';
-import { Given, givenFactory } from './given';
+import { INestApplication } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
-import { flatten, omit } from 'ramda';
+import { Test, TestingModule } from '@nestjs/testing';
+import { gql } from 'apollo-server-core';
+import { AppModule } from '../src/app.module';
+import { CmsService } from '../src/cms/cms.service';
+import { Given, givenFactory } from './given';
 import { Connection } from 'mongoose';
 import { PostsService } from '../src/posts/posts.service';
 import { reconciliateByKey } from '../src/common/reconciliators';
+import { omit } from 'ramda';
 
-describe('Explore (e2e)', () => {
+describe('ClozeeEvents (e2e)', () => {
   let given: Given;
   let moduleFixture: TestingModule;
   let app: INestApplication;
@@ -43,39 +42,32 @@ describe('Explore (e2e)', () => {
 
   afterAll(async done => {
     await app.close();
-    const connection = await moduleFixture.resolve(getConnectionToken());
+    const connection = await moduleFixture.resolve<Connection>(getConnectionToken());
     connection.close(() => done());
   });
 
-  it('should return the list of upcoming events', async done => {
+  it('should return an event by id', async done => {
     const events = await given.cms.withUpcomingEventsRegistered();
     const postsService = await moduleFixture.resolve<PostsService>(PostsService);
-    const posts = await Promise.all(
-      events.map(async e => {
-        const postIds = e.posts as string[];
-        const foundPosts = await postsService.findManyByIds(postIds);
-        return reconciliateByKey('_id', postIds, foundPosts);
-      }),
-    );
-    const eventsAsGQLResponse = events.map((e, index) => ({
-      ...e,
-      startAt: e.startAt.toISOString(),
-      endAt: e.endAt.toISOString(),
-      posts: posts[index].map(p => ({
+    const posts = await postsService.findManyByIds(events[0].posts as string[]);
+    const eventAsGQLResponse = {
+      ...events[0],
+      startAt: events[0].startAt.toISOString(),
+      endAt: events[0].endAt.toISOString(),
+      posts: reconciliateByKey('_id', events[0].posts as string[], posts).map(p => ({
         ...omit(['category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
         createdAt: p.createdAt.toISOString(),
       })),
-    }));
-    const exploreEventsQuery = gql`
+    };
+    const getEventQuery = gql`
       {
-        explore {
-          events {
-            id
-            title
-            bannerUrl
-            startAt
-            endAt
-            posts {
+        event(id: ${events[0].id}) {
+          id
+          title
+          bannerUrl
+          startAt
+          endAt
+          posts {
               _id
               condition
               createdAt
@@ -85,19 +77,19 @@ describe('Explore (e2e)', () => {
               title
               images
               donationPercentage
-            }
           }
         }
       }
     `;
+
     await request(app.getHttpServer())
       .post('/graphql')
       .send({
-        query: print(exploreEventsQuery),
+        query: print(getEventQuery),
       })
       .expect(200)
       .then(response => {
-        expect(response.body).toEqual({ data: { explore: { events: eventsAsGQLResponse } } });
+        expect(response.body).toEqual({ data: { event: eventAsGQLResponse } });
         return response;
       });
 

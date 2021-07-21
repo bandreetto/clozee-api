@@ -69,13 +69,47 @@ export class CmsService {
         },
       })
       .toPromise();
-    return response.data.map(eventDTO => ({
+    return response.data.map(eventDTO => {
+      let bannerUrl = eventDTO.banner?.url;
+      if (!bannerUrl) {
+        bannerUrl = '';
+        this.logger.warn(`Could not find image for clozee-event ${eventDTO.id}`);
+      } else bannerUrl = `${configuration.cms.cdn()}/${eventDTO.banner.hash}${eventDTO.banner.ext}`;
+
+      return {
+        id: eventDTO.id,
+        title: eventDTO.title,
+        startAt: new Date(eventDTO.startAt),
+        endAt: new Date(eventDTO.endAt),
+        posts: eventDTO.posts.map(p => p.postId),
+        bannerUrl,
+      };
+    });
+  }
+
+  async getEventById(eventId: number): Promise<ClozeeEvent> {
+    await this.authPromise;
+    const { data: eventDTO } = await this.httpService
+      .get<EventDTO>(`${configuration.cms.url()}/events/${eventId}`, {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+        },
+      })
+      .toPromise();
+
+    let bannerUrl = eventDTO.banner?.url;
+    if (!bannerUrl) {
+      bannerUrl = '';
+      this.logger.warn(`Could not find image for clozee-event ${eventDTO.id}`);
+    } else bannerUrl = `${configuration.cms.cdn()}/${eventDTO.banner.hash}${eventDTO.banner.ext}`;
+
+    return {
       id: eventDTO.id,
       title: eventDTO.title,
       startAt: new Date(eventDTO.startAt),
       endAt: new Date(eventDTO.endAt),
       posts: eventDTO.posts.map(p => p.postId),
-      bannerUrl: eventDTO.banner.url,
-    }));
+      bannerUrl,
+    };
   }
 }

@@ -15,7 +15,7 @@ export function givenCmsFactory(cmsService: CmsService, givenPosts: GivenPosts):
     const events: ClozeeEvent[] = [
       {
         id: baseId,
-        posts: createdPosts,
+        posts: createdPosts.map(p => p._id),
         title: 'Feira que já terminou',
         startAt: dayjs().subtract(4, 'hours').toDate(),
         endAt: dayjs().subtract(2, 'hours').toDate(),
@@ -23,7 +23,7 @@ export function givenCmsFactory(cmsService: CmsService, givenPosts: GivenPosts):
       },
       {
         id: baseId + 1,
-        posts: createdPosts,
+        posts: createdPosts.map(p => p._id),
         title: 'Feira que começou',
         startAt: dayjs().subtract(2, 'hours').toDate(),
         endAt: dayjs().add(2, 'hours').toDate(),
@@ -31,7 +31,7 @@ export function givenCmsFactory(cmsService: CmsService, givenPosts: GivenPosts):
       },
       {
         id: baseId + 2,
-        posts: createdPosts,
+        posts: createdPosts.map(p => p._id),
         title: 'Feira que vai começar',
         startAt: dayjs().add(2, 'hours').toDate(),
         endAt: dayjs().add(4, 'hours').toDate(),
@@ -40,10 +40,10 @@ export function givenCmsFactory(cmsService: CmsService, givenPosts: GivenPosts):
     ];
 
     jest.spyOn(cmsService, 'getEvents').mockImplementation(async () => events);
+    jest.spyOn(cmsService, 'getEventById').mockImplementation(async id => events.find(e => e.id === id));
 
     return events;
   }
-
   return {
     withUpcomingEventsRegistered,
   };

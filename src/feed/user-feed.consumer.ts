@@ -219,7 +219,6 @@ export class UserFeedConsumer {
 
   @OnEvent('follow.deleted', { async: true })
   async decreaseUnfollowedUserPostsScore(payload: Follow) {
-    console.log('unfollow');
     try {
       const followeePosts = await this.postsService.findManyByUser(payload.followee);
       const feeds = await this.userFeedService.findByPosts(
