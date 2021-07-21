@@ -1,8 +1,8 @@
-import { Injectable, HttpService, Logger, NotImplementedException } from '@nestjs/common';
+import { HttpService, Injectable, Logger } from '@nestjs/common';
 import { ClozeeEvent } from '../clozee-events/contracts';
 import configuration from '../config/configuration';
 import { SearchCategory } from './contracts';
-import { SearchCategoryDTO, CMSAuthResponse, EventDTO } from './contracts/dtos';
+import { CMSAuthResponse, EventDTO, SearchCategoryDTO } from './contracts/dtos';
 
 @Injectable()
 export class CmsService {
@@ -56,7 +56,12 @@ export class CmsService {
     });
   }
 
-  async getEvents(range: { before?: Date; after?: Date }): Promise<ClozeeEvent[]> {
+  async getEvents(range: {
+    startBefore?: Date;
+    startAfter?: Date;
+    endBefore?: Date;
+    endAfter?: Date;
+  }): Promise<ClozeeEvent[]> {
     await this.authPromise;
     const response = await this.httpService
       .get<EventDTO[]>(`${configuration.cms.url()}/events`, {
@@ -64,8 +69,10 @@ export class CmsService {
           authorization: `Bearer ${this.token}`,
         },
         params: {
-          ...(range.after ? { startAt_gte: range.after } : null),
-          ...(range.before ? { startAt_lte: range.before } : null),
+          ...(range.startAfter ? { startAt_gte: range.startAfter } : null),
+          ...(range.startBefore ? { startAt_lte: range.startBefore } : null),
+          ...(range.endAfter ? { endAt_gte: range.endAfter } : null),
+          ...(range.endBefore ? { endAt_lte: range.endBefore } : null),
         },
       })
       .toPromise();
