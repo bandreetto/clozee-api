@@ -1,12 +1,19 @@
 version: '3.7'
  
- services:
-   mongo:
-     image: "mongodb"
-     volumes:
-       - db-data:/data/db
-       - mongo-config:/data/configdb
+services:
+  mongo:
+    image: "mongo"
+    ports:
+      - "27017:27017"
+    volumes:
+      - $PWD/.docker-volumes/mongo-data:/data/db
+      - $PWD/.docker-volumes/mongo-config:/data/configdb
 
-   redis:
-      image: "redis"
+  redis:
+     image: "redis"
+     ports:
+       - "6379:6379"
+     volumes:
+       - $PWD/.docker-volumes/redis-data:/var/lib/redis
+       - $PWD/.docker-volumes/redis.conf:/usr/local/etc/redis/redis.conf
 
