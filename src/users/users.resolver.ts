@@ -24,6 +24,7 @@ import { BlockUserPayload } from './contracts/payloads';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
 import { FollowsLoader } from '../follows/follows.dataloader';
+import { Group } from '../groups/contracts';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -286,10 +287,12 @@ export class UsersResolver {
 
   @ResolveField()
   async blockedUsers(@Root() user: User): Promise<User[]> {
-    return user.blockedUsers.map(blockedUser => {
-      if (typeof blockedUser !== 'string') return blockedUser;
-      return this.usersLoader.load(blockedUser);
-    });
+    return Promise.all(
+      user.blockedUsers.map((blockedUser: string | User) => {
+        if (typeof blockedUser !== 'string') return blockedUser;
+        return this.usersLoader.load(blockedUser);
+      }),
+    );
   }
 
   @ResolveField()
@@ -308,5 +311,30 @@ export class UsersResolver {
   async isFollowing(@Root() user: User, @CurrentUser() currentUser: TokenUser): Promise<boolean> {
     const follows = await this.followsLoader.byFollowee.load(user._id);
     return !!follows.find(follow => follow.follower === currentUser?._id);
+  }
+
+  @ResolveField()
+  async groups(): Promise<Group[]> {
+    const posts = await this.postsService.findLastDistinctUsersPosts(6);
+    return [
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 1',
+        posts: posts,
+        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
+      },
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 2',
+        posts: posts,
+        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
+      },
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 3',
+        posts: posts,
+        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
+      },
+    ];
   }
 }
