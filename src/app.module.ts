@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { GraphQLModule } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
@@ -26,7 +26,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { CmsModule } from './cms/cms.module';
 import { ExploreModule } from './explore/explore.module';
 import { ClozeeEventsModule } from './clozee-events/clozee-events.module';
+import { ClockService } from './common/clock/clock.service';
 
+@Global()
 @Module({
   imports: [
     MongooseModule.forRoot(configuration.database.url(), {
@@ -69,6 +71,8 @@ import { ClozeeEventsModule } from './clozee-events/clozee-events.module';
     ExploreModule,
     ClozeeEventsModule,
   ],
+  providers: [ClockService],
+  exports: [ClockService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

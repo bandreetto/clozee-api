@@ -1,5 +1,6 @@
 import { Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { sortBy, uniq } from 'ramda';
+import { ClockService } from '../common/clock/clock.service';
 import { ClozeeEvent } from '../clozee-events/contracts';
 import { CmsService } from '../cms/cms.service';
 import { SearchCategory } from '../cms/contracts/search-category';
@@ -19,6 +20,7 @@ export class ExploreResolver {
     private readonly likesService: LikesService,
     private readonly ordersService: OrdersService,
     private readonly usersLoader: UsersLoader,
+    private readonly clockService: ClockService,
   ) {}
 
   @Query(() => Explore, { description: 'Returns explore data' })
@@ -59,7 +61,7 @@ export class ExploreResolver {
   @ResolveField()
   async events(): Promise<ClozeeEvent[]> {
     const eventsToCome = await this.cmsService.getEvents({
-      endAfter: new Date(),
+      endAfter: this.clockService.now(),
     });
 
     return sortBy(event => event.startAt, eventsToCome);

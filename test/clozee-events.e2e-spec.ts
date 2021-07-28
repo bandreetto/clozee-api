@@ -5,17 +5,18 @@ dotenv.config({
 
 import request from 'supertest';
 import { print } from 'graphql';
-import { INestApplication } from '@nestjs/common';
+import { HttpService, INestApplication } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
 import { gql } from 'apollo-server-core';
 import { AppModule } from '../src/app.module';
-import { CmsService } from '../src/cms/cms.service';
 import { Given, givenFactory } from './given';
 import { Connection } from 'mongoose';
 import { PostsService } from '../src/posts/posts.service';
 import { reconciliateByKey } from '../src/common/reconciliators';
 import { omit } from 'ramda';
+import { HttpServiceMock } from './mocks';
+import { CmsService } from '../src/cms/cms.service';
 
 describe('ClozeeEvents (e2e)', () => {
   let given: Given;
@@ -26,8 +27,8 @@ describe('ClozeeEvents (e2e)', () => {
     moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(CmsService)
-      .useValue({ getEvents: () => {}, getEventById: () => {} })
+      .overrideProvider(HttpService)
+      .useClass(HttpServiceMock)
       .compile();
     given = await givenFactory(moduleFixture);
     app = moduleFixture.createNestApplication();
@@ -48,20 +49,22 @@ describe('ClozeeEvents (e2e)', () => {
 
   it('should return an event by id', async done => {
     const events = await given.cms.withUpcomingEventsRegistered();
+    const cmsService = await moduleFixture.resolve(CmsService);
+    const event = await cmsService.getEventById(events[0].id);
     const postsService = await moduleFixture.resolve<PostsService>(PostsService);
-    const posts = await postsService.findManyByIds(events[0].posts as string[]);
+    const posts = await postsService.findManyByIds(events[0].posts.map(p => p.postId));
     const eventAsGQLResponse = {
-      ...events[0],
-      startAt: events[0].startAt.toISOString(),
-      endAt: events[0].endAt.toISOString(),
-      posts: reconciliateByKey('_id', events[0].posts as string[], posts).map(p => ({
+      ...event,
+      startAt: event.startAt.toISOString(),
+      endAt: event.endAt.toISOString(),
+      posts: reconciliateByKey('_id', event.posts as string[], posts).map(p => ({
         ...omit(['category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
         createdAt: p.createdAt.toISOString(),
       })),
     };
     const getEventQuery = gql`
       {
-        event(id: ${events[0].id}) {
+        event(id: ${event.id}) {
           id
           title
           bannerUrl

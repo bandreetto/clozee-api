@@ -4,19 +4,20 @@ dotenv.config({
 });
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpService, INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { gql } from 'apollo-server-core';
 import { print } from 'graphql';
-import { CmsService } from '../src/cms/cms.service';
-import { Post } from '../src/posts/contracts/index';
 import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
-import { flatten, omit } from 'ramda';
 import { Connection } from 'mongoose';
 import { PostsService } from '../src/posts/posts.service';
 import { reconciliateByKey } from '../src/common/reconciliators';
+import { omit } from 'ramda';
+import { ClockServiceMock, HttpServiceMock } from './mocks';
+import { CmsService } from '../src/cms/cms.service';
+import { ClockService } from '../src/common/clock/clock.service';
 
 describe('Explore (e2e)', () => {
   let given: Given;
@@ -27,8 +28,10 @@ describe('Explore (e2e)', () => {
     moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
     })
-      .overrideProvider(CmsService)
-      .useValue({ getEvents: () => {}, getEventById: () => {} })
+      .overrideProvider(HttpService)
+      .useClass(HttpServiceMock)
+      .overrideProvider(ClockService)
+      .useClass(ClockServiceMock)
       .compile();
     given = await givenFactory(moduleFixture);
     app = moduleFixture.createNestApplication();
@@ -43,12 +46,14 @@ describe('Explore (e2e)', () => {
 
   afterAll(async done => {
     await app.close();
-    const connection = await moduleFixture.resolve(getConnectionToken());
+    const connection = await moduleFixture.resolve<Connection>(getConnectionToken());
     connection.close(() => done());
   });
 
   it('should return the list of upcoming events', async done => {
-    const events = await given.cms.withUpcomingEventsRegistered();
+    const cmsEvents = await given.cms.withUpcomingEventsRegistered();
+    const cmsService = await moduleFixture.resolve(CmsService);
+    const events = await Promise.all(cmsEvents.map(e => cmsService.getEventById(e.id)));
     const postsService = await moduleFixture.resolve<PostsService>(PostsService);
     const posts = await Promise.all(
       events.map(async e => {
@@ -90,6 +95,7 @@ describe('Explore (e2e)', () => {
         }
       }
     `;
+
     await request(app.getHttpServer())
       .post('/graphql')
       .send({

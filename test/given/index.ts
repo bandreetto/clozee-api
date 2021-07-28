@@ -1,8 +1,10 @@
+import { HttpService } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
 import { CategoriesService } from '../../src/categories/categories.service';
-import { CmsService } from '../../src/cms/cms.service';
+import { ClockService } from '../../src/common/clock/clock.service';
 import { PostsService } from '../../src/posts/posts.service';
 import { UsersService } from '../../src/users/users.service';
+import { ClockServiceMock, HttpServiceMock } from '../mocks';
 import { GivenCategories, givenCategoriesFactory } from './categories';
 import { GivenCms, givenCmsFactory } from './cms';
 import { GivenPosts, givenPostsFactory } from './posts';
@@ -25,8 +27,9 @@ export async function givenFactory(testingModule: TestingModule) {
   const postsService = await testingModule.resolve(PostsService);
   const givenPosts = givenPostsFactory(postsService, givenUsers, givenCategories);
 
-  const cmsService = await testingModule.resolve(CmsService);
-  const givenCms = givenCmsFactory(cmsService, givenPosts);
+  const httpServiceMock = (await testingModule.resolve(HttpService)) as HttpServiceMock;
+  const clockService = await testingModule.resolve(ClockService);
+  const givenCms = givenCmsFactory(httpServiceMock, clockService, givenPosts);
 
   return {
     categories: givenCategories,
