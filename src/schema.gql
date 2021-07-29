@@ -219,6 +219,17 @@ enum POST_CONDITIONS {
   USED_FAIR
 }
 
+type Group {
+  _id: String!
+  name: String!
+
+  """List of users participating in this group."""
+  participants: [User!]!
+
+  """The list of posts on this group."""
+  posts: [Post!]!
+}
+
 type User {
   _id: String!
   pagarmeRecipientId: String
@@ -259,6 +270,9 @@ type User {
   """The list of users following this user."""
   following: [User!]!
 
+  """The groups that the user is participating in."""
+  groups: [Group!]!
+
   """A boolean indicating weather the current user is following this user."""
   isFollowing: Boolean!
   createdAt: DateTime!
@@ -275,27 +289,6 @@ type Delivery {
 
   """The expected delivery time in business days."""
   deliveryTime: Int!
-}
-
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
 }
 
 type PageInfo {
@@ -358,6 +351,27 @@ type Order {
   """The amount of this order that was donated."""
   donationAmount: Float!
   createdAt: DateTime!
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
 }
 
 type Session {
@@ -504,6 +518,9 @@ type Query {
   """Returns explore data"""
   explore: Explore!
   event(id: Float!): ClozeeEvent!
+
+  """Returns a group by id. Only return groups that the user is part of."""
+  group(id: String!): Group!
 }
 
 input FeedTagsInput {
@@ -594,6 +611,15 @@ type Mutation {
 
   """Mark all user notifications as seen."""
   clearNotifications: [Notification!]!
+
+  """Create a new group for this user and the provided participants."""
+  createGroup(
+    """The user ids of the participants of this group."""
+    participants: [String!]!
+
+    """The name of the group."""
+    name: String!
+  ): Group!
 }
 
 input SignUpInput {

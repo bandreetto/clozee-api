@@ -13,6 +13,7 @@ import { BankInfo, BankInfoSchema } from './bank-info';
 import { FeedTags, FeedTagsSchema } from './feed-tags';
 import { PaymentMethod } from './payment-method';
 import { sentitiveData } from '../user.field-middlewares';
+import { Group } from '../../groups/contracts';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -111,6 +112,9 @@ export class User {
     description: 'The list of users following this user.',
   })
   following?: User[];
+
+  @Field(() => [Group], { description: 'The groups that the user is participating in.', middleware: [sentitiveData] })
+  groups?: Group[];
 
   @Field({
     description: 'A boolean indicating weather the current user is following this user.',

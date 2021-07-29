@@ -27,6 +27,7 @@ import { CmsModule } from './cms/cms.module';
 import { ExploreModule } from './explore/explore.module';
 import { ClozeeEventsModule } from './clozee-events/clozee-events.module';
 import { ClockService } from './common/clock/clock.service';
+import { GroupsModule } from './groups/groups.module';
 
 @Global()
 @Module({
@@ -70,6 +71,7 @@ import { ClockService } from './common/clock/clock.service';
     CmsModule,
     ExploreModule,
     ClozeeEventsModule,
+    GroupsModule,
   ],
   providers: [ClockService],
   exports: [ClockService],
