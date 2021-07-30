@@ -113,9 +113,6 @@ export class User {
   })
   following?: User[];
 
-  @Field(() => [Group], { description: 'The groups that the user is participating in.', middleware: [sentitiveData] })
-  groups?: Group[];
-
   @Field({
     description: 'A boolean indicating weather the current user is following this user.',
   })

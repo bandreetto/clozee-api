@@ -27,6 +27,32 @@ export class GroupsResolver {
   }
 
   @UseGuards(AuthGuard)
+  @Query(() => [Group], { description: 'Return the groups that this user is participating in.' })
+  async groups(@CurrentUser() tokenUser: TokenUser): Promise<Group[]> {
+    const posts = await this.postsService.findLastDistinctUsersPosts(6);
+    return [
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 1',
+        posts: posts,
+        participants: await this.usersService.findManyByIds([...(posts.map(p => p.user) as string[]), tokenUser._id]),
+      },
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 2',
+        posts: posts,
+        participants: await this.usersService.findManyByIds([...(posts.map(p => p.user) as string[]), tokenUser._id]),
+      },
+      {
+        _id: v4(),
+        name: 'Nome do Grupo 3',
+        posts: posts,
+        participants: await this.usersService.findManyByIds([...(posts.map(p => p.user) as string[]), tokenUser._id]),
+      },
+    ];
+  }
+
+  @UseGuards(AuthGuard)
   @Mutation(() => Group, { description: 'Create a new group for this user and the provided participants.' })
   async createGroup(
     @Args('name', { description: 'The name of the group.' }) name: string,
