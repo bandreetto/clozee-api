@@ -312,29 +312,4 @@ export class UsersResolver {
     const follows = await this.followsLoader.byFollowee.load(user._id);
     return !!follows.find(follow => follow.follower === currentUser?._id);
   }
-
-  @ResolveField()
-  async groups(): Promise<Group[]> {
-    const posts = await this.postsService.findLastDistinctUsersPosts(6);
-    return [
-      {
-        _id: v4(),
-        name: 'Nome do Grupo 1',
-        posts: posts,
-        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
-      },
-      {
-        _id: v4(),
-        name: 'Nome do Grupo 2',
-        posts: posts,
-        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
-      },
-      {
-        _id: v4(),
-        name: 'Nome do Grupo 3',
-        posts: posts,
-        participants: await this.usersService.findManyByIds(posts.map(p => p.user) as string[]),
-      },
-    ];
-  }
 }
