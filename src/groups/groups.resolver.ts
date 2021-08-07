@@ -47,7 +47,7 @@ export class GroupsResolver {
       {
         _id: v4(),
         name: 'Nome do Grupo 3',
-        posts: posts,
+        posts: [],
         participants: await this.usersService.findManyByIds([...(posts.map(p => p.user) as string[]), tokenUser._id]),
       },
     ];
