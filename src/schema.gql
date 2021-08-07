@@ -422,6 +422,51 @@ type PostCommentNotification implements Notification {
   post: Post!
 }
 
+type Group {
+  _id: String!
+  name: String!
+
+  """List of users participating in this group."""
+  participants: [User!]!
+
+  """The list of posts on this group."""
+  posts: [Post!]!
+}
+
+type GroupPostNotification implements Notification {
+  _id: String!
+  kind: String!
+
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
+
+  """The moment this notification was sent."""
+  createdAt: DateTime!
+
+  """The group that the post was added to."""
+  group: Group!
+
+  """Owner of the post."""
+  postOwner: User!
+}
+
+type GroupInviteNotification implements Notification {
+  _id: String!
+  kind: String!
+
+  """Flag indicating if this notification is new and/or unseen."""
+  unseen: Boolean!
+
+  """The moment this notification was sent."""
+  createdAt: DateTime!
+
+  """The group the user was added to."""
+  group: Group!
+
+  """User who sent the invitation."""
+  inviter: User!
+}
+
 type SearchCategory {
   id: Float!
 
@@ -460,17 +505,6 @@ type Explore {
 
   """A list of upcoming events."""
   events: [ClozeeEvent!]!
-}
-
-type Group {
-  _id: String!
-  name: String!
-
-  """List of users participating in this group."""
-  participants: [User!]!
-
-  """The list of posts on this group."""
-  posts: [Post!]!
 }
 
 type Query {
@@ -620,6 +654,9 @@ type Mutation {
     """The name of the group."""
     name: String!
   ): Group!
+
+  """Adds a post to the group."""
+  addPostToGroup(post: AddGroupPostInput!, groupId: String!): Group!
 }
 
 input SignUpInput {
@@ -744,6 +781,30 @@ input AddCommentInput {
   """The id of the post the comment is being made."""
   post: String!
   body: String!
+}
+
+input AddGroupPostInput {
+  title: String!
+  size: SIZES!
+  description: String!
+
+  """An array of urls for post images."""
+  images: [String!] = []
+
+  """An array of images id's, get from the UploadPostImage mutation"""
+  imagesIds: [String!] = []
+
+  """The id of the post category."""
+  category: String!
+
+  """The condition of this post's product."""
+  condition: POST_CONDITIONS!
+
+  """Price of the item being announced in cents."""
+  price: Int!
+
+  """The percentage of the seller's profit being destined to donation."""
+  donationPercentage: Float = 0
 }
 
 type Subscription {
