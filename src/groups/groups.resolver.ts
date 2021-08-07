@@ -7,6 +7,7 @@ import { PostsService } from '../posts/posts.service';
 import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { Group } from './contracts';
+import { AddGroupPostInput } from './contracts/inputs';
 
 @Resolver(Group)
 export class GroupsResolver {
@@ -46,7 +47,7 @@ export class GroupsResolver {
       {
         _id: v4(),
         name: 'Nome do Grupo 3',
-        posts: posts,
+        posts: [],
         participants: await this.usersService.findManyByIds([...(posts.map(p => p.user) as string[]), tokenUser._id]),
       },
     ];
@@ -65,6 +66,30 @@ export class GroupsResolver {
       name: name,
       posts: [],
       participants: await this.usersService.findManyByIds([...participants, tokenUser._id]),
+    };
+  }
+
+  @UseGuards(AuthGuard)
+  @Mutation(() => Group, { description: 'Adds a post to the group.' })
+  async addPostToGroup(
+    @Args('groupId') groupId: string,
+    @Args('post') post: AddGroupPostInput,
+    @CurrentUser() tokenUser: TokenUser,
+  ): Promise<Group> {
+    if (groupId === '404') {
+      throw new NotFoundException('Could not find group to add post');
+    }
+    const posts = await this.postsService.findLastDistinctUsersPosts(6);
+    const participants = await this.usersService.findManyByIds([
+      ...(posts.map(p => p.user) as string[]),
+      tokenUser._id,
+    ]);
+
+    return {
+      _id: groupId,
+      name: 'Grupo com mais 1 post',
+      posts: posts,
+      participants,
     };
   }
 }

@@ -1,6 +1,8 @@
 export * from './comment-tag-notification';
 export * from './sale-notification';
 export * from './post-comment-notification';
+export * from './group-post-notification';
+export * from './group-invite-notification';
 
 import { Field, InterfaceType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
@@ -31,11 +33,7 @@ export class Notification {
   @Prop({
     type: String,
     required: true,
-    enum: [
-      CommentTagNotification.name,
-      SaleNotification.name,
-      PostCommentNotification.name,
-    ],
+    enum: [CommentTagNotification.name, SaleNotification.name, PostCommentNotification.name],
   })
   @Field()
   kind: string;
