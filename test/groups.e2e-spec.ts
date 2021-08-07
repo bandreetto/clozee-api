@@ -82,7 +82,6 @@ describe('Groups (e2e)', () => {
         },
       })
       .set({
-        accept: 'applicaiton/json',
         authorization: `Bearer ${groupOwner[1]}`,
       })
       .expect(200)
