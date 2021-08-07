@@ -47,7 +47,7 @@ describe('Groups (e2e)', () => {
     connection.close(() => done());
   });
 
-  it('should be able to create a group and add posts to it', async done => {
+  it('should be able to create a group', async done => {
     const [groupOwner, ...invitees] = await given.users.someUsersLoggedIn(3);
     const GROUP_NAME = 'Test Group';
     const expectedGQLResponse = {
