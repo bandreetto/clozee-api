@@ -784,27 +784,12 @@ input AddCommentInput {
 }
 
 input AddGroupPostInput {
+  _id: String!
   title: String!
-  size: SIZES!
   description: String!
-
-  """An array of urls for post images."""
-  images: [String!] = []
 
   """An array of images id's, get from the UploadPostImage mutation"""
   imagesIds: [String!] = []
-
-  """The id of the post category."""
-  category: String!
-
-  """The condition of this post's product."""
-  condition: POST_CONDITIONS!
-
-  """Price of the item being announced in cents."""
-  price: Int!
-
-  """The percentage of the seller's profit being destined to donation."""
-  donationPercentage: Float = 0
 }
 
 type Subscription {
