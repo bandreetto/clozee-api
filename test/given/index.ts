@@ -1,10 +1,11 @@
 import { HttpService } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { TestingModule } from '@nestjs/testing';
 import { CategoriesService } from '../../src/categories/categories.service';
 import { ClockService } from '../../src/common/clock/clock.service';
 import { PostsService } from '../../src/posts/posts.service';
 import { UsersService } from '../../src/users/users.service';
-import { ClockServiceMock, HttpServiceMock } from '../mocks';
+import { HttpServiceMock } from '../mocks';
 import { GivenCategories, givenCategoriesFactory } from './categories';
 import { GivenCms, givenCmsFactory } from './cms';
 import { GivenPosts, givenPostsFactory } from './posts';
@@ -22,7 +23,8 @@ export async function givenFactory(testingModule: TestingModule) {
   const givenCategories = givenCategoriesFactory(categoriesService);
 
   const usersService = await testingModule.resolve(UsersService);
-  const givenUsers = givenUsersFactory(usersService);
+  const jwtService = await testingModule.resolve(JwtService);
+  const givenUsers = givenUsersFactory(usersService, jwtService);
 
   const postsService = await testingModule.resolve(PostsService);
   const givenPosts = givenPostsFactory(postsService, givenUsers, givenCategories);

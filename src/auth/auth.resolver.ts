@@ -13,6 +13,7 @@ import { TOKEN_TYPES } from './contracts/enums';
 import { AuthGuard } from '../common/guards';
 import { CurrentToken, TokenTypes } from '../common/decorators';
 import { EventEmitter2 } from 'eventemitter2';
+import { createAccessToken, createPreSignToken, createRefreshToken } from './auth.logic';
 
 const SCRYPT_KEYLEN = 64;
 const SALT_LEN = 16;
@@ -27,31 +28,6 @@ export class AuthResolver {
     private readonly jwtService: JwtService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
-
-  createAccessToken = (user: User) =>
-    this.jwtService.sign(
-      { username: user.username },
-      {
-        header: {
-          typ: TOKEN_TYPES.ACCESS,
-        },
-        expiresIn: configuration.auth.accessTokenExp(),
-        subject: user._id,
-      },
-    );
-
-  createRefreshToken = (userId: string) =>
-    this.jwtService.sign(
-      {},
-      {
-        header: { typ: TOKEN_TYPES.REFRESH },
-        expiresIn: configuration.auth.refreshTokenExp(),
-        subject: userId,
-      },
-    );
-
-  createPreSignToken = (userId: string) =>
-    this.jwtService.sign({}, { header: { typ: TOKEN_TYPES.PRE_SIGN }, subject: userId });
 
   @Mutation(() => AuthResponse)
   async signUp(@Args('input') input: SignUpInput): Promise<AuthResponse> {
@@ -108,8 +84,8 @@ export class AuthResolver {
       );
       const response = {
         me: user,
-        token: this.createAccessToken(user),
-        refreshToken: this.createRefreshToken(user._id),
+        token: createAccessToken(user, configuration.auth.accessTokenExp(), this.jwtService),
+        refreshToken: createRefreshToken(user._id, configuration.auth.accessTokenExp(), this.jwtService),
       };
       await this.usersService.commitTransaction(session);
       return response;
@@ -137,7 +113,7 @@ export class AuthResolver {
     });
     await this.eventEmitter.emitAsync('user.preSigned', user._id);
     return {
-      preSignToken: this.createPreSignToken(user._id),
+      preSignToken: createPreSignToken(user._id, this.jwtService),
       userId: user._id,
     };
   }
@@ -154,8 +130,8 @@ export class AuthResolver {
 
     return {
       me: user,
-      token: this.createAccessToken(user),
-      refreshToken: this.createRefreshToken(user._id),
+      token: createAccessToken(user, configuration.auth.accessTokenExp(), this.jwtService),
+      refreshToken: createRefreshToken(user._id, configuration.auth.accessTokenExp(), this.jwtService),
     };
   }
 
@@ -169,8 +145,8 @@ export class AuthResolver {
 
     return {
       me: user,
-      token: this.createAccessToken(user),
-      refreshToken: this.createRefreshToken(user._id),
+      token: createAccessToken(user, configuration.auth.accessTokenExp(), this.jwtService),
+      refreshToken: createRefreshToken(user._id, configuration.auth.accessTokenExp(), this.jwtService),
     };
   }
 }
