@@ -12,11 +12,7 @@ import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { PostsService } from '../src/posts/posts.service';
-import { reconciliateByKey } from '../src/common/reconciliators';
-import { omit } from 'ramda';
 import { HttpServiceMock } from './mocks';
-import { CmsService } from '../src/cms/cms.service';
 import configuration from '../src/config/configuration';
 
 describe('Groups (e2e)', () => {

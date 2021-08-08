@@ -98,9 +98,11 @@ export class PostsResolver {
       _id: v4(),
       user: user._id,
       images,
+      type: 'FeedPost',
     });
 
     this.eventEmitter.emit('post.created', createdPost);
+    this.eventEmitter.emit('feed-post.created', createdPost);
 
     return createdPost;
   }

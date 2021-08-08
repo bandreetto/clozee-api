@@ -1,4 +1,4 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { User } from '../../users/contracts';
 import { Comment } from '../../comments/contracts';
@@ -16,51 +16,54 @@ export class Post {
   @Field(() => User)
   user: User | string;
 
-  @Prop({ required: true })
-  @Field()
-  title: string;
+  @Prop()
+  @Field({ nullable: true })
+  title?: string;
 
-  @Prop({ type: SIZES, required: true })
+  @Prop({ type: SIZES })
   @Field(() => SIZES, {
     description: 'Size of the product being announced on this post.',
+    nullable: true,
   })
-  size: SIZES;
+  size?: SIZES;
 
   @Prop()
   @Field({ nullable: true })
-  description: string;
+  description?: string;
 
   @Prop({ type: [String], default: [] })
   @Field(() => [String], { description: 'An array of urls for post images.' })
   images: string[];
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String })
   @Field(() => Category, {
     description: 'The category of this post.',
+    nullable: true,
   })
-  category: string | Category;
+  category?: string | Category;
 
-  @Prop({ required: true })
-  @Field({ description: 'Price of the item being announced in cents.' })
-  price: number;
+  @Prop()
+  @Field({ description: 'Price of the item being announced in cents.', nullable: true })
+  price?: number;
 
-  @Prop({ required: true, min: 0, max: 100, default: 0 })
+  @Prop({ min: 0, max: 100, default: 0 })
   @Field({
     defaultValue: 0,
     description: "The percentage of the seller's profit being destined to donation.",
   })
-  donationPercentage: number;
+  donationPercentage?: number;
 
   @Field(() => Int, {
     description: "The calculated amount of the post's price going to donation in cents.",
   })
   donationAmount?: number;
 
-  @Prop({ required: true })
+  @Prop()
   @Field(() => POST_CONDITIONS, {
     description: "The condition of the post's product",
+    nullable: true,
   })
-  condition: POST_CONDITIONS;
+  condition?: POST_CONDITIONS;
 
   @Prop({ default: [] })
   reportedBy?: string[];
@@ -93,6 +96,15 @@ export class Post {
 
   @Prop({ default: false })
   deleted?: boolean;
+
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['FeedPost', 'GroupPost'],
+    default: 'FeedPost',
+  })
+  @Field(() => String, { defaultValue: 'FeedPost' })
+  type: 'FeedPost' | 'GroupPost';
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

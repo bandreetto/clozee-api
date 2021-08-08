@@ -58,7 +58,7 @@ describe('ClozeeEvents (e2e)', () => {
       startAt: event.startAt.toISOString(),
       endAt: event.endAt.toISOString(),
       posts: reconciliateByKey('_id', event.posts as string[], posts).map(p => ({
-        ...omit(['category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
+        ...omit(['type', 'category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
         createdAt: p.createdAt.toISOString(),
       })),
     };

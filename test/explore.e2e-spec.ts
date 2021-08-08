@@ -67,7 +67,7 @@ describe('Explore (e2e)', () => {
       startAt: e.startAt.toISOString(),
       endAt: e.endAt.toISOString(),
       posts: posts[index].map(p => ({
-        ...omit(['category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
+        ...omit(['type', 'category', 'deleted', 'reportedBy', 'updatedAt', 'user', '__v'], p),
         createdAt: p.createdAt.toISOString(),
       })),
     }));

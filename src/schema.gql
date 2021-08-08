@@ -168,20 +168,20 @@ type Category {
 type Post {
   _id: String!
   user: User!
-  title: String!
+  title: String
 
   """Size of the product being announced on this post."""
-  size: SIZES!
+  size: SIZES
   description: String
 
   """An array of urls for post images."""
   images: [String!]!
 
   """The category of this post."""
-  category: Category!
+  category: Category
 
   """Price of the item being announced in cents."""
-  price: Float!
+  price: Float
 
   """The percentage of the seller's profit being destined to donation."""
   donationPercentage: Float!
@@ -190,7 +190,7 @@ type Post {
   donationAmount: Int!
 
   """The condition of the post's product"""
-  condition: POST_CONDITIONS!
+  condition: POST_CONDITIONS
   comments: [Comment!]!
 
   """A boolean indicating whether this post was sold or not."""
@@ -209,6 +209,7 @@ type Post {
   """
   liked: Boolean!
   createdAt: DateTime!
+  type: String!
 }
 
 """Possible post's product conditions."""
@@ -784,7 +785,7 @@ input AddCommentInput {
 }
 
 input AddGroupPostInput {
-  title: String!
+  title: String
   description: String!
 
   """An array of images id's, get from the UploadPostImage mutation"""

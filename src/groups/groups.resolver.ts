@@ -4,7 +4,6 @@ import { CurrentUser } from '../common/decorators';
 import { AuthGuard } from '../common/guards';
 import { TokenUser } from '../common/types';
 import { PostsService } from '../posts/posts.service';
-import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { Group } from './contracts';
 import { AddGroupPostInput } from './contracts/inputs';
@@ -12,13 +11,15 @@ import { GroupsService } from './groups.service';
 import { UsersLoader } from 'src/users/users.dataloaders';
 import { User } from 'src/users/contracts';
 import { Post } from 'src/posts/contracts';
+import configuration from 'src/config/configuration';
+import { PostsLoader } from 'src/posts/posts.dataloader';
 
 @Resolver(Group)
 export class GroupsResolver {
   constructor(
     private readonly groupsService: GroupsService,
     private readonly postsService: PostsService,
-    private readonly usersService: UsersService,
+    private readonly postsLoader: PostsLoader,
     private readonly usersLoader: UsersLoader,
   ) {}
 
@@ -28,7 +29,7 @@ export class GroupsResolver {
     const group = await this.groupsService.findById(groupId);
     if (!group) throw new NotFoundException(`Could not find group with the id ${groupId}`);
     const groupParticipants = await this.groupsService.findParticipantsByGroupId(groupId);
-    if (!groupParticipants.find(gp => gp.user === tokenUser._id))
+    if (!groupParticipants.find(participant => participant.user === tokenUser._id))
       throw new NotFoundException(`Could not find group with the id ${groupId}`);
     return { ...group, participants: groupParticipants.map(gp => gp.user) };
   }
@@ -81,20 +82,29 @@ export class GroupsResolver {
     @Args('post') post: AddGroupPostInput,
     @CurrentUser() tokenUser: TokenUser,
   ): Promise<Group> {
-    if (groupId === '404') {
-      throw new NotFoundException('Could not find group to add post');
+    const group = await this.groupsService.findById(groupId);
+    if (!group) {
+      throw new NotFoundException('Could not find the group to add post.');
     }
-    const posts = await this.postsService.findLastDistinctUsersPosts(6);
-    const participants = await this.usersService.findManyByIds([
-      ...(posts.map(p => p.user) as string[]),
-      tokenUser._id,
-    ]);
-
+    const participants = await this.groupsService.findParticipantsByGroupId(groupId);
+    if (!participants.find(participant => participant.user === tokenUser._id)) {
+      throw new NotFoundException('Could not find the group to add post.');
+    }
+    const createdPost = await this.postsService.create({
+      _id: v4(),
+      ...post,
+      images: post.imagesIds.map(imageId => `https://${configuration.images.cdn()}/posts/${imageId}`),
+      user: tokenUser._id,
+      type: 'GroupPost',
+    });
+    await this.groupsService.createGroupPost({
+      _id: v4(),
+      post: createdPost._id,
+      group: group._id,
+    });
     return {
-      _id: groupId,
-      name: 'Grupo com mais 1 post',
-      posts: posts,
-      participants,
+      ...group,
+      participants: participants.map(participant => participant.user),
     };
   }
 
@@ -108,7 +118,8 @@ export class GroupsResolver {
   }
 
   @ResolveField()
-  posts(@Root() group: Group): Promise<Post[]> {
-    return Promise.all([]);
+  async posts(@Root() group: Group): Promise<Post[]> {
+    const groupPosts = await this.groupsService.findGroupPostsByGroupId(group._id);
+    return Promise.all(groupPosts.map(groupPost => this.postsLoader.load(groupPost.post)));
   }
 }
