@@ -94,6 +94,7 @@ export class GroupsResolver {
       post: createdPost._id,
       group: group._id,
     });
+    this.eventEmitter.emit('group-post.created', { group, post: createdPost, postOwner: tokenUser });
     return group;
   }
 

@@ -15,13 +15,13 @@ export class GroupInviteNotification implements Notification {
   user: string;
   createdAt?: Date;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   @Field(() => Group, {
     description: 'The group the user was added to.',
   })
   group: string | Group;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   @Field(() => User, {
     description: 'User who sent the invitation.',
   })

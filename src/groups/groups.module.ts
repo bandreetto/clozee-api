@@ -27,6 +27,6 @@ import { GroupsService } from './groups.service';
     UsersModule,
   ],
   providers: [GroupsResolver, GroupsService, GroupsLoader],
-  exports: [GroupsLoader],
+  exports: [GroupsLoader, GroupsService],
 })
 export class GroupsModule {}

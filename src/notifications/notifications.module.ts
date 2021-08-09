@@ -35,6 +35,7 @@ import { LikesModule } from '../likes/likes.module';
 import { NotificationTasks } from './notifications.tasks';
 import { GroupInviteNotificationResolver } from './group-invite-notification.resolver';
 import { GroupsModule } from 'src/groups/groups.module';
+import { GroupPostNotificationResolver } from './group-post-notification.resolver';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { GroupsModule } from 'src/groups/groups.module';
     NotificationsConsumer,
     PostCommentNotificationResolver,
     GroupInviteNotificationResolver,
+    GroupPostNotificationResolver,
     NotificationTasks,
     {
       provide: 'PUB_SUB',
