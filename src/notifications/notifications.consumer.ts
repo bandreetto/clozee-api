@@ -8,11 +8,12 @@ import { Post } from '../posts/contracts';
 import { UsersService } from '../users/users.service';
 import { v4 } from 'uuid';
 import { CommentsService } from '../comments/comments.service';
-import { CommentTagNotification, SaleNotification } from './contracts';
+import { CommentTagNotification, GroupInviteNotification, SaleNotification } from './contracts';
 import { NotificationsService } from './notifications.service';
 import { PostCommentNotification } from './contracts/post-comment-notification';
 import { FollowsService } from '../follows/follows.service';
 import { PostsService } from '../posts/posts.service';
+import { GroupCreatedPayload } from 'src/groups/contracts/payloads';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -91,7 +92,7 @@ export class NotificationsConsumer {
         `Sending comment created push notification to post owner ${payload.commentOwner._id} for comment ${payload.comment._id}`,
       );
       const post = await this.postsService.findById(payload.comment.post as string);
-      if (payload.comment.tags.some(tag => tag === post.user))
+      if ((payload.comment.tags as string[]).some(tag => tag === post.user))
         return this.logger.log(
           'Skipping comment created push notification as post owner will be notified by the tag notification.',
         );
@@ -251,6 +252,31 @@ export class NotificationsConsumer {
     } catch (error) {
       this.logger.error({
         message: 'Error while sending push to followers on new post.',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('group.created', { async: true })
+  async createGroupInviteNotifications(payload: GroupCreatedPayload) {
+    try {
+      const groupInviteNotifications: GroupInviteNotification[] = payload.participants.map(participant => ({
+        _id: v4(),
+        kind: GroupInviteNotification.name,
+        user: participant,
+        group: payload.group,
+        inviter: payload.groupCreator._id,
+        unseen: true,
+      }));
+      const createdNotifications = await this.notificationsService.createMany(groupInviteNotifications);
+      await Promise.all(
+        createdNotifications.map(notification => this.pubSub.publish('notification', { notification })),
+      );
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while sending push to group invitees',
         payload,
         error: error.toString(),
         metadata: error,

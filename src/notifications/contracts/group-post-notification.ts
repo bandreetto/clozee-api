@@ -1,8 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Group } from 'src/groups/contracts';
 import { User } from 'src/users/contracts';
 import { Notification } from '.';
 
+@Schema()
 @ObjectType({
   implements: () => [Notification],
 })
@@ -23,3 +25,5 @@ export class GroupPostNotification implements Notification {
   })
   postOwner: User;
 }
+
+export const GroupPostNotificationSchema = SchemaFactory.createForClass(GroupPostNotification);

@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PostsModule } from '../posts/posts.module';
 import { UsersModule } from '../users/users.module';
 import { Group, GroupParticipant, GroupParticipantSchema, GroupPost, GroupPostSchema, GroupSchema } from './contracts';
+import { GroupsLoader } from './groups.dataloader';
 import { GroupsResolver } from './groups.resolver';
 import { GroupsService } from './groups.service';
 
@@ -25,6 +26,7 @@ import { GroupsService } from './groups.service';
     PostsModule,
     UsersModule,
   ],
-  providers: [GroupsResolver, GroupsService],
+  providers: [GroupsResolver, GroupsService, GroupsLoader],
+  exports: [GroupsLoader],
 })
 export class GroupsModule {}
