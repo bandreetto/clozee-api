@@ -1,8 +1,10 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Group } from 'src/groups/contracts';
 import { User } from 'src/users/contracts';
 import { Notification } from '.';
 
+@Schema()
 @ObjectType({
   implements: () => [Notification],
 })
@@ -13,13 +15,17 @@ export class GroupInviteNotification implements Notification {
   user: string;
   createdAt?: Date;
 
+  @Prop({ type: String, required: true })
   @Field(() => Group, {
     description: 'The group the user was added to.',
   })
-  group: Group;
+  group: string | Group;
 
+  @Prop({ type: String, required: true })
   @Field(() => User, {
     description: 'User who sent the invitation.',
   })
-  inviter: User;
+  inviter: string | User;
 }
+
+export const GroupInviteNotificationSchema = SchemaFactory.createForClass(GroupInviteNotification);

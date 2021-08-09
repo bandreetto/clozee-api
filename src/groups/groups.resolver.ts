@@ -13,6 +13,7 @@ import { User } from 'src/users/contracts';
 import { Post } from 'src/posts/contracts';
 import configuration from 'src/config/configuration';
 import { PostsLoader } from 'src/posts/posts.dataloader';
+import { EventEmitter2 } from 'eventemitter2';
 
 @Resolver(Group)
 export class GroupsResolver {
@@ -21,6 +22,7 @@ export class GroupsResolver {
     private readonly postsService: PostsService,
     private readonly postsLoader: PostsLoader,
     private readonly usersLoader: UsersLoader,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   @UseGuards(AuthGuard)
@@ -31,7 +33,7 @@ export class GroupsResolver {
     const groupParticipants = await this.groupsService.findParticipantsByGroupId(groupId);
     if (!groupParticipants.find(participant => participant.user === tokenUser._id))
       throw new NotFoundException(`Could not find group with the id ${groupId}`);
-    return { ...group, participants: groupParticipants.map(gp => gp.user) };
+    return group;
   }
 
   @UseGuards(AuthGuard)
@@ -39,15 +41,7 @@ export class GroupsResolver {
   async groups(@CurrentUser() tokenUser: TokenUser): Promise<Group[]> {
     const participating = await this.groupsService.findParticipantsByUser(tokenUser._id);
     const groups = await this.groupsService.findManyByIds(participating.map(participant => participant.group));
-    const allParticipants = await this.groupsService.findParticipantsByManyGroupIds(groups.map(group => group._id));
-    return groups.map(group => {
-      const participants = allParticipants.filter(participant => participant.group === group._id);
-
-      return {
-        ...group,
-        participants,
-      };
-    });
+    return groups;
   }
 
   @UseGuards(AuthGuard)
@@ -69,10 +63,8 @@ export class GroupsResolver {
       group: group._id,
     }));
     await this.groupsService.createGroupParticipants(groupParticipants);
-    return {
-      ...group,
-      participants: participants,
-    };
+    this.eventEmitter.emit('group.created', { group, participants, groupCreator: tokenUser });
+    return group;
   }
 
   @UseGuards(AuthGuard)
@@ -102,17 +94,15 @@ export class GroupsResolver {
       post: createdPost._id,
       group: group._id,
     });
-    return {
-      ...group,
-      participants: participants.map(participant => participant.user),
-    };
+    this.eventEmitter.emit('group-post.created', { group, post: createdPost, postOwner: tokenUser });
+    return group;
   }
 
   @ResolveField()
-  participants(@Root() group: Group): Promise<User[]> {
-    const users = group.participants.map((participant: string | User) => {
-      if (typeof participant !== 'string') return participant;
-      return this.usersLoader.load(participant);
+  async participants(@Root() group: Group): Promise<User[]> {
+    const participants = await this.groupsService.findParticipantsByGroupId(group._id);
+    const users = participants.map(participant => {
+      return this.usersLoader.load(participant.user);
     });
     return Promise.all(users);
   }

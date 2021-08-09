@@ -9,7 +9,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { JwtService } from '@nestjs/jwt';
 import { Token } from '../auth/contracts';
 import { isAccessToken } from '../auth/auth.logic';
-import { NOTIFICAION_KINDS, NOTIFICATION_ENUM_TO_KIND_MAPPER } from './contracts/enums';
+import { NOTIFICATION_KINDS, NOTIFICATION_ENUM_TO_KIND_MAPPER } from './contracts/enums';
 
 /**
  * 5 hours in seconds => 5 hours * 60 minutes * 60 seconds
@@ -29,7 +29,7 @@ export class NotificationsResolver {
       variables: {
         token: string;
         userId: string;
-        notificationKinds: NOTIFICAION_KINDS[];
+        notificationKinds: NOTIFICATION_KINDS[];
       },
     ) => {
       const notificationKindsValues = variables.notificationKinds.map(
@@ -45,13 +45,13 @@ export class NotificationsResolver {
     @Args('notificationKinds', {
       description:
         'The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.',
-      type: () => [NOTIFICAION_KINDS],
+      type: () => [NOTIFICATION_KINDS],
       /**
        * Use these as default to support old versions of the app.
        */
-      defaultValue: [NOTIFICAION_KINDS.COMMENT_TAG, NOTIFICAION_KINDS.SALE],
+      defaultValue: [NOTIFICATION_KINDS.COMMENT_TAG, NOTIFICATION_KINDS.SALE],
     })
-    _notificationKindsEnum: NOTIFICAION_KINDS[],
+    _notificationKindsEnum: NOTIFICATION_KINDS[],
   ) {
     const decodedToken = await this.jwtService.verifyAsync<Token>(token, {
       complete: true,
@@ -68,13 +68,13 @@ export class NotificationsResolver {
     @Args('notificationKinds', {
       description:
         'The kinds of notification to return. If this argument is ommited, the service will return the comment tag and sale notification for compatibility with older versions.',
-      type: () => [NOTIFICAION_KINDS],
+      type: () => [NOTIFICATION_KINDS],
       /**
        * Use these as default to support old versions of the app.
        */
-      defaultValue: [NOTIFICAION_KINDS.COMMENT_TAG, NOTIFICAION_KINDS.SALE],
+      defaultValue: [NOTIFICATION_KINDS.COMMENT_TAG, NOTIFICATION_KINDS.SALE],
     })
-    notificationKindsEnum: NOTIFICAION_KINDS[],
+    notificationKindsEnum: NOTIFICATION_KINDS[],
     @CurrentUser()
     tokenUser: TokenUser,
   ): Promise<Notification[]> {

@@ -12,6 +12,10 @@ import { CommentTagNotificationResolver } from './comment-tag-notification.resol
 import {
   CommentTagNotification,
   CommentTagNotificationSchema,
+  GroupInviteNotification,
+  GroupInviteNotificationSchema,
+  GroupPostNotification,
+  GroupPostNotificationSchema,
   Notification,
   NotificationSchema,
   PostComentNotificationSchema,
@@ -29,6 +33,9 @@ import Redis from 'ioredis';
 import configuration from '../config/configuration';
 import { LikesModule } from '../likes/likes.module';
 import { NotificationTasks } from './notifications.tasks';
+import { GroupInviteNotificationResolver } from './group-invite-notification.resolver';
+import { GroupsModule } from 'src/groups/groups.module';
+import { GroupPostNotificationResolver } from './group-post-notification.resolver';
 
 @Module({
   imports: [
@@ -49,6 +56,14 @@ import { NotificationTasks } from './notifications.tasks';
             name: PostCommentNotification.name,
             schema: PostComentNotificationSchema,
           },
+          {
+            name: GroupInviteNotification.name,
+            schema: GroupInviteNotificationSchema,
+          },
+          {
+            name: GroupPostNotification.name,
+            schema: GroupPostNotificationSchema,
+          },
         ],
       },
     ]),
@@ -61,6 +76,7 @@ import { NotificationTasks } from './notifications.tasks';
     PostsModule,
     FollowsModule,
     LikesModule,
+    GroupsModule,
   ],
   providers: [
     NotificationsResolver,
@@ -69,6 +85,8 @@ import { NotificationTasks } from './notifications.tasks';
     NotificationsService,
     NotificationsConsumer,
     PostCommentNotificationResolver,
+    GroupInviteNotificationResolver,
+    GroupPostNotificationResolver,
     NotificationTasks,
     {
       provide: 'PUB_SUB',

@@ -547,15 +547,15 @@ type Query {
     notificationKinds: [NOTIFICAION_KINDS!] = [COMMENT_TAG, SALE]
   ): [Notification!]!
 
-  """Returns explore data"""
-  explore: Explore!
-  event(id: Float!): ClozeeEvent!
-
   """Returns a group by id. Only return groups that the user is part of."""
   group(id: String!): Group!
 
   """Return the groups that this user is participating in."""
   groups: [Group!]!
+
+  """Returns explore data"""
+  explore: Explore!
+  event(id: Float!): ClozeeEvent!
 }
 
 input FeedTagsInput {
@@ -571,6 +571,8 @@ enum NOTIFICAION_KINDS {
   COMMENT_TAG
   SALE
   POST_COMMENT
+  GROUP_INVITE
+  GROUP_POST
 }
 
 type Mutation {
