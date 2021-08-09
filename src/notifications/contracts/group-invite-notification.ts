@@ -19,7 +19,7 @@ export class GroupInviteNotification implements Notification {
   @Field(() => Group, {
     description: 'The group the user was added to.',
   })
-  group: Group;
+  group: string | Group;
 
   @Prop({ required: true })
   @Field(() => User, {
