@@ -12,11 +12,8 @@ import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { PostsService } from '../src/posts/posts.service';
-import { reconciliateByKey } from '../src/common/reconciliators';
-import { omit } from 'ramda';
 import { HttpServiceMock } from './mocks';
-import { CmsService } from '../src/cms/cms.service';
+import configuration from '../src/config/configuration';
 
 describe('Groups (e2e)', () => {
   let given: Given;
@@ -92,6 +89,72 @@ describe('Groups (e2e)', () => {
         return response;
       });
 
+    done();
+  });
+
+  it('should be able to add a post to an existing group', async done => {
+    const { group, loggedParticipants } = await given.groups.oneGroupCreated();
+    const imageId = 'id1';
+    const post = {
+      title: 'title',
+      description: 'description',
+    };
+    const expectedGQLResponse = {
+      data: {
+        addPostToGroup: {
+          _id: group._id,
+          name: group.name,
+          participants: loggedParticipants.map(([user]) => ({
+            _id: user._id,
+          })),
+          posts: [
+            {
+              ...post,
+              images: [`https://${configuration.images.cdn()}/posts/${imageId}`],
+            },
+          ],
+        },
+      },
+    };
+    const addGroupPostMutation = gql`
+      mutation AddGroupPost($groupId: String!, $post: AddGroupPostInput!) {
+        addPostToGroup(groupId: $groupId, post: $post) {
+          _id
+          name
+          participants {
+            _id
+          }
+          posts {
+            _id
+            title
+            description
+            images
+          }
+        }
+      }
+    `;
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: print(addGroupPostMutation),
+        variables: {
+          groupId: group._id,
+          post: {
+            ...post,
+            imagesIds: [imageId],
+          },
+        },
+      })
+      .set({
+        authorization: `Bearer ${loggedParticipants[0][1]}`,
+      })
+      .expect(200)
+      .then(response => {
+        expect(typeof response.body.data.addPostToGroup.posts[0]._id).toBe('string');
+        delete response.body.data.addPostToGroup.posts[0]._id;
+        expect(response.body).toEqual(expectedGQLResponse);
+      });
     done();
   });
 });

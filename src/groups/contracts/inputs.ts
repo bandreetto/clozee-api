@@ -2,10 +2,7 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class AddGroupPostInput {
-  @Field()
-  _id: string;
-
-  @Field()
+  @Field({ nullable: true })
   title?: string;
 
   @Field()

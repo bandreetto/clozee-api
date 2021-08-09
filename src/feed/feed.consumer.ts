@@ -23,7 +23,7 @@ export class FeedConsumer {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  @OnEvent('post.created', { async: true })
+  @OnEvent('feed-post.created', { async: true })
   async createFeedPost(payload: Post) {
     try {
       const categoryId = typeof payload.category === 'string' ? payload.category : payload.category._id;

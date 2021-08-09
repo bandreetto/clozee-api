@@ -1,4 +1,5 @@
 export * from './group-participant';
+export * from './group-post';
 
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';

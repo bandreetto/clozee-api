@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Document } from 'mongoose';
-import { Group, GroupParticipant } from './contracts';
+import { Group, GroupParticipant, GroupPost } from './contracts';
 
 @Injectable()
 export class GroupsService {
   constructor(
     @InjectModel(Group.name) private readonly groupModel: Model<Group & Document>,
     @InjectModel(GroupParticipant.name) private readonly groupParticipantModel: Model<GroupParticipant & Document>,
+    @InjectModel(GroupPost.name) private readonly groupPostModel: Model<GroupPost & Document>,
   ) {}
 
   async findById(groupId: string): Promise<Group> {
@@ -46,6 +47,14 @@ export class GroupsService {
       .lean();
   }
 
+  async findGroupPostsByGroupId(groupId: string): Promise<GroupPost[]> {
+    return this.groupPostModel
+      .find({
+        group: groupId,
+      })
+      .lean();
+  }
+
   async createGroup(group: Group): Promise<Group> {
     const createdGroup = await this.groupModel.create(group);
     return createdGroup.toObject();
@@ -54,5 +63,10 @@ export class GroupsService {
   async createGroupParticipants(groupParticipants: GroupParticipant[]): Promise<GroupParticipant[]> {
     const createdParticipants = await this.groupParticipantModel.insertMany(groupParticipants);
     return createdParticipants.map(participant => participant.toObject());
+  }
+
+  async createGroupPost(groupPost: GroupPost): Promise<GroupPost> {
+    const createdGroupPost = await this.groupPostModel.create(groupPost);
+    return createdGroupPost.toObject();
   }
 }
