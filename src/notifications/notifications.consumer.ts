@@ -264,14 +264,16 @@ export class NotificationsConsumer {
   @OnEvent('group.created', { async: true })
   async createGroupInviteNotifications(payload: GroupCreatedPayload) {
     try {
-      const groupInviteNotifications: GroupInviteNotification[] = payload.participants.map(participant => ({
-        _id: v4(),
-        kind: GroupInviteNotification.name,
-        user: participant,
-        group: payload.group._id,
-        inviter: payload.groupCreator._id,
-        unseen: true,
-      }));
+      const groupInviteNotifications: GroupInviteNotification[] = payload.participants
+        .filter(participant => participant !== payload.groupCreator._id)
+        .map(participant => ({
+          _id: v4(),
+          kind: GroupInviteNotification.name,
+          user: participant,
+          group: payload.group._id,
+          inviter: payload.groupCreator._id,
+          unseen: true,
+        }));
       const createdNotifications = await this.notificationsService.createMany(groupInviteNotifications);
       await Promise.all(
         createdNotifications.map(notification => this.pubSub.publish('notification', { notification })),
@@ -291,16 +293,20 @@ export class NotificationsConsumer {
     try {
       const allParticipants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
       const participantsToBeNotified = allParticipants.filter(participant => participant._id !== payload.postOwner._id);
-      const groupPostNotifications: GroupPostNotification[] = participantsToBeNotified.map(participant => ({
-        _id: v4(),
-        kind: GroupPostNotification.name,
-        user: participant.user,
-        group: payload.group._id,
-        postOwner: payload.postOwner._id,
-        unseen: true,
-      }));
-      const createNotifications = await this.notificationsService.createMany(groupPostNotifications);
-      await Promise.all(createNotifications.map(notification => this.pubSub.publish('notification', { notification })));
+      const groupPostNotifications: GroupPostNotification[] = participantsToBeNotified
+        .filter(participant => participant._id !== payload.postOwner._id)
+        .map(participant => ({
+          _id: v4(),
+          kind: GroupPostNotification.name,
+          user: participant.user,
+          group: payload.group._id,
+          postOwner: payload.postOwner._id,
+          unseen: true,
+        }));
+      const createdNotifications = await this.notificationsService.createMany(groupPostNotifications);
+      await Promise.all(
+        createdNotifications.map(notification => this.pubSub.publish('notification', { notification })),
+      );
     } catch (error) {
       this.logger.error({
         message: 'Error to create group post added notification',

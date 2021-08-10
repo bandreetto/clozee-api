@@ -85,7 +85,7 @@ export class GroupsResolver {
     const createdPost = await this.postsService.create({
       _id: v4(),
       ...post,
-      images: post.imagesIds.map(imageId => `https://${configuration.images.cdn()}/posts/${imageId}`),
+      images: post.imagesIds.map(imageId => `https://${configuration.images.cdn()}/posts/${imageId}.jpg`),
       user: tokenUser._id,
       type: 'GroupPost',
     });
