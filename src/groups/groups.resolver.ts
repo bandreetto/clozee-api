@@ -1,4 +1,4 @@
-import { NotFoundException, UseGuards } from '@nestjs/common';
+import { BadRequestException, NotFoundException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, ResolveField, Resolver, Root } from '@nestjs/graphql';
 import { CurrentUser } from '../common/decorators';
 import { AuthGuard } from '../common/guards';
@@ -52,12 +52,18 @@ export class GroupsResolver {
     participantsUserIds: string[],
     @CurrentUser() tokenUser: TokenUser,
   ): Promise<Group> {
+    const participants = await Promise.all(
+      participantsUserIds.map(particpantUserId => this.usersLoader.load(particpantUserId)),
+    );
+    if (participants.some(participant => !participant)) {
+      throw new BadRequestException('Participants must be an array of valid user ids.');
+    }
     const group = await this.groupsService.createGroup({
       _id: v4(),
       name,
     });
-    const participants = [tokenUser._id, ...participantsUserIds];
-    const groupParticipants = participants.map(participantUserId => ({
+    const participantsIds = [tokenUser._id, ...participantsUserIds];
+    const groupParticipants = participantsIds.map(participantUserId => ({
       _id: v4(),
       user: participantUserId,
       group: group._id,
