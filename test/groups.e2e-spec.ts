@@ -110,7 +110,7 @@ describe('Groups (e2e)', () => {
           posts: [
             {
               ...post,
-              images: [`https://${configuration.images.cdn()}/posts/${imageId}`],
+              images: [`https://${configuration.images.cdn()}/posts/${imageId}.jpg`],
             },
           ],
         },
