@@ -292,7 +292,6 @@ export class NotificationsConsumer {
   async createGroupPostNotifications(payload: GroupPostCreatedPayload) {
     try {
       const allParticipants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
-      console.log({ allParticipants, owner: payload.postOwner });
       const participantsToBeNotified = allParticipants.filter(
         participant => participant.user !== payload.postOwner._id,
       );
