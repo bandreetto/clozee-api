@@ -24,7 +24,6 @@ import { BlockUserPayload } from './contracts/payloads';
 import { UsersLoader } from './users.dataloaders';
 import { UsersService } from './users.service';
 import { FollowsLoader } from '../follows/follows.dataloader';
-import { Group } from '../groups/contracts';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -266,9 +265,10 @@ export class UsersResolver {
   async posts(@Root() user: User): Promise<Post[]> {
     const posts = await this.postsLoader.byUser.load(user._id);
     const notDeletedPosts = posts.filter(post => !post.deleted);
+    const feedPosts = notDeletedPosts.filter(post => post.type === 'FeedPost');
     return sort(
       descend(post => post.createdAt),
-      notDeletedPosts,
+      feedPosts,
     );
   }
 
