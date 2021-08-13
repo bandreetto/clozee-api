@@ -28,12 +28,12 @@ export function createAccessToken(user: User, accessTokenExpiration: string, jwt
   );
 }
 
-export function createRefreshToken(userId: string, accessTokenExpiration: string, jwtService: JwtService): string {
+export function createRefreshToken(userId: string, refreshTokenExpiration: string, jwtService: JwtService): string {
   return jwtService.sign(
     {},
     {
       header: { typ: TOKEN_TYPES.REFRESH },
-      expiresIn: accessTokenExpiration,
+      expiresIn: refreshTokenExpiration,
       subject: userId,
     },
   );

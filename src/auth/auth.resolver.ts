@@ -131,7 +131,7 @@ export class AuthResolver {
     return {
       me: user,
       token: createAccessToken(user, configuration.auth.accessTokenExp(), this.jwtService),
-      refreshToken: createRefreshToken(user._id, configuration.auth.accessTokenExp(), this.jwtService),
+      refreshToken: createRefreshToken(user._id, configuration.auth.refreshTokenExp(), this.jwtService),
     };
   }
 
@@ -146,7 +146,7 @@ export class AuthResolver {
     return {
       me: user,
       token: createAccessToken(user, configuration.auth.accessTokenExp(), this.jwtService),
-      refreshToken: createRefreshToken(user._id, configuration.auth.accessTokenExp(), this.jwtService),
+      refreshToken: createRefreshToken(user._id, configuration.auth.refreshTokenExp(), this.jwtService),
     };
   }
 }
