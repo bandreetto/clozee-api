@@ -15,6 +15,7 @@ import configuration from 'src/config/configuration';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { EventEmitter2 } from 'eventemitter2';
 import { PUBLIC_GROUP_ID } from './groups.consts';
+import { descend, sort } from 'ramda';
 
 @Resolver(Group)
 export class GroupsResolver {
@@ -32,7 +33,7 @@ export class GroupsResolver {
     const group = await this.groupsService.findById(groupId);
     if (!group) throw new NotFoundException(`Could not find group with the id ${groupId}`);
     const groupParticipants = await this.groupsService.findParticipantsByGroupId(groupId);
-    if (!groupParticipants.find(participant => participant.user === tokenUser._id))
+    if (!groupParticipants.find(participant => participant.user === tokenUser._id) || group._id === PUBLIC_GROUP_ID)
       throw new NotFoundException(`Could not find group with the id ${groupId}`);
     return group;
   }
@@ -87,7 +88,7 @@ export class GroupsResolver {
       throw new NotFoundException('Could not find the group to add post.');
     }
     const participants = await this.groupsService.findParticipantsByGroupId(groupId);
-    if (!participants.find(participant => participant.user === tokenUser._id)) {
+    if (!participants.find(participant => participant.user === tokenUser._id) || group._id === PUBLIC_GROUP_ID) {
       throw new NotFoundException('Could not find the group to add post.');
     }
     const createdPost = await this.postsService.create({
@@ -118,6 +119,10 @@ export class GroupsResolver {
   @ResolveField()
   async posts(@Root() group: Group): Promise<Post[]> {
     const groupPosts = await this.groupsService.findGroupPostsByGroupId(group._id);
-    return Promise.all(groupPosts.map(groupPost => this.postsLoader.load(groupPost.post)));
+    const posts = await Promise.all(groupPosts.map(groupPost => this.postsLoader.load(groupPost.post)));
+    return sort(
+      descend(post => post.createdAt),
+      posts,
+    );
   }
 }
