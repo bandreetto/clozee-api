@@ -323,4 +323,41 @@ export class NotificationsConsumer {
       });
     }
   }
+
+  @OnEvent('group-post.created', { async: true })
+  async sendPushToGroupParticipants(payload: GroupPostCreatedPayload) {
+    try {
+      if (payload.group._id === PUBLIC_GROUP_ID) {
+        this.logger.log('Skipping public group post push notifications');
+        return;
+      }
+      const participants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
+      const users = await this.usersService.findManyByIds(participants.map(participant => participant.user));
+      const usersToBeNotified = users.filter(user => user._id !== payload.postOwner._id && user.deviceToken);
+      if (!usersToBeNotified.length) {
+        this.logger.warn('Skipping group post pushes as there is no users to notify');
+        return;
+      }
+      const postOwner = users.find(user => user._id === payload.postOwner._id);
+      await admin.messaging().sendMulticast({
+        tokens: usersToBeNotified.map(user => user.deviceToken),
+        notification: {
+          title: `Post novo no grupo ${payload.group.name}! 🤩`,
+          body: `Vem cá ver o que @${postOwner.username} acabou de postar!`,
+        },
+        data: {
+          postId: payload.post._id,
+          group: payload.group._id,
+          postOwner: payload.postOwner._id,
+        },
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error on sending group post push to group participants',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
 }
