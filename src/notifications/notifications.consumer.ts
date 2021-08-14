@@ -15,6 +15,7 @@ import { FollowsService } from '../follows/follows.service';
 import { PostsService } from '../posts/posts.service';
 import { GroupCreatedPayload, GroupPostCreatedPayload } from 'src/groups/contracts/payloads';
 import { GroupsService } from 'src/groups/groups.service';
+import { PUBLIC_GROUP_ID } from 'src/groups/groups.consts';
 
 @Injectable()
 export class NotificationsConsumer {
@@ -291,6 +292,10 @@ export class NotificationsConsumer {
   @OnEvent('group-post.created', { async: true })
   async createGroupPostNotifications(payload: GroupPostCreatedPayload) {
     try {
+      if (payload.group._id === PUBLIC_GROUP_ID) {
+        this.logger.log('Skipping public group post notification');
+        return;
+      }
       const allParticipants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
       const participantsToBeNotified = allParticipants.filter(
         participant => participant.user !== payload.postOwner._id,
