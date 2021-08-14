@@ -33,7 +33,7 @@ export class GroupsResolver {
     const group = await this.groupsService.findById(groupId);
     if (!group) throw new NotFoundException(`Could not find group with the id ${groupId}`);
     const groupParticipants = await this.groupsService.findParticipantsByGroupId(groupId);
-    if (!groupParticipants.find(participant => participant.user === tokenUser._id))
+    if (!groupParticipants.find(participant => participant.user === tokenUser._id) || group._id === PUBLIC_GROUP_ID)
       throw new NotFoundException(`Could not find group with the id ${groupId}`);
     return group;
   }
@@ -88,7 +88,7 @@ export class GroupsResolver {
       throw new NotFoundException('Could not find the group to add post.');
     }
     const participants = await this.groupsService.findParticipantsByGroupId(groupId);
-    if (!participants.find(participant => participant.user === tokenUser._id)) {
+    if (!participants.find(participant => participant.user === tokenUser._id) || group._id === PUBLIC_GROUP_ID) {
       throw new NotFoundException('Could not find the group to add post.');
     }
     const createdPost = await this.postsService.create({
