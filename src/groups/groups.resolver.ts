@@ -15,6 +15,7 @@ import configuration from 'src/config/configuration';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { EventEmitter2 } from 'eventemitter2';
 import { PUBLIC_GROUP_ID } from './groups.consts';
+import { descend, sort } from 'ramda';
 
 @Resolver(Group)
 export class GroupsResolver {
@@ -118,6 +119,10 @@ export class GroupsResolver {
   @ResolveField()
   async posts(@Root() group: Group): Promise<Post[]> {
     const groupPosts = await this.groupsService.findGroupPostsByGroupId(group._id);
-    return Promise.all(groupPosts.map(groupPost => this.postsLoader.load(groupPost.post)));
+    const posts = await Promise.all(groupPosts.map(groupPost => this.postsLoader.load(groupPost.post)));
+    return sort(
+      descend(post => post.createdAt),
+      posts,
+    );
   }
 }
