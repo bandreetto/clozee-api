@@ -14,6 +14,7 @@ import { Post } from 'src/posts/contracts';
 import configuration from 'src/config/configuration';
 import { PostsLoader } from 'src/posts/posts.dataloader';
 import { EventEmitter2 } from 'eventemitter2';
+import { PUBLIC_GROUP_ID } from './groups.consts';
 
 @Resolver(Group)
 export class GroupsResolver {
@@ -41,7 +42,8 @@ export class GroupsResolver {
   async groups(@CurrentUser() tokenUser: TokenUser): Promise<Group[]> {
     const participating = await this.groupsService.findParticipantsByUser(tokenUser._id);
     const groups = await this.groupsService.findManyByIds(participating.map(participant => participant.group));
-    return groups;
+    const publicGroup = await this.groupsService.findById(PUBLIC_GROUP_ID);
+    return [...(publicGroup ? [publicGroup] : []), ...groups];
   }
 
   @UseGuards(AuthGuard)
