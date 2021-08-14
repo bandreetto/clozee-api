@@ -289,6 +289,38 @@ export class NotificationsConsumer {
     }
   }
 
+  @OnEvent('group.created', { async: true })
+  async sendPushToGroupInvitees(payload: GroupCreatedPayload) {
+    try {
+      const participants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
+      const users = await this.usersService.findManyByIds(participants.map(participant => participant.user));
+      const usersToBeNotified = users.filter(user => user._id !== payload.groupCreator._id);
+      if (!usersToBeNotified.length) {
+        this.logger.warn('Skipping group invite pushes as there is no users to notify');
+        return;
+      }
+      const groupCreator = users.find(user => user._id === payload.groupCreator._id);
+      await admin.messaging().sendMulticast({
+        tokens: usersToBeNotified.map(user => user.deviceToken),
+        notification: {
+          title: `${groupCreator.username} te convidou para um grupo!`,
+          body: `Venha compartilhar suas inspirações no ${payload.group.name} também! 😉`,
+        },
+        data: {
+          group: payload.group._id,
+          groupCreator: payload.groupCreator._id,
+        },
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error while sending push to group invitees',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
   @OnEvent('group-post.created', { async: true })
   async createGroupPostNotifications(payload: GroupPostCreatedPayload) {
     try {
@@ -317,6 +349,43 @@ export class NotificationsConsumer {
     } catch (error) {
       this.logger.error({
         message: 'Error to create group post added notification',
+        payload,
+        error: error.toString(),
+        metadata: error,
+      });
+    }
+  }
+
+  @OnEvent('group-post.created', { async: true })
+  async sendPushToGroupParticipants(payload: GroupPostCreatedPayload) {
+    try {
+      if (payload.group._id === PUBLIC_GROUP_ID) {
+        this.logger.log('Skipping public group post push notifications');
+        return;
+      }
+      const participants = await this.groupsService.findParticipantsByGroupId(payload.group._id);
+      const users = await this.usersService.findManyByIds(participants.map(participant => participant.user));
+      const usersToBeNotified = users.filter(user => user._id !== payload.postOwner._id && user.deviceToken);
+      if (!usersToBeNotified.length) {
+        this.logger.warn('Skipping group post pushes as there is no users to notify');
+        return;
+      }
+      const postOwner = users.find(user => user._id === payload.postOwner._id);
+      await admin.messaging().sendMulticast({
+        tokens: usersToBeNotified.map(user => user.deviceToken),
+        notification: {
+          title: `Post novo no grupo ${payload.group.name}! 🤩`,
+          body: `Vem cá ver o que @${postOwner.username} acabou de postar!`,
+        },
+        data: {
+          postId: payload.post._id,
+          group: payload.group._id,
+          postOwner: payload.postOwner._id,
+        },
+      });
+    } catch (error) {
+      this.logger.error({
+        message: 'Error on sending group post push to group participants',
         payload,
         error: error.toString(),
         metadata: error,
