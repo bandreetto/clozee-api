@@ -303,8 +303,8 @@ export class NotificationsConsumer {
       await admin.messaging().sendMulticast({
         tokens: usersToBeNotified.map(user => user.deviceToken),
         notification: {
-          title: `${groupCreator.username} te convidou para um grupo!`,
-          body: `Venha compartilhar suas inspirações no ${payload.group.name} também! 😉`,
+          title: `Oieee 👋`,
+          body: `@${groupCreator.username} acabou de te adicionar no grupo ${payload.group.name}`,
         },
         data: {
           group: payload.group._id,
@@ -374,7 +374,7 @@ export class NotificationsConsumer {
       await admin.messaging().sendMulticast({
         tokens: usersToBeNotified.map(user => user.deviceToken),
         notification: {
-          title: `Post novo no grupo ${payload.group.name}! 🤩`,
+          title: `Tem novidade no ${payload.group.name} 🤩`,
           body: `Vem cá ver o que @${postOwner.username} acabou de postar!`,
         },
         data: {
