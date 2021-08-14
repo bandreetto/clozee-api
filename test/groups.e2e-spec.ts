@@ -157,4 +157,47 @@ describe('Groups (e2e)', () => {
       });
     done();
   });
+
+  it('should be able to return groups that is participating', async () => {
+    const { group, loggedParticipants } = await given.groups.oneGroupCreated();
+
+    const expectedGQLResponse = {
+      data: {
+        groups: [
+          {
+            ...group,
+            participants: loggedParticipants.map(([participant]) => ({
+              _id: participant._id,
+            })),
+          },
+        ],
+      },
+    };
+
+    const groupsQuery = gql`
+      {
+        groups {
+          _id
+          name
+          participants {
+            _id
+          }
+        }
+      }
+    `;
+
+    await request(app.getHttpServer())
+      .post('/graphql')
+      .send({
+        query: print(groupsQuery),
+      })
+      .set({
+        authorization: `Bearer ${loggedParticipants[0][1]}`,
+      })
+      .expect(200)
+      .then(response => {
+        expect(response.body).toEqual(expectedGQLResponse);
+        return response;
+      });
+  });
 });

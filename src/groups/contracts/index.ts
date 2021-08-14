@@ -22,6 +22,12 @@ export class Group {
 
   @Field(() => [Post], { description: 'The list of posts on this group.' })
   posts?: string[] | Post[];
+
+  @Field()
+  createdAt?: Date;
+
+  @Field()
+  updatedAt?: Date;
 }
 
 export const GroupSchema = SchemaFactory.createForClass(Group);

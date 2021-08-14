@@ -41,7 +41,8 @@ export class GroupsResolver {
   async groups(@CurrentUser() tokenUser: TokenUser): Promise<Group[]> {
     const participating = await this.groupsService.findParticipantsByUser(tokenUser._id);
     const groups = await this.groupsService.findManyByIds(participating.map(participant => participant.group));
-    return groups;
+    const publicGroup = await this.groupsService.findById('public-group');
+    return [...(publicGroup ? [publicGroup] : []), ...groups];
   }
 
   @UseGuards(AuthGuard)

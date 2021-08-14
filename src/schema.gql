@@ -432,6 +432,8 @@ type Group {
 
   """The list of posts on this group."""
   posts: [Post!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
 }
 
 type GroupPostNotification implements Notification {
