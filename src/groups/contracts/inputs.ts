@@ -5,8 +5,8 @@ export class AddGroupPostInput {
   @Field({ nullable: true })
   title?: string;
 
-  @Field()
-  description: string;
+  @Field({ nullable: true })
+  description?: string;
 
   @Field(() => [String], {
     description: "An array of images id's, get from the UploadPostImage mutation",

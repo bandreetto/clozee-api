@@ -790,7 +790,7 @@ input AddCommentInput {
 
 input AddGroupPostInput {
   title: String
-  description: String!
+  description: String
 
   """An array of images id's, get from the UploadPostImage mutation"""
   imagesIds: [String!] = []
