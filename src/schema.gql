@@ -510,6 +510,15 @@ type Explore {
   events: [ClozeeEvent!]!
 }
 
+type Trend {
+  id: Float!
+  title: String!
+  description: String!
+
+  """User owner of this post."""
+  user: User!
+}
+
 type Query {
   me: User!
   user(id: String!): User!
@@ -558,6 +567,7 @@ type Query {
   """Returns explore data"""
   explore: Explore!
   event(id: Float!): ClozeeEvent!
+  trends: [Trend!]!
 }
 
 input FeedTagsInput {
