@@ -14,4 +14,7 @@ export class Trend {
 
   @Field(() => User, { description: 'User owner of this post.' })
   user: User | string;
+
+  @Field()
+  createdAt: Date;
 }
