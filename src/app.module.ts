@@ -28,6 +28,7 @@ import { ExploreModule } from './explore/explore.module';
 import { ClozeeEventsModule } from './clozee-events/clozee-events.module';
 import { ClockService } from './common/clock/clock.service';
 import { GroupsModule } from './groups/groups.module';
+import { TrendsModule } from './trends/trends.module';
 
 @Global()
 @Module({
@@ -72,6 +73,7 @@ import { GroupsModule } from './groups/groups.module';
     ExploreModule,
     ClozeeEventsModule,
     GroupsModule,
+    TrendsModule,
   ],
   providers: [ClockService],
   exports: [ClockService],

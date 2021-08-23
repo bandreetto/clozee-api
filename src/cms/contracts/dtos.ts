@@ -71,3 +71,12 @@ export interface EventDTO {
   updated_at: string;
   posts: { id: number; postId: string }[];
 }
+
+export interface TrendDTO {
+  id: number;
+  title: string;
+  description: string;
+  published_at: Date;
+  created_at: Date;
+  updated_at: Date;
+}
