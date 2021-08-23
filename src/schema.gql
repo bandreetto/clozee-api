@@ -517,6 +517,7 @@ type Trend {
 
   """User owner of this post."""
   user: User!
+  createdAt: DateTime!
 }
 
 type Query {

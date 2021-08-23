@@ -16,6 +16,7 @@ export class TrendsResolver {
         title: 'Você não vai acreditar nessas dicas 😱',
         description:
           'Olha só essas 8 tendências! A 3 já conquistou meu ❤️ \nhttps://stealthelook.com.br/8-tendencias-de-moda-que-estou-roubando-das-celebridades/',
+        createdAt: new Date(),
       },
     ];
   }
