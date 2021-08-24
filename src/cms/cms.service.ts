@@ -129,6 +129,9 @@ export class CmsService {
         headers: {
           authorization: `Bearer ${this.token}`,
         },
+        params: {
+          _sort: 'created_at:desc',
+        },
       })
       .toPromise();
     return trendsDTO.map(fromTrendDTOtoTrend);

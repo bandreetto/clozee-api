@@ -9,6 +9,7 @@ import { ClockService } from '../../src/common/clock/clock.service';
 import { GivenUsers } from './users';
 import { clozeeTrendsUser } from '../mocks/users';
 import { User } from '../../src/users/contracts';
+import { descend, sort } from 'ramda';
 
 export interface GivenCms {
   withUpcomingEventsRegistered: () => Promise<EventDTO[]>;
@@ -205,12 +206,18 @@ export function givenCmsFactory(
 
     httpService.mockGet(
       {
-        data: trendsDTO,
+        data: sort(
+          descend(trend => trend.created_at),
+          trendsDTO,
+        ),
       },
       `${configuration.cms.url()}/trends`,
       {
         headers: {
           authorization: `Bearer ${httpService.mocks.cms.token}`,
+        },
+        params: {
+          _sort: 'created_at:desc',
         },
       },
     );
