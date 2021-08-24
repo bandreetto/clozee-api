@@ -37,7 +37,7 @@ export async function givenFactory(testingModule: TestingModule) {
 
   const httpServiceMock = (await testingModule.resolve(HttpService)) as HttpServiceMock;
   const clockService = await testingModule.resolve(ClockService);
-  const givenCms = givenCmsFactory(httpServiceMock, clockService, givenPosts);
+  const givenCms = givenCmsFactory(httpServiceMock, clockService, givenPosts, givenUsers);
 
   return {
     categories: givenCategories,

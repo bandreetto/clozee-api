@@ -470,6 +470,16 @@ type GroupInviteNotification implements Notification {
   inviter: User!
 }
 
+type Trend {
+  id: Float!
+  title: String!
+  description: String!
+
+  """User owner of this post."""
+  user: User!
+  createdAt: DateTime!
+}
+
 type SearchCategory {
   id: Float!
 
@@ -508,16 +518,6 @@ type Explore {
 
   """A list of upcoming events."""
   events: [ClozeeEvent!]!
-}
-
-type Trend {
-  id: Float!
-  title: String!
-  description: String!
-
-  """User owner of this post."""
-  user: User!
-  createdAt: DateTime!
 }
 
 type Query {

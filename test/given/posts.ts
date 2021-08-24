@@ -4,6 +4,7 @@ import { POST_CONDITIONS, SIZES } from '../../src/posts/contracts/enums';
 import faker from 'faker';
 import { GivenUsers } from './users';
 import { GivenCategories } from './categories';
+import { randomUser } from '../mocks';
 
 export interface GivenPosts {
   somePostsSavedCreated: (numberOfPosts: number) => Promise<Post[]>;
@@ -15,7 +16,7 @@ export function givenPostsFactory(
   givenCategories: GivenCategories,
 ): GivenPosts {
   async function somePostsSavedCreated(numberOfPosts: number): Promise<Post[]> {
-    const user = await givenUsers.oneUserSignedUp();
+    const user = await givenUsers.oneUserSignedUp(randomUser);
     const category = await givenCategories.oneCategoryRegistered();
     const posts: Post[] = Array(numberOfPosts)
       .fill(null)
