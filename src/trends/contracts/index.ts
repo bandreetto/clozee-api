@@ -13,7 +13,7 @@ export class Trend {
   description: string;
 
   @Field(() => User, { description: 'User owner of this post.' })
-  user: User | string;
+  user?: User | string;
 
   @Field()
   createdAt: Date;

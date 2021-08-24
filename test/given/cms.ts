@@ -2,18 +2,24 @@ import faker from 'faker';
 import { GivenPosts } from './posts';
 import dayjs from 'dayjs';
 import { HttpServiceMock } from '../mocks';
-import { EventDTO } from '../../src/cms/contracts';
+import { EventDTO, TrendDTO } from '../../src/cms/contracts';
+import { Trend } from '../../src/trends/contracts';
 import configuration from '../../src/config/configuration';
 import { ClockService } from '../../src/common/clock/clock.service';
+import { GivenUsers } from './users';
+import { clozeeTrendsUser } from '../mocks/users';
+import { User } from '../../src/users/contracts';
 
 export interface GivenCms {
   withUpcomingEventsRegistered: () => Promise<EventDTO[]>;
+  withExistingTrends: (trends: Trend[]) => Promise<[trends: Trend[], trendsUser: User]>;
 }
 
 export function givenCmsFactory(
   httpService: HttpServiceMock,
   clockService: ClockService,
   givenPosts: GivenPosts,
+  givenUsers: GivenUsers,
 ): GivenCms {
   async function withUpcomingEventsRegistered(): Promise<EventDTO[]> {
     const createdPosts = await givenPosts.somePostsSavedCreated(3);
@@ -50,8 +56,8 @@ export function givenCmsFactory(
             },
           },
           provider: faker.datatype.string(),
-          created_at: faker.date.past(),
-          updated_at: faker.date.past(),
+          created_at: faker.date.past().toISOString(),
+          updated_at: faker.date.past().toISOString(),
           alternativeText: faker.commerce.product(),
         },
         updated_at: faker.date.past().toISOString(),
@@ -88,8 +94,8 @@ export function givenCmsFactory(
             },
           },
           provider: faker.datatype.string(),
-          created_at: faker.date.past(),
-          updated_at: faker.date.past(),
+          created_at: faker.date.past().toISOString(),
+          updated_at: faker.date.past().toISOString(),
           alternativeText: faker.commerce.product(),
         },
         updated_at: faker.date.past().toISOString(),
@@ -126,8 +132,8 @@ export function givenCmsFactory(
             },
           },
           provider: faker.datatype.string(),
-          created_at: faker.date.past(),
-          updated_at: faker.date.past(),
+          created_at: faker.date.past().toISOString(),
+          updated_at: faker.date.past().toISOString(),
           alternativeText: faker.commerce.product(),
         },
         updated_at: faker.date.past().toISOString(),
@@ -186,7 +192,36 @@ export function givenCmsFactory(
 
     return events;
   }
+
+  async function withExistingTrends(trends: Trend[]): Promise<[trends: Trend[], trendUser: User]> {
+    const trendsUser = await givenUsers.oneUserSignedUp(clozeeTrendsUser);
+    const trendsDTO: TrendDTO[] = trends.map(trend => ({
+      ...trend,
+      created_at: trend.createdAt.toISOString(),
+      updated_at: trend.createdAt.toISOString(),
+      published_at: trend.createdAt.toISOString(),
+      user: trendsUser._id,
+    }));
+
+    httpService.mockGet(
+      {
+        data: trendsDTO,
+      },
+      `${configuration.cms.url()}/trends`,
+      {
+        headers: {
+          authorization: `Bearer ${httpService.mocks.cms.token}`,
+        },
+      },
+    );
+    const trendsWithUser = trends.map(trend => ({
+      ...trend,
+      user: trendsUser._id,
+    }));
+    return [trendsWithUser, trendsUser];
+  }
   return {
     withUpcomingEventsRegistered,
+    withExistingTrends,
   };
 }

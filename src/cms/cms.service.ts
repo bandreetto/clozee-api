@@ -1,8 +1,10 @@
 import { HttpService, Injectable, Logger } from '@nestjs/common';
+import { Trend } from 'src/trends/contracts';
 import { ClozeeEvent } from '../clozee-events/contracts';
 import configuration from '../config/configuration';
+import { fromTrendDTOtoTrend } from './cms.logic';
 import { SearchCategory } from './contracts';
-import { CMSAuthResponse, EventDTO, SearchCategoryDTO } from './contracts/dtos';
+import { CMSAuthResponse, EventDTO, SearchCategoryDTO, TrendDTO } from './contracts/dtos';
 
 @Injectable()
 export class CmsService {
@@ -118,5 +120,17 @@ export class CmsService {
       posts: eventDTO.posts.map(p => p.postId),
       bannerUrl,
     };
+  }
+
+  async getTrends(): Promise<Trend[]> {
+    await this.authPromise;
+    const { data: trendsDTO } = await this.httpService
+      .get<TrendDTO[]>(`${configuration.cms.url()}/trends`, {
+        headers: {
+          authorization: `Bearer ${this.token}`,
+        },
+      })
+      .toPromise();
+    return trendsDTO.map(fromTrendDTOtoTrend);
   }
 }

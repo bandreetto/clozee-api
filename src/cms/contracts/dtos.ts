@@ -12,8 +12,8 @@ export interface CMSAuthResponse {
       description: string;
       type: string;
     };
-    created_at: Date;
-    updated_at: Date;
+    created_at: string;
+    updated_at: string;
   };
 }
 
@@ -45,17 +45,17 @@ export interface StrapiImageDTO {
   previewUrl?: string;
   provider: string;
   provider_metadata?: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SearchCategoryDTO {
   id: number;
   title: string;
   searchTerm: string;
-  published_at: Date;
-  created_at: Date;
-  updated_at: Date;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
   description?: string;
   image: StrapiImageDTO;
 }
@@ -76,7 +76,7 @@ export interface TrendDTO {
   id: number;
   title: string;
   description: string;
-  published_at: Date;
-  created_at: Date;
-  updated_at: Date;
+  published_at: string;
+  created_at: string;
+  updated_at: string;
 }
