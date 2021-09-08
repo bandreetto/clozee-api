@@ -11,10 +11,16 @@ export class TrendsResolver {
   @Query(() => [Trend])
   async trends(): Promise<Trend[]> {
     const trends = await this.cmsService.getTrends();
-    return trends.map(trend => ({
-      ...trend,
-      user: trend.user || 'clozee-trends-user',
-    }));
+    return Promise.all(
+      trends.map(async trend => {
+        const userId = (trend.user as string) || 'clozee-trends-user';
+        const user = await this.usersLoader.load(userId);
+        return {
+          ...trend,
+          user: user?._id || 'clozee-trends-user',
+        };
+      }),
+    );
   }
 
   @ResolveField()
