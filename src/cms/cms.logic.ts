@@ -6,6 +6,7 @@ export function fromTrendDTOtoTrend(trendDTO: TrendDTO): Trend {
     id: trendDTO.id,
     title: trendDTO.title,
     description: trendDTO.description,
+    user: trendDTO.trendOwnerId,
     createdAt: new Date(trendDTO.created_at),
   };
 }

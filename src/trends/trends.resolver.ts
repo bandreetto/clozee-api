@@ -11,10 +11,9 @@ export class TrendsResolver {
   @Query(() => [Trend])
   async trends(): Promise<Trend[]> {
     const trends = await this.cmsService.getTrends();
-    const clozeeUser = await this.usersLoader.load('clozee-trends-user');
     return trends.map(trend => ({
       ...trend,
-      user: clozeeUser._id,
+      user: trend.user || 'clozee-trends-user',
     }));
   }
 

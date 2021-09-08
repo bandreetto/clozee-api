@@ -76,6 +76,7 @@ export interface TrendDTO {
   id: number;
   title: string;
   description: string;
+  trendOwnerId?: string;
   published_at: string;
   created_at: string;
   updated_at: string;
