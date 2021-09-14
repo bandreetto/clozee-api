@@ -75,7 +75,7 @@ export interface EventDTO {
 export interface TrendDTO {
   id: number;
   title: string;
-  description: string;
+  description?: string;
   trendOwnerId?: string;
   published_at: string;
   created_at: string;

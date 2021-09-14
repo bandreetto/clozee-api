@@ -9,8 +9,8 @@ export class Trend {
   @Field()
   title: string;
 
-  @Field()
-  description: string;
+  @Field({ nullable: true })
+  description?: string;
 
   @Field(() => User, { description: 'User owner of this post.' })
   user?: User | string;
