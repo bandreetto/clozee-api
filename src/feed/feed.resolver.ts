@@ -128,6 +128,7 @@ export class FeedResolver {
           _id: seenPostId,
           post,
           session: session._id,
+          user: session.user,
         });
       })
       .then(() => this.logger.log(`Post ${post} marked as seen for user ${user._id}. SeenPostId: ${seenPostId}`))
