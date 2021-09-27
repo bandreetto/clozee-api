@@ -47,14 +47,16 @@ describe('Trends (e2e)', () => {
     const [trends, trendsUser] = await given.cms.withExistingTrends(randomThreeTrends);
     const expectedGQLResponse = {
       data: {
-        trends: trends.map(trend => ({
-          ...trend,
-          createdAt: trend.createdAt.toISOString(),
-          user: {
-            username: trendsUser.username,
-            avatar: trendsUser.avatar,
-          },
-        })),
+        trends: expect.arrayContaining(
+          trends.map(trend => ({
+            ...trend,
+            createdAt: trend.createdAt.toISOString(),
+            user: {
+              username: trendsUser.username,
+              avatar: trendsUser.avatar,
+            },
+          })),
+        ),
       },
     };
     const trendsQuery = gql`

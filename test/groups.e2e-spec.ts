@@ -12,7 +12,7 @@ import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { HttpServiceMock } from './mocks';
+import { HttpServiceMock, randomUser } from './mocks';
 import configuration from '../src/config/configuration';
 
 describe('Groups (e2e)', () => {
@@ -45,7 +45,7 @@ describe('Groups (e2e)', () => {
   });
 
   it('should be able to create a group', async done => {
-    const [groupOwner, ...invitees] = await given.users.someUsersLoggedIn(3);
+    const [groupOwner, ...invitees] = await given.users.someUsersLoggedIn(Array(3).fill(null).map(randomUser));
     const GROUP_NAME = 'Test Group';
     const expectedGQLResponse = {
       data: {

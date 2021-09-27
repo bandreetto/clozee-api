@@ -23,7 +23,7 @@ export function givenCmsFactory(
   givenUsers: GivenUsers,
 ): GivenCms {
   async function withUpcomingEventsRegistered(): Promise<EventDTO[]> {
-    const createdPosts = await givenPosts.somePostsSavedCreated(3);
+    const createdPosts = await givenPosts.somePostsCreated(3);
     const baseId = faker.datatype.number(100);
     const now = clockService.now();
     const events: EventDTO[] = [
@@ -195,7 +195,7 @@ export function givenCmsFactory(
   }
 
   async function withExistingTrends(trends: Trend[]): Promise<[trends: Trend[], trendUser: User]> {
-    const trendsUser = await givenUsers.oneUserSignedUp(clozeeTrendsUser);
+    const trendsUser = await givenUsers.oneUserSignedUp(clozeeTrendsUser());
     const trendsDTO: TrendDTO[] = trends.map(trend => ({
       ...trend,
       created_at: trend.createdAt.toISOString(),
