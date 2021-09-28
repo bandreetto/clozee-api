@@ -39,6 +39,8 @@ describe('Feed (e2e)', () => {
   });
 
   afterAll(async done => {
+    // Wait for event loopt to clear before exiting
+    await new Promise(resolve => setInterval(resolve));
     await app.close();
     const connection = await moduleFixture.resolve<Connection>(getConnectionToken());
     connection.close(() => done());
