@@ -8,6 +8,9 @@ export class SeenPost {
   @Prop({ required: true })
   post: string;
 
+  @Prop({ required: true })
+  user: string;
+
   @Prop({ required: true, index: true })
   session: string;
 }

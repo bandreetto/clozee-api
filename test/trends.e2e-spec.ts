@@ -38,6 +38,8 @@ describe('Trends (e2e)', () => {
   });
 
   afterAll(async done => {
+    // Wait for event loopt to clear before exiting
+    await new Promise(resolve => setInterval(resolve));
     await app.close();
     const connection = await moduleFixture.resolve<Connection>(getConnectionToken());
     connection.close(() => done());
@@ -47,14 +49,16 @@ describe('Trends (e2e)', () => {
     const [trends, trendsUser] = await given.cms.withExistingTrends(randomThreeTrends);
     const expectedGQLResponse = {
       data: {
-        trends: trends.map(trend => ({
-          ...trend,
-          createdAt: trend.createdAt.toISOString(),
-          user: {
-            username: trendsUser.username,
-            avatar: trendsUser.avatar,
-          },
-        })),
+        trends: expect.arrayContaining(
+          trends.map(trend => ({
+            ...trend,
+            createdAt: trend.createdAt.toISOString(),
+            user: {
+              username: trendsUser.username,
+              avatar: trendsUser.avatar,
+            },
+          })),
+        ),
       },
     };
     const trendsQuery = gql`

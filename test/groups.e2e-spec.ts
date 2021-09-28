@@ -12,8 +12,9 @@ import { AppModule } from '../src/app.module';
 import { Given, givenFactory } from './given';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { HttpServiceMock } from './mocks';
+import { HttpServiceMock, randomUser } from './mocks';
 import configuration from '../src/config/configuration';
+import { times } from 'ramda';
 
 describe('Groups (e2e)', () => {
   let given: Given;
@@ -39,13 +40,15 @@ describe('Groups (e2e)', () => {
   });
 
   afterAll(async done => {
+    // Wait for event loopt to clear before exiting
+    await new Promise(resolve => setInterval(resolve));
     await app.close();
     const connection = await moduleFixture.resolve<Connection>(getConnectionToken());
     connection.close(() => done());
   });
 
   it('should be able to create a group', async done => {
-    const [groupOwner, ...invitees] = await given.users.someUsersLoggedIn(3);
+    const [groupOwner, ...invitees] = await given.users.someUsersLoggedIn(times(randomUser, 3));
     const GROUP_NAME = 'Test Group';
     const expectedGQLResponse = {
       data: {
