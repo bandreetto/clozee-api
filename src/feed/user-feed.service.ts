@@ -145,11 +145,13 @@ export class UserFeedService {
       {
         _id: { $in: feedIds },
       },
-      {
-        $set: {
-          score: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] } as any,
+      [
+        {
+          $addFields: {
+            score: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] },
+          },
         },
-      },
+      ],
     );
   }
 
@@ -158,11 +160,13 @@ export class UserFeedService {
       {
         _id: { $in: feedIds },
       },
-      {
-        $set: {
-          score: { $multiply: [{ $rand: {} }, 100] } as any,
+      [
+        {
+          $addFields: {
+            score: { $multiply: [{ $rand: {} }, 100] },
+          },
         },
-      },
+      ],
     );
   }
 
