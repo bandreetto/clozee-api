@@ -15,7 +15,7 @@ export class UserFeedService {
     @InjectModel(Feed.name) private readonly feedModel: Model<Feed & Document>,
   ) {}
 
-  async createManyPerFeed(user: string, followingUsers: string[], followingPoints: number): Promise<void> {
+  async createManyPerFeed(user: string, followingUsers: string[]): Promise<void> {
     await this.feedModel.aggregate([
       {
         $addFields: {
@@ -26,8 +26,8 @@ export class UserFeedService {
           score: {
             $cond: {
               if: { $in: ['$postOwner', followingUsers] },
-              then: { $add: ['$score', followingPoints] },
-              else: '$score',
+              then: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] },
+              else: { $multiply: [{ $rand: {} }, 10] },
             },
           },
         },
@@ -44,11 +44,7 @@ export class UserFeedService {
     ]);
   }
 
-  async createManyPerUser(
-    { _id, ...newFeed }: Omit<UserFeed, 'user'>,
-    followingUsers: string[],
-    followingPoints: number,
-  ): Promise<void> {
+  async createManyPerUser({ _id, ...newFeed }: Omit<UserFeed, 'user'>, followingUsers: string[]): Promise<void> {
     await this.usersModel.aggregate([
       {
         $replaceWith: {
@@ -64,8 +60,8 @@ export class UserFeedService {
           score: {
             $cond: {
               if: { $in: ['$user', followingUsers] },
-              then: { $add: ['$score', followingPoints] },
-              else: '$score',
+              then: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] },
+              else: { multiply: [{ $rand: {} }, 100] },
             },
           },
         },
@@ -144,27 +140,27 @@ export class UserFeedService {
     });
   }
 
-  async addToScores(amount: number, feedIds: string[]): Promise<void> {
+  async applyFollowingScore(feedIds: string[]) {
     return this.userFeedModel.updateMany(
       {
         _id: { $in: feedIds },
       },
       {
-        $inc: {
-          score: amount,
+        $set: {
+          score: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] } as any,
         },
       },
     );
   }
 
-  async addToScoreByPost(amount: number, postId: string): Promise<void> {
+  async applyNormalScore(feedIds: string[]) {
     return this.userFeedModel.updateMany(
       {
-        post: postId,
+        _id: { $in: feedIds },
       },
       {
-        $inc: {
-          score: amount,
+        $set: {
+          score: { $multiply: [{ $rand: {} }, 100] } as any,
         },
       },
     );
