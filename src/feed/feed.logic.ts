@@ -1,9 +1,8 @@
 import { Category } from '../categories/contracts';
 import { FEMALE_CATEGORY_ID, MALE_CATEGORY_ID } from '../common/contants';
-import { Connection } from '../common/types';
 import { Post } from '../posts/contracts';
 import { GENDER_TAGS } from '../users/contracts/enum';
-import { UserFeed } from './contracts';
+import { FeedPostConnection, UserFeed } from './contracts';
 import { Tags } from './contracts/tags';
 
 export function encodeCursor(date: Date, score = 0): string {
@@ -18,12 +17,13 @@ export function decodeCursor(cursor: string): [date: Date, score: number] {
 }
 
 export function fromPostsToConnection(
-  posts: { feedPost: UserFeed; post: Post; score?: number }[],
+  posts: { feedPost: UserFeed; post: Post; score: number }[],
   hasNextPage: boolean,
-): Connection<Post> {
-  const edges = posts.map(({ feedPost, post }) => ({
+): FeedPostConnection {
+  const edges = posts.map(({ feedPost, post, score }) => ({
     cursor: encodeCursor(feedPost.createdAt, feedPost.score),
     node: post,
+    score,
   }));
   return {
     edges,
@@ -35,13 +35,9 @@ export function fromPostsToConnection(
   };
 }
 
-export function getPostScore(post: Post, numberOfLikes: number, numberOfComments: number, followingIds?: string[]) {
-  let score = 0;
-  score += numberOfLikes;
-  score += numberOfComments;
-  const postOwner = typeof post.user === 'string' ? post.user : post.user._id;
-  if (followingIds?.includes(postOwner)) score += 20;
-  return score;
+export function getPostScore(postOwner: string, followingIds?: string[]): number {
+  if (followingIds?.includes(postOwner)) return 90 + Math.random() * 10;
+  return Math.random() * 100;
 }
 
 export function getFeedTags(post: Post, postCategory: Category, parentCategories: Category[]): Tags {

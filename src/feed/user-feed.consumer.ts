@@ -3,8 +3,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { OrderCreatedPayload } from '../orders/contracts/payloads';
 import { Post } from '../posts/contracts';
 import { UserFeedService } from './user-feed.service';
-import { LikePayload } from '../likes/contracts/payloads';
-import { CommentCreatedPayload } from '../comments/contracts/payloads';
 import { SeenPostService } from './seen-post.service';
 import { Session } from '../sessions/contracts';
 import { BlockUserPayload } from '../users/contracts/payloads';
@@ -12,8 +10,8 @@ import { PostsService } from '../posts/posts.service';
 import { FollowsService } from '../follows/follows.service';
 import { Follow } from '../follows/contracts';
 import { Feed } from './contracts';
+import { getPostScore } from './feed.logic';
 
-const FOLLOWING_POINTS = 20;
 @Injectable()
 export class UserFeedConsumer {
   logger = new Logger(UserFeedConsumer.name);
@@ -36,12 +34,11 @@ export class UserFeedConsumer {
       await this.userFeedService.createManyPerUser(
         {
           post: payload.post,
-          score: payload.score,
+          score: getPostScore(payload.postOwner, followingUsers),
           tags: payload.tags,
           createdAt: payload.createdAt,
         },
         followingUsers,
-        FOLLOWING_POINTS,
       );
       this.logger.log(`UserFeedPosts created for Post ${payload._id}`);
     } catch (error) {
@@ -61,7 +58,7 @@ export class UserFeedConsumer {
 
       const follows = await this.followsService.findManyByFollowers([payload]);
       const followees = follows.map(f => f.followee);
-      await this.userFeedService.createManyPerFeed(payload, followees, FOLLOWING_POINTS);
+      await this.userFeedService.createManyPerFeed(payload, followees);
       this.logger.log(`Feed created for user ${payload}`);
     } catch (error) {
       this.logger.error({
@@ -80,7 +77,7 @@ export class UserFeedConsumer {
 
       const follows = await this.followsService.findManyByFollowers([userId]);
       const followees = follows.map(f => f.followee);
-      await this.userFeedService.createManyPerFeed(userId, followees, FOLLOWING_POINTS);
+      await this.userFeedService.createManyPerFeed(userId, followees);
       this.logger.log(`New feed generated for user ${userId}`);
     } catch (error) {
       this.logger.error({
@@ -99,48 +96,6 @@ export class UserFeedConsumer {
     } catch (error) {
       this.logger.error({
         message: 'Error while trying to delete FeedPost from post.deleted event.',
-        payload,
-        error: error.toString(),
-        metadata: error,
-      });
-    }
-  }
-
-  @OnEvent('post.liked', { async: true })
-  async incrementLikeScore(payload: LikePayload) {
-    try {
-      await this.userFeedService.addToScoreByPost(1, payload.post);
-    } catch (error) {
-      this.logger.error({
-        message: 'Error while incrementing post score from post.liked event.',
-        payload,
-        error: error.toString(),
-        metadata: error,
-      });
-    }
-  }
-
-  @OnEvent('post.unliked', { async: true })
-  async decrementLikeScore(payload: LikePayload) {
-    try {
-      await this.userFeedService.addToScoreByPost(-1, payload.post);
-    } catch (error) {
-      this.logger.error({
-        message: 'Error while decrementing post score from post.unliked event.',
-        payload,
-        error: error.toString(),
-        metadata: error,
-      });
-    }
-  }
-
-  @OnEvent('comment.created', { async: true })
-  async incrementCommentScore(payload: CommentCreatedPayload) {
-    try {
-      await this.userFeedService.addToScoreByPost(1, payload.post._id);
-    } catch (error) {
-      this.logger.error({
-        message: 'Error while incrementing post score from comment.created event.',
         payload,
         error: error.toString(),
         metadata: error,
@@ -203,10 +158,7 @@ export class UserFeedConsumer {
         followeePosts.map(p => p._id),
         payload.follower,
       );
-      await this.userFeedService.addToScores(
-        FOLLOWING_POINTS,
-        feeds.map(f => f._id),
-      );
+      await this.userFeedService.applyFollowingScore(feeds.map(f => f._id));
     } catch (error) {
       this.logger.error({
         message: 'Could not increase post score after following',
@@ -225,10 +177,7 @@ export class UserFeedConsumer {
         followeePosts.map(p => p._id),
         payload.follower,
       );
-      await this.userFeedService.addToScores(
-        -FOLLOWING_POINTS,
-        feeds.map(f => f._id),
-      );
+      await this.userFeedService.applyNormalScore(feeds.map(f => f._id));
     } catch (error) {
       this.logger.error({
         message: 'Could not decrease post score after unfollowing',

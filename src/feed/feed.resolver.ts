@@ -108,6 +108,7 @@ export class FeedResolver {
     const orderedPosts = feedPosts.map(feedPost => ({
       feedPost,
       post: posts.find(post => post._id === feedPost.post),
+      score: feedPost.score,
     }));
     const hasNextPage = postsCount - args.first > 0;
     const connection = fromPostsToConnection(orderedPosts, hasNextPage);

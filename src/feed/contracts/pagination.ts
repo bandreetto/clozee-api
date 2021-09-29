@@ -8,6 +8,8 @@ export class FeedPostEdge implements Edge<Post> {
   node: Post;
   @Field({ description: 'An opaque cursor representing this edge position.' })
   cursor: string;
+  @Field({ description: 'The score of this post for this user.' })
+  score: number;
 }
 
 @ObjectType()

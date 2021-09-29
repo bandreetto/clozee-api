@@ -370,6 +370,9 @@ type FeedPostEdge {
 
   """An opaque cursor representing this edge position."""
   cursor: String!
+
+  """The score of this post for this user."""
+  score: Float!
 }
 
 type FeedPostConnection {

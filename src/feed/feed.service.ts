@@ -22,19 +22,6 @@ export class FeedService {
     await this.feedModel.deleteOne({ post }).lean();
   }
 
-  async addToScoreByPost(amount: number, postId: string): Promise<void> {
-    await this.feedModel.updateOne(
-      {
-        post: postId,
-      },
-      {
-        $inc: {
-          score: amount,
-        },
-      },
-    );
-  }
-
   async deleteManyByPosts(posts: string[]): Promise<void> {
     const result = await this.feedModel.deleteMany({
       post: { $in: posts },
@@ -66,7 +53,7 @@ export class FeedService {
       },
       {
         $addFields: {
-          searchScore: { $meta: 'searchScore' },
+          score: { $meta: 'searchScore' },
         },
       },
       {
@@ -79,12 +66,12 @@ export class FeedService {
             $in: tags.genders.length ? tags.genders : Object.values(GENDER_TAGS),
           },
           post: { $nin: blacklistedPosts },
-          searchScore: { $lt: maxScore },
+          score: { $lt: maxScore },
         },
       },
       {
         $sort: {
-          searchScore: -1,
+          score: -1,
           createdAt: -1,
         },
       },
