@@ -61,7 +61,7 @@ export class UserFeedService {
             $cond: {
               if: { $in: ['$user', followingUsers] },
               then: { $add: [90, { $multiply: [{ $rand: {} }, 10] }] },
-              else: { multiply: [{ $rand: {} }, 100] },
+              else: { $multiply: [{ $rand: {} }, 100] },
             },
           },
         },
