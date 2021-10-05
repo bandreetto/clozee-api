@@ -11,7 +11,7 @@ export class Sale {
   post: string | Post;
 
   @Prop({ type: String, index: true })
-  order: string | Order;
+  order?: string | Order;
 }
 
 export const SaleSchema = SchemaFactory.createForClass(Sale);

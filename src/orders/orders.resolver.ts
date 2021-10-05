@@ -3,6 +3,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -27,7 +28,13 @@ import { OrdersService } from './orders.service';
 import { SalesLoader } from './sales.dataloader';
 import { PagarmeService } from '../payments/pagarme.service';
 import { getSubTotal, getSplitValues, getDonationAmount, getClozeeAmount } from './orders.logic';
-import { FIXED_TAX, MINIMUM_TRANSACTION_VALUE, VARIABLE_TAX, WIRE_TRANFER_TAX } from '../common/contants';
+import {
+  CHECKOUT_LINK_DELIVERY_FEE,
+  FIXED_TAX,
+  MINIMUM_TRANSACTION_VALUE,
+  VARIABLE_TAX,
+  WIRE_TRANFER_TAX,
+} from '../common/contants';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -190,6 +197,42 @@ export class OrdersResolver {
     }
     this.eventEmitter.emit('order.created', { order, posts });
     return order;
+  }
+
+  @Mutation(() => String, { description: 'Returns a link to a web page to checkout the post.' })
+  async checkoutLink(
+    @Args('postId', { description: 'The id of the post to be sold.' }) postId: string,
+  ): Promise<string> {
+    const post = await this.postsService.findById(postId);
+    if (!post) throw new NotFoundException('Post not found!');
+    if (post.deleted) throw new NotFoundException('Post not found!');
+
+    try {
+      await this.ordersService.createSales([
+        {
+          _id: v4(),
+          post: postId,
+        },
+      ]);
+      const amount = CHECKOUT_LINK_DELIVERY_FEE + post.price;
+      return this.pagarmeService.createCheckoutLink(amount, [post]);
+    } catch (error) {
+      this.logger.error({
+        message: 'An error occoured while trying to create checkout link.',
+        error: error.toString(),
+        metadata: {
+          error,
+          postId,
+        },
+      });
+
+      /**
+       * Check for mongo duplicated error code
+       */
+      if (error.core === 11000) throw new ConflictException('Duplicated Sale error. This post is already sold.');
+
+      throw new InternalServerErrorException('An error occoured while trying to create checkout link.');
+    }
   }
 
   @ResolveField()
