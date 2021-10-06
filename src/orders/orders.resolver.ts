@@ -35,6 +35,7 @@ import {
   VARIABLE_TAX,
   WIRE_TRANFER_TAX,
 } from '../common/contants';
+import { SALE_STATUS } from './contracts/enums';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -207,11 +208,13 @@ export class OrdersResolver {
     if (!post) throw new NotFoundException('Post not found!');
     if (post.deleted) throw new NotFoundException('Post not found!');
 
+    this.logger.log(`Creating checkout link for post ${postId}`);
     try {
       await this.ordersService.createSales([
         {
           _id: v4(),
           post: postId,
+          status: SALE_STATUS.pending,
         },
       ]);
       const amount = CHECKOUT_LINK_DELIVERY_FEE + post.price;
@@ -229,7 +232,7 @@ export class OrdersResolver {
       /**
        * Check for mongo duplicated error code
        */
-      if (error.core === 11000) throw new ConflictException('Duplicated Sale error. This post is already sold.');
+      if (error.code === 11000) throw new ConflictException('Duplicated Sale error. This post is already sold.');
 
       throw new InternalServerErrorException('An error occoured while trying to create checkout link.');
     }

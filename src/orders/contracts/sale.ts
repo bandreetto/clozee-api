@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from 'src/posts/contracts';
 import { Order } from '.';
+import { SALE_STATUS } from './enums';
 
 @Schema({ timestamps: true })
 export class Sale {
@@ -12,6 +13,9 @@ export class Sale {
 
   @Prop({ type: String, index: true })
   order?: string | Order;
+
+  @Prop({ type: SALE_STATUS, index: true })
+  status?: SALE_STATUS;
 }
 
 export const SaleSchema = SchemaFactory.createForClass(Sale);

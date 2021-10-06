@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export type BankAccountTypes =
   | 'conta_corrente'
   | 'conta_poupanca'
@@ -14,3 +16,36 @@ export interface BankAccountCreateOptions {
   legal_name: string;
   type: BankAccountTypes;
 }
+
+export interface OrderItems {
+  object: string;
+  id: string;
+  title: string;
+  unit_price: string;
+  quantity: string;
+  category: string;
+  tangible: string;
+  venue: string;
+  date: string;
+}
+
+export interface OrderPostbackBody {
+  id: string;
+  fingerprint: string;
+  event: string;
+  old_status: string;
+  current_status: string;
+  object: string;
+  order: {
+    object: string;
+    id: string;
+    company_id: string;
+    status: string;
+    amount: string;
+    items: OrderItems[];
+  };
+  payment_link_id: string;
+  postback_url: string;
+  date_created: string;
+}
+export interface OrderPostbackRequest extends Request<{}, any, OrderPostbackBody, {}> {}
