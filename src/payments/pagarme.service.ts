@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import pagarme from 'pagarme';
 import R from 'ramda';
+import { Post } from 'src/posts/contracts';
 import configuration from '../config/configuration';
 import { User } from '../users/contracts';
 import { ICreateCardResponse, ITransaction } from './contracts';
@@ -199,5 +200,42 @@ export class PagarmeService {
       });
       throw new InternalServerErrorException();
     }
+  }
+
+  async createCheckoutLink(amount: number, posts: Post[]): Promise<string> {
+    const client = await pagarme.client.connect({
+      api_key: configuration.pagarme.token(),
+    });
+    const response = await client.paymentLinks.create({
+      amount,
+      items: posts.map(p => ({
+        id: p._id,
+        title: p.title,
+        unit_price: p.price,
+        quantity: 1,
+        tangible: true,
+      })),
+      payment_config: {
+        boleto: {
+          enabled: false,
+          expires_in: 20,
+        },
+        credit_card: {
+          enabled: true,
+          free_installments: 12,
+          interest_rate: 1,
+          max_installments: 12,
+        },
+      },
+      default_payment_method: 'credit_card',
+      postback_config: {
+        orders: configuration.pagarme.postbackOrders(),
+        transactions: configuration.pagarme.postbackTransactions(),
+      },
+      max_orders: 1,
+      expires_in: 30,
+    });
+
+    return response.url;
   }
 }

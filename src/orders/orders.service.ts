@@ -66,6 +66,17 @@ export class OrdersService implements TransactionableService<ClientSession> {
     return newSales.map(s => s.toObject());
   }
 
+  async updateSaleByPost(postId: string, fields: Partial<Sale>): Promise<Sale> {
+    return this.saleModel
+      .findOneAndUpdate(
+        {
+          post: postId,
+        },
+        { $set: { ...fields } },
+      )
+      .lean();
+  }
+
   async findSalesByPosts(postIds: string[]): Promise<Sale[]> {
     return this.saleModel.find({ post: { $in: postIds } }).lean();
   }

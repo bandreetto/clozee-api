@@ -30,6 +30,8 @@ export default {
   pagarme: {
     recipientId: () => process.env.CLOZEE_RECIPIENT_ID,
     token: () => process.env.PAGARME_API_TOKEN,
+    postbackOrders: () => process.env.PAGARME_POSTBACK_ORDERS,
+    postbackTransactions: () => process.env.PAGARME_POSTBACK_TRANSACTIONS,
   },
   redis: {
     url: () => process.env.REDIS_URL,

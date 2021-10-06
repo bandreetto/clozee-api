@@ -25,7 +25,7 @@ import { OrdersConsumer } from './orders.consumer';
       },
     ]),
     CountersModule,
-    PaymentsModule,
+    forwardRef(() => PaymentsModule),
     forwardRef(() => DeliveryModule),
     forwardRef(() => UsersModule),
     forwardRef(() => PostsModule),
