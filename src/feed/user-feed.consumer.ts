@@ -24,7 +24,7 @@ export class UserFeedConsumer {
   ) {}
 
   @OnEvent('feed.created', { async: true })
-  async createUserFeedPost(payload: Feed) {
+  async createUserUserFeedPost(payload: Feed) {
     try {
       const follows = await this.followsService.findManyByFollowees([payload.postOwner]);
 
@@ -90,12 +90,12 @@ export class UserFeedConsumer {
   }
 
   @OnEvent('post.deleted', { async: true })
-  async deleteFeedPost(payload: Post) {
+  async deleteUserFeedPost(payload: Post) {
     try {
       await this.userFeedService.deleteByPost(payload._id);
     } catch (error) {
       this.logger.error({
-        message: 'Error while trying to delete FeedPost from post.deleted event.',
+        message: 'Error while trying to delete UserFeedPost from post.deleted event.',
         payload,
         error: error.toString(),
         metadata: error,
@@ -109,7 +109,7 @@ export class UserFeedConsumer {
       await this.userFeedService.deleteManyByPosts(payload.posts.map(p => p._id));
     } catch (error) {
       this.logger.error({
-        message: 'Error while deleting FeedPost from order.created event.',
+        message: 'Error while deleting UserFeedPost from order.created event.',
         payload,
         error: error.toString(),
         metadata: error,
