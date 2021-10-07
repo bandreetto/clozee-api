@@ -1,11 +1,13 @@
 export * from './sale';
 export * from './delivery-info';
+export * from './pagarme-info';
 
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Post } from '../../posts/contracts';
 import { Address, AddressSchema, User } from '../../users/contracts';
 import { DeliveryInfo, DeliveryInfoSchema } from './delivery-info';
+import { PagarmeInfo, PagarmeInfoSchema } from './pagarme-info';
 
 @Schema({ timestamps: true })
 @ObjectType()
@@ -22,9 +24,9 @@ export class Order {
   @Field(() => User)
   buyer: string | User;
 
-  @Prop({ required: true })
+  @Prop()
   @Field()
-  paymentMethod: string;
+  paymentMethod?: string;
 
   @Prop({ type: AddressSchema, required: true })
   @Field(() => Address)
@@ -59,6 +61,12 @@ export class Order {
 
   @Field()
   createdAt?: Date;
+
+  @Prop({ type: PagarmeInfoSchema })
+  pagarme?: PagarmeInfo;
+
+  @Prop()
+  deleted?: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

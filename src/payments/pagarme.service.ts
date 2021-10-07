@@ -233,7 +233,6 @@ export class PagarmeService {
         transactions: configuration.pagarme.postbackTransactions(),
       },
       max_orders: 1,
-      expires_in: 30,
     });
 
     return response.url;

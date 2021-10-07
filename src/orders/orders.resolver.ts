@@ -35,7 +35,6 @@ import {
   VARIABLE_TAX,
   WIRE_TRANFER_TAX,
 } from '../common/contants';
-import { SALE_STATUS } from './contracts/enums';
 
 @Resolver(() => Order)
 export class OrdersResolver {
@@ -210,13 +209,6 @@ export class OrdersResolver {
 
     this.logger.log(`Creating checkout link for post ${postId}`);
     try {
-      await this.ordersService.createSales([
-        {
-          _id: v4(),
-          post: postId,
-          status: SALE_STATUS.pending,
-        },
-      ]);
       const amount = CHECKOUT_LINK_DELIVERY_FEE + post.price;
       return this.pagarmeService.createCheckoutLink(amount, [post]);
     } catch (error) {
