@@ -278,27 +278,6 @@ type Delivery {
   deliveryTime: Int!
 }
 
-type AuthResponse {
-  """The token's owner user."""
-  me: User!
-
-  """
-  A short lived access token, used to authenticate and grant access to the subject.
-  """
-  token: String!
-
-  """A long lived token, used to get a new access token."""
-  refreshToken: String!
-}
-
-type PreSignResponse {
-  """The pre-signed user token."""
-  preSignToken: String!
-
-  """The pre-signed user id. Use it to create the user later."""
-  userId: String!
-}
-
 type PageInfo {
   """The first cursor of this page."""
   startCursor: String
@@ -359,6 +338,27 @@ type Order {
   """The amount of this order that was donated."""
   donationAmount: Float!
   createdAt: DateTime!
+}
+
+type AuthResponse {
+  """The token's owner user."""
+  me: User!
+
+  """
+  A short lived access token, used to authenticate and grant access to the subject.
+  """
+  token: String!
+
+  """A long lived token, used to get a new access token."""
+  refreshToken: String!
+}
+
+type PreSignResponse {
+  """The pre-signed user token."""
+  preSignToken: String!
+
+  """The pre-signed user id. Use it to create the user later."""
+  userId: String!
 }
 
 type Session {
@@ -473,16 +473,6 @@ type GroupInviteNotification implements Notification {
   inviter: User!
 }
 
-type Trend {
-  id: Float!
-  title: String!
-  description: String
-
-  """User owner of this post."""
-  user: User!
-  createdAt: DateTime!
-}
-
 type SearchCategory {
   id: Float!
 
@@ -521,6 +511,16 @@ type Explore {
 
   """A list of upcoming events."""
   events: [ClozeeEvent!]!
+}
+
+type Trend {
+  id: Float!
+  title: String!
+  description: String
+
+  """User owner of this post."""
+  user: User!
+  createdAt: DateTime!
 }
 
 type Query {

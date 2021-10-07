@@ -6,13 +6,23 @@ import { GivenUsers } from './users';
 import { GivenCategories } from './categories';
 import { randomUser } from '../mocks';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { OrdersService } from '../../src/orders/orders.service';
+import { CountersService } from '../../src/counters/counters.service';
+import { v4 } from 'uuid';
+import { getClozeeAmount } from '../../src/orders/orders.logic';
+import { FIXED_TAX, VARIABLE_TAX } from '../../src/common/contants';
+import { UsersService } from '../../src/users/users.service';
 
 export interface GivenPosts {
   somePostsCreated: (numberOfPosts: number) => Promise<Post[]>;
+  somePostsSold: (numberOfPosts: number) => Promise<Post[]>;
 }
 
 export function givenPostsFactory(
   postsService: PostsService,
+  ordersService: OrdersService,
+  countersService: CountersService,
+  usersService: UsersService,
   eventEmmiter: EventEmitter2,
   givenUsers: GivenUsers,
   givenCategories: GivenCategories,
@@ -47,7 +57,36 @@ export function givenPostsFactory(
     );
     return createdPosts;
   }
+
+  async function somePostsSold(numberOfPosts: number): Promise<Post[]> {
+    const posts = await somePostsCreated(numberOfPosts);
+    const buyer = await givenUsers.oneUserSignedUp(randomUser());
+    const nextOrderNumber = await countersService.getCounterAndIncrement('orders');
+    const clozeeTax = getClozeeAmount(VARIABLE_TAX, FIXED_TAX, posts);
+    const seller = await usersService.findById(posts[0].user as string);
+    const order = await ordersService.create({
+      _id: v4(),
+      number: nextOrderNumber,
+      buyer: buyer._id,
+      clozeeTax,
+      deliveryInfo: {
+        price: 10,
+        deliveryTime: 5,
+      },
+      buyersAddress: buyer.address,
+      sellersAddress: seller.address,
+    });
+    await ordersService.createSales(
+      posts.map(p => ({
+        _id: v4(),
+        order: order._id,
+        post: p._id,
+      })),
+    );
+    return posts;
+  }
   return {
     somePostsCreated,
+    somePostsSold,
   };
 }

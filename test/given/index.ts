@@ -4,7 +4,9 @@ import { TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { CategoriesService } from '../../src/categories/categories.service';
 import { ClockService } from '../../src/common/clock/clock.service';
+import { CountersService } from '../../src/counters/counters.service';
 import { GroupsService } from '../../src/groups/groups.service';
+import { OrdersService } from '../../src/orders/orders.service';
 import { PostsService } from '../../src/posts/posts.service';
 import { SessionsService } from '../../src/sessions/sessions.service';
 import { UsersService } from '../../src/users/users.service';
@@ -37,7 +39,17 @@ export async function givenFactory(testingModule: TestingModule) {
   const givenGroups = givenGroupsFactory(givenUsers, groupsService);
 
   const postsService = await testingModule.resolve(PostsService);
-  const givenPosts = givenPostsFactory(postsService, eventEmitter, givenUsers, givenCategories);
+  const ordersService = await testingModule.resolve(OrdersService);
+  const countersService = await testingModule.resolve(CountersService);
+  const givenPosts = givenPostsFactory(
+    postsService,
+    ordersService,
+    countersService,
+    usersService,
+    eventEmitter,
+    givenUsers,
+    givenCategories,
+  );
 
   const httpServiceMock = (await testingModule.resolve(HttpService)) as HttpServiceMock;
   const clockService = await testingModule.resolve(ClockService);
