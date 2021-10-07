@@ -203,9 +203,13 @@ export class OrdersResolver {
   async checkoutLink(
     @Args('postId', { description: 'The id of the post to be sold.' }) postId: string,
   ): Promise<string> {
-    const post = await this.postsService.findById(postId);
+    const [post, sales] = await Promise.all([
+      this.postsService.findById(postId),
+      this.ordersService.findSalesByPosts([postId]),
+    ]);
     if (!post) throw new NotFoundException('Post not found!');
     if (post.deleted) throw new NotFoundException('Post not found!');
+    if (sales.length) throw new ConflictException('This post is already sold!');
 
     this.logger.log(`Creating checkout link for post ${postId}`);
     try {
