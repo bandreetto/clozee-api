@@ -1,11 +1,12 @@
 import { Logger } from '@nestjs/common';
+import { GraphQLRequestContext } from 'apollo-server-core';
 
 const logger = new Logger('GraphqlModule');
 
 export const errorLoggerPlugin = {
   requestDidStart() {
     return {
-      didEncounterErrors(context) {
+      didEncounterErrors(context: GraphQLRequestContext) {
         if (context.errors[0].message === 'Unauthorized' || context.errors[0].message === 'Forbidden resource') return;
 
         if (

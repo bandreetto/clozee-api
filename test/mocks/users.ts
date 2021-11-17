@@ -1,10 +1,11 @@
 import faker from 'faker';
 import { User } from '../../src/users/contracts';
 
+<<<<<<< HEAD
 export function randomUser(): User {
   return {
     _id: faker.datatype.uuid(),
-    cpf: '464.917.188-16',
+    cpf: '999.999.999-99',
     name: faker.name.firstName(),
     email: faker.internet.email(),
     avatar: faker.image.imageUrl(),
@@ -13,7 +14,7 @@ export function randomUser(): User {
       state: faker.address.state(),
       number: faker.datatype.number(10000),
       street: faker.address.streetName(),
-      zipCode: '09751-040',
+      zipCode: '99999-999',
       district: 'district',
     },
     username: faker.internet.userAgent(),
